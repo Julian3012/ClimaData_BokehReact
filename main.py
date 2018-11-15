@@ -1,53 +1,60 @@
-# myapp.py
-
-from random import random
-
+import random
+from bokeh.models import (HoverTool, FactorRange, Plot, LinearAxis, Grid,
+                          Range1d)
+from bokeh.models.glyphs import VBar
+from bokeh.plotting import figure
+from bokeh.embed import components
+from bokeh.models.sources import ColumnDataSource
 import bokeh
+from flask import Flask, render_template
 
-from bokeh.plotting import figure, curdoc, gridplot
-from bokeh.layouts import column, row, widgetbox
+app = Flask(__name__)
 
-# create a callback that will add a number in a random location
+
+@app.route("/<int:bars_count>/")
+def chart(bars_count):
+    if bars_count <= 0:
+        bars_count = 1
+
+    data = {"days": [], "bugs": [], "costs": []}
+    for i in range(1, bars_count + 1):
+        data['days'].append(i)
+        data['bugs'].append(random.randint(1,100))
+        data['costs'].append(random.uniform(1.00, 1000.00))
+
+    hover = create_hover_tool()
+    plot = create_bar_chart(data, "Bugs found per day", "days",
+                            "bugs", hover)
+    script, div = components(plot)
+
+    return render_template("chart.html", bars_count=bars_count,
+                           the_div=div, the_script=script)
 def callback():
     pass
 
-# ControllButtons
-btBackwards = bokeh.models.Button(label="<<")
-btBackwards.on_click(callback)
-btBack = bokeh.models.Button(label="<")
-btBack.on_click(callback)
-btPause = bokeh.models.Button(label="P")
-btPause.on_click(callback)
-btFore = bokeh.models.Button(label=">")
-btFore.on_click(callback)
-btForeward = bokeh.models.Button(label=">>")
-btForeward.on_click(callback)
+@app.route("/")
+def home():
+    btBackwards = bokeh.models.Button(label="<<")
+    btBackwards.on_click(callback)
+    btBackwardsScript, btBackwardsDiv = components(btBackwards)
 
-#OptionButtons
-bt3Gauss = bokeh.models.Button(label="3Gauss")
-bt3Gauss.on_click(callback)
-btInvP = bokeh.models.Button(label="Inv P")
-btInvP.on_click(callback)
-btInvC = bokeh.models.Button(label="Inv C")
-btInvC.on_click(callback)
-btMaxX1 = bokeh.models.Button(label="Max X1")
-btMaxX1.on_click(callback)
-btLinear = bokeh.models.Button(label="Linear")
-btLinear.on_click(callback)
-btAxes = bokeh.models.Button(label="Axes")
-btAxes.on_click(callback)
-btRange = bokeh.models.Button(label="Range")
-btRange.on_click(callback)
-btBlowUp = bokeh.models.Button(label="blowup_")
-btBlowUp.on_click(callback)
-btPrint = bokeh.models.Button(label="Print")
-btPrint.on_click(callback)
+    return render_template("index.html", btBackwardsDiv=btBackwardsDiv,
+                           btBackwardsScript=btBackwardsScript)
 
-#w1 = row(children=[btBackwards, btBack, btPause, btFore, btForeward], sizing_mode='scale_width', width=800)
-#w2 = row(children=[bt3Gauss, btInvP, btInvC, btMaxX1, btLinear, btAxes, btRange, btBlowUp, btPrint], sizing_mode='scale_width', width=800 )
 
-w1 = row(children=[btBackwards, btBack, btPause, btFore, btForeward], sizing_mode='scale_width', width=100)
-w2 = row(children=[bt3Gauss, btInvP, btInvC, btMaxX1, btLinear, btAxes, btRange, btBlowUp, btPrint], sizing_mode='scale_width', width=100 )
+def create_hover_tool():
+    # we'll code this function in a moment
+    return None
 
-# put the button and plot in a layout and add to the document
-curdoc().add_root(column(w1,w2))
+
+def create_bar_chart(data, title, x_name, y_name, hover_tool=None,
+                     width=1200, height=300):
+    p = figure(plot_width=400, plot_height=400)
+
+# add a circle renderer with a size, color, and alpha
+    p.circle(data['days'], data['bugs'], size=20, color="navy", alpha=0.5)
+
+    return p
+
+if __name__ == '__main__':
+    app.run(port=8080)

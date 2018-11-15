@@ -1,20 +1,24 @@
-{% extends base %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bar charts with Bokeh!</title>
+    <link href="http://cdn.pydata.org/bokeh/release/bokeh-1.0.1.min.css" rel="stylesheet">
+    <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.0.1.min.css" rel="stylesheet">
+    <style>
+      {% include 'styles.css' %}
+    </style>
+    {{ btBackwardsScript|safe }}
+  </head>
+  <body>
+    <h1>Bugs found over the past {{ bars_count }} days</h1>
+    {{ the_div|safe }}
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-1.0.1.min.js"></script>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.0.1.min.js"></script>
 
-{% block title %}ncview2 - reach new limits{% endblock %}
+    <table>
+        <tr><th></th><th></th></tr>
+        <tr><td>{{ btBackwardsDiv|safe }}</td><td></td></tr>
 
-{% block postamble %}
-  <style>
-    {% include 'styles.css' %}
-  </style>
-{% endblock %}
-
-{% block contents %}
-  <div class="content">
-    <h1>ncview2 - reach new limits</h1>
-
-    <p></p>
-
-    {{ super() }}
-
-  </div>
-{% endblock %}
+    </table>
+  </body>
+</html>

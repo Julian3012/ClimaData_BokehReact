@@ -9,7 +9,6 @@ from bokeh.layouts import column, row, widgetbox
 
 # create a callback that will add a number in a random location
 def callback():
-    print("Test")
     pass
 
 # ControllButtons
@@ -51,4 +50,4 @@ w1 = row(children=[btBackwards, btBack, btPause, btFore, btForeward], sizing_mod
 w2 = row(children=[bt3Gauss, btInvP, btInvC, btMaxX1, btLinear, btAxes, btRange, btBlowUp, btPrint], sizing_mode='scale_width', width=100 )
 
 # put the button and plot in a layout and add to the document
-curdoc().add_root(btBackwards)
+curdoc().add_root(column(w1,w2))
