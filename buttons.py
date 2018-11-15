@@ -47,8 +47,8 @@ btPrint.on_click(callback)
 #w1 = row(children=[btBackwards, btBack, btPause, btFore, btForeward], sizing_mode='scale_width', width=800)
 #w2 = row(children=[bt3Gauss, btInvP, btInvC, btMaxX1, btLinear, btAxes, btRange, btBlowUp, btPrint], sizing_mode='scale_width', width=800 )
 
-w1 = row(children=[btBackwards, btBack, btPause, btFore, btForeward], sizing_mode='scale_width', width=100)
-w2 = row(children=[bt3Gauss, btInvP, btInvC, btMaxX1, btLinear, btAxes, btRange, btBlowUp, btPrint], sizing_mode='scale_width', width=100 )
+w1 = row(children=[btBackwards, btBack, btPause, btFore, btForeward], sizing_mode='scale_width', width=100, name="controlbuttons")
+w2 = row(children=[bt3Gauss, btInvP, btInvC, btMaxX1, btLinear, btAxes, btRange, btBlowUp, btPrint], sizing_mode='scale_width', width=100, name="optionbuttons" )
 
 # put the button and plot in a layout and add to the document
 curdoc().add_root(w1)

@@ -1,60 +1,145 @@
-import random
-from bokeh.models import (HoverTool, FactorRange, Plot, LinearAxis, Grid,
-                          Range1d)
-from bokeh.models.glyphs import VBar
+from os.path import dirname, join
+
+import numpy as np
+import pandas.io.sql as psql
+import sqlite3 as sql
+
 from bokeh.plotting import figure
-from bokeh.embed import components
-from bokeh.models.sources import ColumnDataSource
+from bokeh.layouts import layout, widgetbox
+from bokeh.models import ColumnDataSource, Div
+from bokeh.models.widgets import Slider, Select, TextInput
+from bokeh.io import curdoc
+from bokeh.sampledata.movies_data import movie_path
+
+
 import bokeh
-from flask import Flask, render_template
+import netCDF4
 
-app = Flask(__name__)
+conn = sql.connect(movie_path)
+query = open(join(dirname(__file__), 'query.sql')).read()
+movies = psql.read_sql(query, conn)
+
+movies["color"] = np.where(movies["Oscars"] > 0, "orange", "grey")
+movies["alpha"] = np.where(movies["Oscars"] > 0, 0.9, 0.25)
+movies.fillna(0, inplace=True)  # just replace missing values with zero
+movies["revenue"] = movies.BoxOffice.apply(lambda x: '{:,d}'.format(int(x)))
+
+with open(join(dirname(__file__), "razzies-clean.csv")) as f:
+    razzies = f.read().splitlines()
+movies.loc[movies.imdbID.isin(razzies), "color"] = "purple"
+movies.loc[movies.imdbID.isin(razzies), "alpha"] = 0.9
+
+axis_map = {
+    "Tomato Meter": "Meter",
+    "Numeric Rating": "numericRating",
+    "Number of Reviews": "Reviews",
+    "Box Office (dollars)": "BoxOffice",
+    "Length (minutes)": "Runtime",
+    "Year": "Year",
+}
+
+desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
+
+# Create Input controls
+reviews = Slider(title="Minimum number of reviews", value=80, start=10, end=300, step=10)
+min_year = Slider(title="Year released", start=1940, end=2014, value=1970, step=1)
+max_year = Slider(title="End Year released", start=1940, end=2014, value=2014, step=1)
+oscars = Slider(title="Minimum number of Oscar wins", start=0, end=4, value=0, step=1)
+boxoffice = Slider(title="Dollars at Box Office (millions)", start=0, end=800, value=0, step=1)
+genre = Select(title="Genre", value="All",
+               options=open(join(dirname(__file__), 'genres.txt')).read().split())
+director = TextInput(title="Director name contains")
+cast = TextInput(title="Cast names contains")
+x_axis = Select(title="X Axis", options=sorted(axis_map.keys()), value="Tomato Meter")
+y_axis = Select(title="Y Axis", options=sorted(axis_map.keys()), value="Number of Reviews")
+
+# Create Column Data Source that will be used by the plot
+source = ColumnDataSource(data=dict(x=[], y=[], color=[], title=[], year=[], revenue=[], alpha=[]))
+
+TOOLTIPS=[
+    ("Title", "@title"),
+    ("Year", "@year"),
+    ("$", "@revenue")
+]
+
+p = figure(plot_height=600, plot_width=700, title="", toolbar_location=None, tooltips=TOOLTIPS)
+p.circle(x="x", y="y", source=source, size=7, color="color", line_color=None, fill_alpha="alpha")
 
 
-@app.route("/<int:bars_count>/")
-def chart(bars_count):
-    if bars_count <= 0:
-        bars_count = 1
+def select_movies():
+    genre_val = genre.value
+    director_val = director.value.strip()
+    cast_val = cast.value.strip()
+    selected = movies[
+        (movies.Reviews >= reviews.value) &
+        (movies.BoxOffice >= (boxoffice.value * 1e6)) &
+        (movies.Year >= min_year.value) &
+        (movies.Year <= max_year.value) &
+        (movies.Oscars >= oscars.value)
+    ]
+    if (genre_val != "All"):
+        selected = selected[selected.Genre.str.contains(genre_val)==True]
+    if (director_val != ""):
+        selected = selected[selected.Director.str.contains(director_val)==True]
+    if (cast_val != ""):
+        selected = selected[selected.Cast.str.contains(cast_val)==True]
+    return selected
 
-    data = {"days": [], "bugs": [], "costs": []}
-    for i in range(1, bars_count + 1):
-        data['days'].append(i)
-        data['bugs'].append(random.randint(1,100))
-        data['costs'].append(random.uniform(1.00, 1000.00))
 
-    hover = create_hover_tool()
-    plot = create_bar_chart(data, "Bugs found per day", "days",
-                            "bugs", hover)
-    script, div = components(plot)
+def update():
+    df = select_movies()
+    x_name = axis_map[x_axis.value]
+    y_name = axis_map[y_axis.value]
 
-    return render_template("chart.html", bars_count=bars_count,
-                           the_div=div, the_script=script)
-def callback():
+    p.xaxis.axis_label = x_axis.value
+    p.yaxis.axis_label = y_axis.value
+    p.title.text = "%d movies selected" % len(df)
+    source.data = dict(
+        x=df[x_name],
+        y=df[y_name],
+        color=df["color"],
+        title=df["Title"],
+        year=df["Year"],
+        revenue=df["revenue"],
+        alpha=df["alpha"],
+    )
+
+controls = [reviews, boxoffice, genre, min_year, max_year, oscars, director, cast, x_axis, y_axis]
+for control in controls:
+    control.on_change('value', lambda attr, old, new: update())
+
+sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
+
+def loadCallback():
+    url = urlinput.value
+    dataset = netCDF4.Dataset(url)
+
+    # lookup a variable
+    print(dataset.variables.keys())
+
+
+    lonvariable = dataset.variables['lon']
+    latvariable = dataset.variables['lat']
+    altvariable = dataset.variables['altitude']
+    # print the first 10 values
+    print("printing")
+    for i in range(0,10):
+    	print(lonvariable[i],latvariable[i])
     pass
 
-@app.route("/")
-def home():
-    btBackwards = bokeh.models.Button(label="<<")
-    btBackwards.on_click(callback)
-    btBackwardsScript, btBackwardsDiv = components(btBackwards)
+inputs = widgetbox(*controls, sizing_mode=sizing_mode)
+urlinput = TextInput(value="default", title="Label:")
+btLoad = bokeh.models.Button(label="load")
+btLoad.on_click(loadCallback)
 
-    return render_template("index.html", btBackwardsDiv=btBackwardsDiv,
-                           btBackwardsScript=btBackwardsScript)
+l = layout([
+    [desc],
+    [widgetbox(urlinput)],
+    [widgetbox(btLoad)],
+    [inputs, p],
+], sizing_mode=sizing_mode)
 
+update()  # initial load of the data
 
-def create_hover_tool():
-    # we'll code this function in a moment
-    return None
-
-
-def create_bar_chart(data, title, x_name, y_name, hover_tool=None,
-                     width=1200, height=300):
-    p = figure(plot_width=400, plot_height=400)
-
-# add a circle renderer with a size, color, and alpha
-    p.circle(data['days'], data['bugs'], size=20, color="navy", alpha=0.5)
-
-    return p
-
-if __name__ == '__main__':
-    app.run(port=8080)
+curdoc().add_root(l)
+curdoc().title = "Movies"
