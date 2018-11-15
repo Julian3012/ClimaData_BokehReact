@@ -5,15 +5,21 @@ import netCDF4
 url = 'http://dtvirt5.deltares.nl:8080/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
 # create a dataset object
 dataset = netCDF4.Dataset(url)
- 
+
 # lookup a variable
-print(dataset.variables.keys())
+print(dataset.variables)
 
+print(dataset)
 
-lonvariable = dataset.variables['lon']
-latvariable = dataset.variables['lat']
-altvariable = dataset.variables['altitude']
-# print the first 10 values
-print("printing")
-for i in range(0,10):
-	print(lonvariable[i],latvariable[i])
+print(len(dataset.variables))
+print()
+
+axis_map = {
+
+}
+
+for k,v in dataset.variables.items():
+    print(k)
+    axis_map[k]=k
+
+print(axis_map)
