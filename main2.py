@@ -11,6 +11,8 @@ from bokeh.models.widgets import Slider, Select, TextInput
 from bokeh.io import curdoc
 from bokeh.sampledata.movies_data import movie_path
 
+from bokeh.palettes import Spectral6
+from bokeh.transform import linear_cmap
 
 import bokeh
 import netCDF4
@@ -31,12 +33,13 @@ x_axis = Select(title="X Axis", options=dimoptions, value="TIME")
 y_axis = Select(title="Y Axis", options=dimoptions, value="DEPTH")
 variable_axis = Select(title="Color", options=varoptions, value="TEMP")
 
+mapper = linear_cmap(field_name='v', palette=Spectral6 ,low=16 ,high=27)
 
 # Create Column Data Source that will be used by the plot
-source = ColumnDataSource(data=dict(x=[], y=[]))
+source = ColumnDataSource(data=dict(x=[], y=[], v=[]))
 
 p = figure(plot_height=600, plot_width=700, title="", toolbar_location=None)
-p.circle(x="x", y="y", source=source, size=7, line_color=None)
+p.circle(x="x", y="y", line_color=mapper ,color=mapper, source=source, size=7)
 
 dataset = None
 #dataset = netCDF4.Dataset("https://dods.ndbc.noaa.gov/thredds/dodsC/oceansites/DATA/CCE1/OS_CCE1_01_D_AQUADOPP.nc")
@@ -65,10 +68,21 @@ x = dataset.variables[x_name]
 
 #print(df)
 
+n = np.array([[0]*22399,[1]*22399,[2]*22399,[3]*22399,[4]*22399,[5]*22399,[6]*22399])
+
+n = n.flatten()
+
+varf = var.flatten()
+
+print(n)
+
 source.data = dict(
-    x=var[:,0],
-    y=var[:,:],
+    x=varf,
+    y=n,
+    v=varf,
 )
+
+
 
 sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
 
