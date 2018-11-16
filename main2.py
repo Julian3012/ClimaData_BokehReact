@@ -19,8 +19,8 @@ import pandas as pd
 #from collections import Dict
 
 
-varoptions = ["RAIN"]
-dimoptions = ["TIME", "RAIN"]
+varoptions = ["TEMP"]
+dimoptions = ["TIME", "DEPTH"]
 
 desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
 
@@ -28,8 +28,8 @@ desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=
 #reviews = Slider(title="Minimum number of reviews", value=80, start=10, end=300, step=10)
 
 x_axis = Select(title="X Axis", options=dimoptions, value="TIME")
-y_axis = Select(title="Y Axis", options=dimoptions, value="RAIN")
-variable_axis = Select(title="Color", options=varoptions, value="RAIN")
+y_axis = Select(title="Y Axis", options=dimoptions, value="DEPTH")
+variable_axis = Select(title="Color", options=varoptions, value="TEMP")
 
 
 # Create Column Data Source that will be used by the plot
@@ -40,7 +40,8 @@ p.circle(x="x", y="y", source=source, size=7, line_color=None)
 
 dataset = None
 #dataset = netCDF4.Dataset("https://dods.ndbc.noaa.gov/thredds/dodsC/oceansites/DATA/CCE1/OS_CCE1_01_D_AQUADOPP.nc")
-dataset = netCDF4.Dataset("/home/max/Downloads/OS_CCE1_08_D_Meteorology-Rain.nc")
+#dataset = netCDF4.Dataset("/home/max/Downloads/OS_CCE1_08_D_Meteorology-Rain.nc")
+dataset = netCDF4.Dataset("/home/max/Downloads/OS_NTAS_2007_D_T30min.nc")
 
 
 for k,v in dataset.variables.items():
@@ -60,13 +61,13 @@ var = dataset.variables[variable_name]
 print(var.dimensions)
 print(var.shape)
 x = dataset.variables[x_name]
-df = pd.DataFrame(var[0,0,:,:])
+#df = pd.DataFrame(var[0,0,:,:])
 
-print(df)
+#print(df)
 
 source.data = dict(
-    x=range(0,57925),
-    y=var[0,0,0,:],
+    x=var[:,0],
+    y=var[:,:],
 )
 
 sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
