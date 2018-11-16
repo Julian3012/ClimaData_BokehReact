@@ -14,75 +14,62 @@ from bokeh.sampledata.movies_data import movie_path
 
 import bokeh
 import netCDF4
+import pandas as pd
 
 #from collections import Dict
 
 
-varoptions = ["None"]
-dimoptions = ["None"]
+varoptions = ["PRES"]
+dimoptions = ["LATITUDE", "LONGITUDE"]
 
 desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
 
 # Create Input controls
 #reviews = Slider(title="Minimum number of reviews", value=80, start=10, end=300, step=10)
 
-x_axis = Select(title="X Axis", options=varoptions, value="None")
-y_axis = Select(title="Y Axis", options=varoptions, value="None")
-variable_axis = Select(title="Color", options=varoptions, value="None")
+x_axis = Select(title="X Axis", options=dimoptions, value="LATITUDE")
+y_axis = Select(title="Y Axis", options=dimoptions, value="LONGITUDE")
+variable_axis = Select(title="Color", options=varoptions, value="RAIN")
+
 
 # Create Column Data Source that will be used by the plot
 source = ColumnDataSource(data=dict(x=[], y=[], color=[]))
 
 p = figure(plot_height=600, plot_width=700, title="", toolbar_location=None)
-p.circle(x="x", y="y", color="color", source=source, size=7, line_color=None)
-
+p.circle(x="x", y="y", source=source, size=7, line_color=None)
 
 dataset = None
 #dataset = netCDF4.Dataset("https://dods.ndbc.noaa.gov/thredds/dodsC/oceansites/DATA/CCE1/OS_CCE1_01_D_AQUADOPP.nc")
-dataset = netCDF4.Dataset("/home/max/Downloads/OS_CCE1_01_D_AQUADOPP.nc")
+dataset = netCDF4.Dataset("/home/max/Downloads/OS_CCE1_08_D_Meteorology-Rain.nc")
 
 
 for k,v in dataset.variables.items():
     print(k)
     varoptions.append(k)
 
-def updateVariable():
-    pass
 
-def update():
-    #if dataset is None:
-    #   return
-    #if dataset.variables is None:
-    #    return
 
-    df = dataset.variables
+x_name = x_axis.value
+y_name = y_axis.value
+variable_name = variable_axis.value
 
-    x_name = x_axis.value
-    y_name = y_axis.value
-    variable_name = variable_axis.value
+p.xaxis.axis_label = x_axis.value
+p.yaxis.axis_label = y_axis.value
 
-    if x_name is None or y_name is None:
-        return
-    if x_name is "None" or y_name is "None":
-        return
 
-    print("Selected %s and %s" % (x_name,y_name) )
 
-    p.xaxis.axis_label = x_axis.value
-    p.yaxis.axis_label = y_axis.value
+var = dataset.variables[variable_name]
+print(var.dimensions)
+print(var.shape)
+x = dataset.variables[x_name]
+df = pd.DataFrame(var[0,0,:,:])
 
-    p.title.text = "%d dataitems selected" % len(df)
-    source.data = dict(
-        x=df[x_name][:10],
-        y=df[y_name][:10],
-        color=df[color_name][:10],
-    )
+print(df)
 
-variable_axis.on_change('value', lambda attr, old, new: updateVariable())
-
-controls = [x_axis, y_axis]
-for control in controls:
-    control.on_change('value', lambda attr, old, new: update())
+source.data = dict(
+    x=range(0,57925),
+    y=var[0,0,0,:],
+)
 
 sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
 
@@ -111,7 +98,6 @@ def loadCallback():
     #for i in range(0,10):
     #	print(lonvariable[i],latvariable[i])
     #pass
-    update()
     print("Done loadCallback")
 
 inputs = widgetbox(variable_axis,x_axis,y_axis, sizing_mode=sizing_mode)
@@ -126,8 +112,6 @@ l = layout([
     [widgetbox(btLoad)],
     [inputs, p],
 ], sizing_mode=sizing_mode)
-
-update()  # initial load of the data
 
 curdoc().add_root(l)
 curdoc().title = "ncview2"
