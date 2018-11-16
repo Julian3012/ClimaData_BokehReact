@@ -72,14 +72,20 @@ n = np.array([[0]*22399,[1]*22399,[2]*22399,[3]*22399,[4]*22399,[5]*22399,[6]*22
 
 n = n.flatten()
 
-varf = var.flatten()
+tmp = []
+for i in range(0,22399):
+    for j in range(0,6):
+        tmp.append(var[i][j])
+
+
+
 
 print(n)
 
 source.data = dict(
-    x=varf,
+    x=tmp,
     y=n,
-    v=varf,
+    v=tmp,
 )
 
 
