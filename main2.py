@@ -20,20 +20,20 @@ import pandas as pd
 
 
 varoptions = ["RAIN"]
-dimoptions = ["LATITUDE", "LONGITUDE"]
+dimoptions = ["TIME", "RAIN"]
 
 desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
 
 # Create Input controls
 #reviews = Slider(title="Minimum number of reviews", value=80, start=10, end=300, step=10)
 
-x_axis = Select(title="X Axis", options=dimoptions, value="LATITUDE")
-y_axis = Select(title="Y Axis", options=dimoptions, value="LONGITUDE")
+x_axis = Select(title="X Axis", options=dimoptions, value="TIME")
+y_axis = Select(title="Y Axis", options=dimoptions, value="RAIN")
 variable_axis = Select(title="Color", options=varoptions, value="RAIN")
 
 
 # Create Column Data Source that will be used by the plot
-source = ColumnDataSource(data=dict(x=[], y=[], color=[]))
+source = ColumnDataSource(data=dict(x=[], y=[]))
 
 p = figure(plot_height=600, plot_width=700, title="", toolbar_location=None)
 p.circle(x="x", y="y", source=source, size=7, line_color=None)
@@ -55,8 +55,6 @@ variable_name = variable_axis.value
 
 p.xaxis.axis_label = x_axis.value
 p.yaxis.axis_label = y_axis.value
-
-
 
 var = dataset.variables[variable_name]
 print(var.dimensions)
