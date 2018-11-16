@@ -19,7 +19,7 @@ import pandas as pd
 #from collections import Dict
 
 
-varoptions = ["PRES"]
+varoptions = ["RAIN"]
 dimoptions = ["LATITUDE", "LONGITUDE"]
 
 desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
