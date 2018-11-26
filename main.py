@@ -9,14 +9,13 @@ from bokeh.layouts import layout, widgetbox, row
 from bokeh.models import ColumnDataSource, Div, PreText
 from bokeh.models.widgets import Slider, Select, TextInput
 from bokeh.io import curdoc
-from bokeh.sampledata.movies_data import movie_path
-
 
 import bokeh as bokeh
 import pandas as pd
 import xarray as xr
 import holoviews as hv
 import numpy as np
+
 
 SIZING_MODE = 'fixed'  # 'scale_width' also looks nice with this example
 
@@ -54,7 +53,7 @@ def loadCallback():
     result = "Default URL"
 
     print("Loading "+ urlinput.value)
-    xrDataset = xr.open_dataset(urlinput.value)
+    xrDataset = xr.open_dataset(urlinput.value,chunks={})
     result = str(xrDataset)
     df =xrDataset.to_dataframe().reset_index()
     rsDiv = PreText(text=result)
