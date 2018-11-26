@@ -13,9 +13,9 @@ def bkapp_page():
     with pull_session(url="http://localhost:5006/bokehserver") as session:
 
         # update or customize that session
-        #session.document.roots[0].children[1].title.text = "Special Sliders For A Specific User!"
+        session.document.roots[0].children[1].title.text = "Special Sliders For A Specific User!"
 
-        #s, d = components(session.document.roots[0])
+        s, d = components(session.document.roots[0])
         # generate a script to load the customized session
 
         script = server_session(session_id=session.id, url='http://localhost:5006/bokehserver')

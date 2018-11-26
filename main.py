@@ -5,117 +5,93 @@ import pandas.io.sql as psql
 import sqlite3 as sql
 
 from bokeh.plotting import figure
-from bokeh.layouts import layout, widgetbox
-from bokeh.models import ColumnDataSource, Div
+from bokeh.layouts import layout, widgetbox, row
+from bokeh.models import ColumnDataSource, Div, PreText
 from bokeh.models.widgets import Slider, Select, TextInput
 from bokeh.io import curdoc
 from bokeh.sampledata.movies_data import movie_path
 
 
-import bokeh
-import netCDF4
+import bokeh as bokeh
+import pandas as pd
+import xarray as xr
+import holoviews as hv
+import numpy as np
 
-#from collections import Dict
+SIZING_MODE = 'fixed'  # 'scale_width' also looks nice with this example
 
-
-varoptions = ["None"]
-dimoptions = ["None"]
 
 desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
 
-# Create Input controls
-#reviews = Slider(title="Minimum number of reviews", value=80, start=10, end=300, step=10)
+renderer = hv.renderer('bokeh')
+options = hv.Store.options(backend='bokeh')
+options.Points = hv.Options('plot', width=800, height=600, size_index=None,)
+options.Points = hv.Options('style', cmap='rainbow', line_color='black')
 
-x_axis = Select(title="X Axis", options=varoptions, value="None")
-y_axis = Select(title="Y Axis", options=varoptions, value="None")
-variable_axis = Select(title="Color", options=varoptions, value="None")
+def update(attr, old, new):
+    lay.children[1] = create_figure()
 
-# Create Column Data Source that will be used by the plot
-source = ColumnDataSource(data=dict(x=[], y=[], color=[]))
+def create_figure():
+    label = "%s vs %s" % (x.value.title(), y.value.title())
+    kdims = [x.value, y.value]
 
-p = figure(plot_height=600, plot_width=700, title="", toolbar_location=None)
-p.circle(x="x", y="y", color="color", source=source, size=7, line_color=None)
-
-
-dataset = None
-#dataset = netCDF4.Dataset("https://dods.ndbc.noaa.gov/thredds/dodsC/oceansites/DATA/CCE1/OS_CCE1_01_D_AQUADOPP.nc")
-dataset = netCDF4.Dataset("/home/max/Downloads/OS_CCE1_01_D_AQUADOPP.nc")
-
-
-for k,v in dataset.variables.items():
-    print(k)
-    varoptions.append(k)
-
-def updateVariable():
-    pass
-
-def update():
-    #if dataset is None:
-    #   return
-    #if dataset.variables is None:
-    #    return
-
-    df = dataset.variables
-
-    x_name = x_axis.value
-    y_name = y_axis.value
-    variable_name = variable_axis.value
-
-    if x_name is None or y_name is None:
-        return
-    if x_name is "None" or y_name is "None":
-        return
-
-    print("Selected %s and %s" % (x_name,y_name) )
-
-    p.xaxis.axis_label = x_axis.value
-    p.yaxis.axis_label = y_axis.value
-
-    p.title.text = "%d dataitems selected" % len(df)
-    source.data = dict(
-        x=df[x_name][:10],
-        y=df[y_name][:10],
-        color=df[color_name][:10],
-    )
-
-variable_axis.on_change('value', lambda attr, old, new: updateVariable())
-
-controls = [x_axis, y_axis]
-for control in controls:
-    control.on_change('value', lambda attr, old, new: update())
-
-sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
+    opts, style = {}, {}
+    opts['color_index'] = color.value if color.value != 'None' else None
+    if size.value != 'None':
+        opts['size_index'] = size.value
+        opts['scaling_factor'] = (1./df[size.value].max())*200
+    points = hv.Points(df, kdims=kdims, label=label).opts(plot=opts, style=style)
+    return renderer.get_plot(points).state
 
 def loadCallback():
-    global dataset
-    global axis_map
+    global x
+    global y
+    global df
+    global color
+    global size
+    global lay
 
-    url = urlinput.value
-    dataset = netCDF4.Dataset(url)
+    result = "Default URL"
 
-    # lookup a variable
-    #print("Keys:")
-    #print(dataset.variables.keys())
+    print("Loading "+ urlinput.value)
+    xrDataset = xr.open_dataset(urlinput.value)
+    result = str(xrDataset)
+    df =xrDataset.to_dataframe().reset_index()
+    rsDiv = PreText(text=result)
 
-    #print("variables:")
-    #print(dataset.variables)
+    columns = sorted(df.columns)
+    print("Columns are ")
+    print(columns)
+    discrete = [x for x in columns if df[x].dtype == object]
+    continuous = [x for x in columns if x not in discrete]
+    quantileable = [x for x in continuous if len(df[x].unique()) > 1]
 
-    for k,v in dataset.variables.items():
-        options.append(k)
+    x = Select(title='X-Axis', value=quantileable[0], options=quantileable)
+    x.on_change('value', update)
+    y = Select(title='Y-Axis', value=quantileable[1], options=quantileable)
+    y.on_change('value', update)
 
+    size = Select(title='Size', value='None', options=['None'] + quantileable)
+    size.on_change('value', update)
 
-    #axis_map = dataset.variables
-    # print the first 10 values
-    #lonvariable = dataset.variables["lon"]
-    #print("printing")
-    #for i in range(0,10):
-    #	print(lonvariable[i],latvariable[i])
-    #pass
-    update()
+    color = Select(title='Color', value='None', options=['None'] + quantileable)
+    color.on_change('value', update)
+
+    controls = widgetbox([x, y, color, size], width=200)
+    lay = row(controls, create_figure())
+
+    curdoc().add_root(lay)
+    print(result)
     print("Done loadCallback")
 
-inputs = widgetbox(variable_axis,x_axis,y_axis, sizing_mode=sizing_mode)
+df = None
+x = None
+y = None
+size = None
+color = None
+lay = None
 
+# LOAD Start part
 urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 btLoad = bokeh.models.Button(label="load")
 btLoad.on_click(loadCallback)
@@ -124,10 +100,7 @@ l = layout([
     [desc],
     [widgetbox(urlinput)],
     [widgetbox(btLoad)],
-    [inputs, p],
-], sizing_mode=sizing_mode)
-
-update()  # initial load of the data
+], sizing_mode=SIZING_MODE)
 
 curdoc().add_root(l)
 curdoc().title = "ncview2"
