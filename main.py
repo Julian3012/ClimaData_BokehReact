@@ -15,6 +15,9 @@ import pandas as pd
 import xarray as xr
 import holoviews as hv
 import numpy as np
+import dask
+import datashader as ds
+from datashader.bokeh_ext import InteractiveImage
 
 
 SIZING_MODE = 'fixed'  # 'scale_width' also looks nice with this example
