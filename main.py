@@ -29,17 +29,23 @@ from scipy.spatial import Delaunay
 renderer = hv.renderer('bokeh').instance(mode='server')
 
 START = 0
-LOADING = 1
-LOADED = 2
+LOADINGMETA = 1
+LOADEDMETA = 2
+LOADING = 3
+LOADED = 4
 
 state = START
 
-def graph(url):
+urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
+
+def graph():
     n1 = []
     n2 = []
     n3 = []
 
-    xrData = xr.open_dataset("/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc",decode_cf=False)
+    url = urlinput.value
+    #url = "/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    xrData = xr.open_dataset(url,decode_cf=False)
     verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
 
     l = len(xrData.clon_bnds)
@@ -61,17 +67,41 @@ def graph(url):
 
     return datashade(hv.TriMesh((tris,verts), label="Wireframe").options(filled=True))
 
-def loadCallback():
-    state = LOADING
+def loadMetaCallback():
+    state = LOADINGMETA
 
-    divLoading = Div(text="loading...")
+    divLoading = Div(text="loading metadata...")
     curdoc().clear()
     l = layout([
     [widgetbox(divLoading)]
     ])
     curdoc().add_root(l)
 
-    plot = renderer.get_plot(graph(""))
+
+
+    state = LOADEDMETA
+
+    btShow = bokeh.models.Button(label="show")
+    btShow.on_click(loadGraphCallback)
+
+    curdoc().clear()
+    l = layout([
+    [widgetbox(btShow)]
+    ])
+    curdoc().add_root(l)
+
+
+
+def loadGraphCallback():
+    state =LOADING
+    divLoading = Div(text="loading graph...")
+    curdoc().clear()
+    l = layout([
+    [widgetbox(divLoading)]
+    ])
+    curdoc().add_root(l)
+
+    plot = renderer.get_plot(graph())
 
     curdoc().clear()
     l = layout([
@@ -82,9 +112,8 @@ def loadCallback():
 
 def modify_doc(doc):
     doc.title = 'HoloViews Bokeh App'
-    urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
     btLoad = bokeh.models.Button(label="load")
-    btLoad.on_click(loadCallback)
+    btLoad.on_click(loadMetaCallback)
 
     doc.clear()
     l = layout([
