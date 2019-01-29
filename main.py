@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from os.path import dirname, join
 
 import numpy as np
@@ -18,91 +19,63 @@ import numpy as np
 import dask
 import datashader as ds
 from datashader.bokeh_ext import InteractiveImage
+from holoviews.operation.datashader import datashade, shade, dynspread, rasterize
+from holoviews.operation import decimate
+import datashader.utils as du, datashader.transfer_functions as tf
 
+import geoviews as gv
+from cartopy import crs
+import geoviews.feature as gf
+from scipy.spatial import Delaunay
 
-SIZING_MODE = 'fixed'  # 'scale_width' also looks nice with this example
+hv.extension('bokeh')
 
-
-desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
-
-renderer = hv.renderer('bokeh')
 options = hv.Store.options(backend='bokeh')
 options.Points = hv.Options('plot', width=800, height=600, size_index=None,)
-options.Points = hv.Options('style', cmap='rainbow', line_color='black')
+xrData = xr.open_dataset("/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc",decode_cf=False)
+verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
 
-def update(attr, old, new):
-    lay.children[1] = create_figure()
+def fnt(verts):
 
-def create_figure():
-    label = "%s vs %s" % (x.value.title(), y.value.title())
-    kdims = [x.value, y.value]
+    #pts = np.column_stack((xrData.clon,xrData.clat,xrData.isel(height=0,time=0).TR_stn))
+    #print(pts)
 
-    opts, style = {}, {}
-    opts['color_index'] = color.value if color.value != 'None' else None
-    if size.value != 'None':
-        opts['size_index'] = size.value
-        opts['scaling_factor'] = (1./df[size.value].max())*200
-    points = hv.Points(df, kdims=kdims, label=label).opts(plot=opts, style=style)
-    return renderer.get_plot(points).state
+    #verts = np.append(verts,[0,0])
+    #print(verts.shape)
+    n1 = []
+    n2 = []
+    n3 = []
 
-def loadCallback():
-    global x
-    global y
-    global df
-    global color
-    global size
-    global lay
+    l = len(xrData.clon_bnds)
+    #for i in range(0,l):
+    #    n1.append([i])
+    #    n2.append([i+l])
+    #    n3.append([i+l+l])
 
-    result = "Default URL"
+    n1 = np.arange(l)
+    n2 = n1 + l
+    n3 = n2 + l
 
-    print("Loading "+ urlinput.value)
-    xrDataset = xr.open_dataset(urlinput.value,chunks={})
-    result = str(xrDataset)
-    df =xrDataset.to_dataframe().reset_index()
-    rsDiv = PreText(text=result)
+    n4 = np.column_stack((n1,n2,n3))
+    n = np.column_stack((n4,xrData.isel(height=0,time=0).TR_stn))
+    #n = np.column_stack((n1,n2,n3))
 
-    columns = sorted(df.columns)
-    print("Columns are ")
-    print(columns)
-    discrete = [x for x in columns if df[x].dtype == object]
-    continuous = [x for x in columns if x not in discrete]
-    quantileable = [x for x in continuous if len(df[x].unique()) > 1]
+    verts = pd.DataFrame(verts,  columns=['x', 'y'])
+    tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2','TR_stn'], dtype = np.float64)
+    tris['v0'] = tris["v0"].astype(np.int32)
+    tris['v1'] = tris["v1"].astype(np.int32)
+    tris['v2'] = tris["v2"].astype(np.int32)
 
-    x = Select(title='X-Axis', value=quantileable[0], options=quantileable)
-    x.on_change('value', update)
-    y = Select(title='Y-Axis', value=quantileable[1], options=quantileable)
-    y.on_change('value', update)
+    print('vertices:', len(verts), 'triangles:', len(tris))
 
-    size = Select(title='Size', value='None', options=['None'] + quantileable)
-    size.on_change('value', update)
+    #mesh = du.mesh(verts,tris)
+    #cvs = ds.Canvas(plot_height=900, plot_width=900)
+    #agg = cvs.trimesh(verts, tris, mesh=mesh)
+    #tf.Image(tf.shade(agg))
 
-    color = Select(title='Color', value='None', options=['None'] + quantileable)
-    color.on_change('value', update)
+    #datashade(hv.TriMesh((tris,verts), vdims=["TR_stn"], label="Wireframe").options(filled=True))
+    return datashade(hv.TriMesh((tris,verts), label="Wireframe").options(filled=True))
 
-    controls = widgetbox([x, y, color, size], width=200)
-    lay = row(controls, create_figure())
-
-    curdoc().add_root(lay)
-    print(result)
-    print("Done loadCallback")
-
-df = None
-x = None
-y = None
-size = None
-color = None
-lay = None
-
-# LOAD Start part
-urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
-btLoad = bokeh.models.Button(label="load")
-btLoad.on_click(loadCallback)
-
-l = layout([
-    [desc],
-    [widgetbox(urlinput)],
-    [widgetbox(btLoad)],
-], sizing_mode=SIZING_MODE)
-
-curdoc().add_root(l)
-curdoc().title = "ncview2"
+shaded = fnt(verts)
+doc = hv.renderer('bokeh').server_doc(shaded)
+doc.title = 'HoloViews Bokeh App'
