@@ -38,14 +38,18 @@ state = START
 
 urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 
+def getURL():
+    url = urlinput.value
+    #url = "/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    return url
+
 def graph():
     n1 = []
     n2 = []
     n3 = []
 
-    url = urlinput.value
-    #url = "/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
-    xrData = xr.open_dataset(url,decode_cf=False)
+
+    xrData = xr.open_dataset(getURL(),decode_cf=False)
     verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
 
     l = len(xrData.clon_bnds)
@@ -77,6 +81,16 @@ def loadMetaCallback():
     ])
     curdoc().add_root(l)
 
+    try:
+        xrData = xr.open_dataset(getURL(),decode_cf=False)
+    except:
+        divError = Div(text="Failed to load metadata")
+        curdoc().clear()
+        l = layout([
+        [widgetbox(divError)]
+        ])
+        curdoc().add_root(l)
+        return
 
 
     state = LOADEDMETA
