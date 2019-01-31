@@ -65,7 +65,7 @@ def graph(v,h):
     n3 = n2 + l
 
     n4 = np.column_stack((n1,n2,n3))
-    n = np.column_stack((n4,getattr(xrData,v).isel(height=0,time=0)))
+    n = np.column_stack((n4,getattr(xrData,v).isel(height=h,time=0)))
 
     verts = pd.DataFrame(verts,  columns=['x', 'y'])
     tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',v], dtype = np.float64)
@@ -132,7 +132,7 @@ def loadGraphCallback():
     if slHeight is not None:
         height = slHeight.value
 
-    slHeight = bokeh.models.Slider(start=0, end=len(xrData.height), value=height, step=1, title="Height")
+    slHeight = bokeh.models.Slider(start=0, end=len(xrData.height)-1, value=height, step=1, title="Height")
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(loadGraphCallback)
 
