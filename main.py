@@ -33,20 +33,23 @@ LOADINGMETA = 1
 LOADEDMETA = 2
 LOADING = 3
 LOADED = 4
+ERROR = 1000
 
 state = START
 
 urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 slVar = None
 slMesh = None
+slHeight = None
 variable = ""
+height = 0
 
 def getURL():
     #url = urlinput.value
     url = "/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     return url
 
-def graph(v):
+def graph(v,h):
     n1 = []
     n2 = []
     n3 = []
@@ -76,7 +79,7 @@ def graph(v):
     return res
 
 def loadMetaCallback():
-    global slVar, slMesh
+    global slVar, slMesh, xrData
     state = LOADINGMETA
 
     divLoading = Div(text="loading metadata...")
@@ -95,6 +98,7 @@ def loadMetaCallback():
         [widgetbox(divError)]
         ])
         curdoc().add_root(l)
+        state = ERROR
         return
 
 
@@ -119,22 +123,39 @@ def loadMetaCallback():
     curdoc().add_root(l)
 
 
-
 def loadGraphCallback():
+    global xrData, height
+    global slHeight
+
     state =LOADING
+
+    if slHeight is not None:
+        height = slHeight.value
+
+    slHeight = bokeh.models.Slider(start=0, end=len(xrData.height), value=height, step=1, title="Height")
+    btShow = bokeh.models.Button(label="show")
+    btShow.on_click(loadGraphCallback)
+
     variable = slVar.value
+
+
     divLoading = Div(text="loading graph...")
     curdoc().clear()
     l = layout([
-    [widgetbox(divLoading)]
+        [widgetbox(slHeight)],
+        [widgetbox(btShow)],
+        [widgetbox(divLoading)]
     ])
     curdoc().add_root(l)
 
-    plot = renderer.get_plot(graph(variable))
+    height = slHeight.value
+    plot = renderer.get_plot(graph(variable,int(height)))
     print(plot.state)
     curdoc().clear()
     l = layout([
-    [plot.state]
+        [widgetbox(slHeight)],
+        [widgetbox(btShow)],
+        [plot.state]
     ])
 
     curdoc().add_root(l)
