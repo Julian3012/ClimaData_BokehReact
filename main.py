@@ -1,30 +1,17 @@
 #!/usr/bin/python
-import os
-
-import numpy as np
-
-from bokeh.plotting import figure
-from bokeh.layouts import layout, widgetbox, row
-from bokeh.models import ColumnDataSource, Div, PreText
-from bokeh.models.widgets import Slider, Select, TextInput
-from bokeh.io import curdoc, show
+from bokeh.layouts import layout, widgetbox
+from bokeh.models import ColumnDataSource, Div
+from bokeh.models.widgets import TextInput
+from bokeh.io import curdoc
 
 import bokeh as bokeh
 import pandas as pd
 import xarray as xr
 import holoviews as hv
 import numpy as np
-import dask
-import datashader as ds
 
-from datashader.bokeh_ext import InteractiveImage
+
 from holoviews.operation.datashader import datashade
-
-import geoviews as gv
-from cartopy import crs
-import geoviews.feature as gf
-from scipy.spatial import Delaunay
-
 
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
 
@@ -41,6 +28,7 @@ urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 slVar = None
 slMesh = None
 slHeight = None
+slCMap = None
 variable = ""
 height = 0
 n = None
@@ -86,7 +74,7 @@ def graph(v,h):
 
     print('vertices:', len(verts), 'triangles:', len(tris))
 
-    res = datashade(hv.TriMesh((tris,verts), label=v).options(filled=True))
+    res = datashade(hv.TriMesh((tris,verts), label=v+" on height %d"%h).options(filled=True)).options(colorbar=True)
     return res
 
 def loadMetaCallback():
@@ -159,6 +147,8 @@ def loadGraphCallback():
 
     slVar = bokeh.models.Select(title="Variable", options=variables, value=variable)
     slHeight = bokeh.models.Slider(start=0, end=len(xrData.height)-1, value=height, step=1, title="Height")
+
+
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(loadGraphCallback)
     #slHeight.on_change("value",sliderUpdate)
@@ -170,9 +160,6 @@ def loadGraphCallback():
     divLoading = Div(text="loading graph...")
     curdoc().clear()
     l = layout([
-        [widgetbox(slVar)],
-        [widgetbox(slHeight)],
-        [widgetbox(btShow)],
         [widgetbox(divLoading)]
     ])
     curdoc().add_root(l)
