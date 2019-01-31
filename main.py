@@ -26,7 +26,7 @@ import geoviews.feature as gf
 from scipy.spatial import Delaunay
 
 
-renderer = hv.renderer('bokeh').instance(mode='server')
+renderer = hv.renderer('bokeh').instance(mode='server',size=300)
 
 START = 0
 LOADINGMETA = 1
@@ -38,6 +38,7 @@ state = START
 
 urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 slVar = None
+slMesh = None
 variable = ""
 
 def getURL():
@@ -75,7 +76,7 @@ def graph(v):
     return res
 
 def loadMetaCallback():
-    global slVar
+    global slVar, slMesh
     state = LOADINGMETA
 
     divLoading = Div(text="loading metadata...")
@@ -99,10 +100,12 @@ def loadMetaCallback():
 
     state = LOADEDMETA
     variables = ["None"]
+    meshOptions = ["calculate", "DOM1", "DOM2", "DOM3"]
     for k,v in xrData.variables.items():
         variables.append(k)
 
     slVar = bokeh.models.Select(title="Variable", options=variables, value="None")
+    slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="calculate")
 
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(loadGraphCallback)
@@ -110,6 +113,7 @@ def loadMetaCallback():
     curdoc().clear()
     l = layout([
     [widgetbox(slVar)],
+    [widgetbox(slMesh)],
     [widgetbox(btShow)]
     ])
     curdoc().add_root(l)
@@ -127,7 +131,7 @@ def loadGraphCallback():
     curdoc().add_root(l)
 
     plot = renderer.get_plot(graph(variable))
-
+    print(plot.state)
     curdoc().clear()
     l = layout([
     [plot.state]
@@ -137,7 +141,7 @@ def loadGraphCallback():
     state = LOADED
 
 def modify_doc(doc):
-    doc.title = 'HoloViews Bokeh App'
+    doc.title = 'ncview2'
     btLoad = bokeh.models.Button(label="load")
     btLoad.on_click(loadMetaCallback)
 
