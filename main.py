@@ -86,7 +86,7 @@ def graph(v,h):
 
     print('vertices:', len(verts), 'triangles:', len(tris))
 
-    res = datashade(hv.TriMesh((tris,verts), label="Wireframe").options(filled=True))
+    res = datashade(hv.TriMesh((tris,verts), label=v).options(filled=True))
     return res
 
 def loadMetaCallback():
@@ -138,19 +138,31 @@ def sliderUpdate(attr, old, new):
     height = new
     loadGraphCallback()
 
+def variableUpdate(attr,old,new):
+    variable = new
+    loadGraphCallback()
+
 def loadGraphCallback():
     global xrData, height
-    global slHeight
+    global slHeight, slVar
 
     state =LOADING
 
     if slHeight is not None:
         height = slHeight.value
+    if slVar is not None:
+        variable = slVar.value
 
+    variables = ["None"]
+    for k,v in xrData.variables.items():
+        variables.append(k)
+
+    slVar = bokeh.models.Select(title="Variable", options=variables, value=variable)
     slHeight = bokeh.models.Slider(start=0, end=len(xrData.height)-1, value=height, step=1, title="Height")
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(loadGraphCallback)
     #slHeight.on_change("value",sliderUpdate)
+    slVar.on_change("value",variableUpdate)
 
     variable = slVar.value
 
@@ -158,6 +170,7 @@ def loadGraphCallback():
     divLoading = Div(text="loading graph...")
     curdoc().clear()
     l = layout([
+        [widgetbox(slVar)],
         [widgetbox(slHeight)],
         [widgetbox(btShow)],
         [widgetbox(divLoading)]
@@ -169,6 +182,7 @@ def loadGraphCallback():
     print(plot.state)
     curdoc().clear()
     l = layout([
+        [widgetbox(slVar)],
         [widgetbox(slHeight)],
         [widgetbox(btShow)],
         [plot.state]
