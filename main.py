@@ -43,6 +43,10 @@ slMesh = None
 slHeight = None
 variable = ""
 height = 0
+n = None
+n4 = None
+tris = None
+verts = None
 
 def getURL():
     #url = urlinput.value
@@ -50,28 +54,35 @@ def getURL():
     return url
 
 def graph(v,h):
+    global n, n4, tris, xrData, verts
     n1 = []
     n2 = []
     n3 = []
 
+    if n is None:
+        xrData = xr.open_dataset(getURL(),decode_cf=False)
+        verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
 
-    xrData = xr.open_dataset(getURL(),decode_cf=False)
-    verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
+        l = len(xrData.clon_bnds)
 
-    l = len(xrData.clon_bnds)
+        n1 = np.arange(l)
+        n2 = n1 + l
+        n3 = n2 + l
 
-    n1 = np.arange(l)
-    n2 = n1 + l
-    n3 = n2 + l
+        n4 = np.column_stack((n1,n2,n3))
+        n = np.column_stack((n4,getattr(xrData,v).isel(height=h,time=0)))
 
-    n4 = np.column_stack((n1,n2,n3))
-    n = np.column_stack((n4,getattr(xrData,v).isel(height=h,time=0)))
-
-    verts = pd.DataFrame(verts,  columns=['x', 'y'])
-    tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',v], dtype = np.float64)
-    tris['v0'] = tris["v0"].astype(np.int32)
-    tris['v1'] = tris["v1"].astype(np.int32)
-    tris['v2'] = tris["v2"].astype(np.int32)
+        verts = pd.DataFrame(verts,  columns=['x', 'y'])
+        tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',v], dtype = np.float64)
+        tris['v0'] = tris["v0"].astype(np.int32)
+        tris['v1'] = tris["v1"].astype(np.int32)
+        tris['v2'] = tris["v2"].astype(np.int32)
+    else:
+        n = np.column_stack((n4, getattr(xrData, v).isel(height=h, time=0)))
+        tris = pd.DataFrame(n, columns=['v0', 'v1', 'v2', v], dtype=np.float64)
+        tris['v0'] = tris["v0"].astype(np.int32)
+        tris['v1'] = tris["v1"].astype(np.int32)
+        tris['v2'] = tris["v2"].astype(np.int32)
 
     print('vertices:', len(verts), 'triangles:', len(tris))
 
@@ -123,6 +134,10 @@ def loadMetaCallback():
     curdoc().add_root(l)
 
 
+def sliderUpdate(attr, old, new):
+    height = new
+    loadGraphCallback()
+
 def loadGraphCallback():
     global xrData, height
     global slHeight
@@ -135,6 +150,7 @@ def loadGraphCallback():
     slHeight = bokeh.models.Slider(start=0, end=len(xrData.height)-1, value=height, step=1, title="Height")
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(loadGraphCallback)
+    #slHeight.on_change("value",sliderUpdate)
 
     variable = slVar.value
 
