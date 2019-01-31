@@ -36,6 +36,8 @@ n4 = None
 tris = None
 verts = None
 
+COLORMAPS = ["Inferno","Magma","Plasma","Viridis"]
+
 def getURL():
     #url = urlinput.value
     url = "/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
@@ -61,20 +63,16 @@ def graph(v,h):
         n = np.column_stack((n4,getattr(xrData,v).isel(height=h,time=0)))
 
         verts = pd.DataFrame(verts,  columns=['x', 'y'])
-        tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',v], dtype = np.float64)
+        tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',"var"], dtype = np.float64)
         tris['v0'] = tris["v0"].astype(np.int32)
         tris['v1'] = tris["v1"].astype(np.int32)
         tris['v2'] = tris["v2"].astype(np.int32)
     else:
-        n = np.column_stack((n4, getattr(xrData, v).isel(height=h, time=0)))
-        tris = pd.DataFrame(n, columns=['v0', 'v1', 'v2', v], dtype=np.float64)
-        tris['v0'] = tris["v0"].astype(np.int32)
-        tris['v1'] = tris["v1"].astype(np.int32)
-        tris['v2'] = tris["v2"].astype(np.int32)
+        tris["var"] = getattr(xrData, v).isel(height=h, time=0)
 
     print('vertices:', len(verts), 'triangles:', len(tris))
 
-    res = datashade(hv.TriMesh((tris,verts), label=v+" on height %d"%h).options(filled=True)).options(colorbar=True)
+    res = datashade(hv.TriMesh((tris,verts), label=(v+" on height %d"%h)).options(filled=True))
     return res
 
 def loadMetaCallback():
