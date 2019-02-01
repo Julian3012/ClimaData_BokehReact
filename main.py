@@ -43,8 +43,15 @@ def getURL():
     url = "/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     return url
 
-def graph(v,h):
-    global n, n4, tris, xrData, verts
+def graph():
+    dm = hv.DynamicMap(triGraph, kdims=["hi"]).redim.range(hi=(0,89))
+    print("DynamicMap:" + str(dm))
+    return datashade(dm)
+
+
+def triGraph(h):
+    global n, n4, tris, xrData, verts, variable
+    print("Called with %d" % h)
     n1 = []
     n2 = []
     n3 = []
@@ -60,7 +67,7 @@ def graph(v,h):
         n3 = n2 + l
 
         n4 = np.column_stack((n1,n2,n3))
-        n = np.column_stack((n4,getattr(xrData,v).isel(height=h,time=0)))
+        n = np.column_stack((n4,getattr(xrData,variable).isel(height=h,time=0)))
 
         verts = pd.DataFrame(verts,  columns=['x', 'y'])
         tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',"var"], dtype = np.float64)
@@ -68,11 +75,11 @@ def graph(v,h):
         tris['v1'] = tris["v1"].astype(np.int32)
         tris['v2'] = tris["v2"].astype(np.int32)
     else:
-        tris["var"] = getattr(xrData, v).isel(height=h, time=0)
+        tris["var"] = getattr(xrData, variable).isel(height=h, time=0)
 
     print('vertices:', len(verts), 'triangles:', len(tris))
 
-    res = datashade(hv.TriMesh((tris,verts), label=(v+" on height %d"%h)).options(filled=True))
+    res = hv.TriMesh((tris,verts), label=(variable+" on height %d"%h)).options(filled=True)
     return res
 
 def loadMetaCallback():
@@ -129,7 +136,7 @@ def variableUpdate(attr,old,new):
     loadGraphCallback()
 
 def loadGraphCallback():
-    global xrData, height
+    global xrData, height, variable
     global slHeight, slVar
 
     state =LOADING
@@ -145,6 +152,12 @@ def loadGraphCallback():
 
     slVar = bokeh.models.Select(title="Variable", options=variables, value=variable)
     slHeight = bokeh.models.Slider(start=0, end=len(xrData.height)-1, value=height, step=1, title="Height")
+
+    slCMap = bokeh.models.Select(title="Colormap", options=["Inferno","Blue","Plasma"], value="Blue")
+    txTitle = bokeh.models.TextInput(value="TR_stn, height ...", title="Title:")
+    txPre = bokeh.models.PreText(text=str(xrData),width=800)
+    cbOpts = bokeh.models.CheckboxButtonGroup(
+        labels=["Colorbar", "x-Axis", "y-Axis"], active=[0, 1, 1])
 
 
     btShow = bokeh.models.Button(label="show")
@@ -163,13 +176,18 @@ def loadGraphCallback():
     curdoc().add_root(l)
 
     height = slHeight.value
-    plot = renderer.get_plot(graph(variable,int(height)))
+    #plot = renderer.get_plot(graph(variable,int(height)))
+    plot = renderer.get_widget(graph(),'widgets')
     print(plot.state)
     curdoc().clear()
     l = layout([
+        [widgetbox(txTitle)],
+        [widgetbox(txPre)],
         [widgetbox(slVar)],
-        [widgetbox(slHeight)],
-        [widgetbox(btShow)],
+        [widgetbox(cbOpts)],
+        #[widgetbox(slHeight)],
+        #[widgetbox(btShow)],
+        [widgetbox(slCMap)],
         [plot.state]
     ])
 
