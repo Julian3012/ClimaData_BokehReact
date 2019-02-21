@@ -9,9 +9,11 @@ import pandas as pd
 import xarray as xr
 import holoviews as hv
 import numpy as np
-
+import geoviews as gv
 
 from holoviews.operation.datashader import datashade, rasterize
+
+import math
 
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
 
@@ -50,6 +52,7 @@ def graph():
     if slCMap is not None:
         cm = slCMap.value
     return rasterize(dm).opts(cmap=cm,colorbar=True)
+    #return datashade(dm)
 
 
 def triGraph(h):
@@ -63,6 +66,12 @@ def triGraph(h):
         xrData = xr.open_dataset(getURL(),decode_cf=False)
         verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
 
+        #not so performant
+        f = 180 / math.pi
+        for v in verts:
+            v[0] = v[0] * f
+            v[1] = v[1] * f
+
         l = len(xrData.clon_bnds)
 
         n1 = np.arange(l)
@@ -72,7 +81,7 @@ def triGraph(h):
         n4 = np.column_stack((n1,n2,n3))
         n = np.column_stack((n4,getattr(xrData,variable).isel(height=h,time=0)))
 
-        verts = pd.DataFrame(verts,  columns=['x', 'y'])
+        verts = pd.DataFrame(verts,  columns=['Longitude', 'Latitude'])
         tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',"var"], dtype = np.float64)
         tris['v0'] = tris["v0"].astype(np.int32)
         tris['v1'] = tris["v1"].astype(np.int32)
