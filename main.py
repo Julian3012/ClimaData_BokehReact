@@ -49,7 +49,7 @@ def graph():
     cm = "Magma"
     if slCMap is not None:
         cm = slCMap.value
-    return rasterize(dm).opts(cmap=cm)
+    return rasterize(dm).opts(cmap=cm,colorbar=True)
 
 
 def triGraph(h):
@@ -193,13 +193,13 @@ def loadGraphCallback():
     curdoc().clear()
     l = layout([
         [widgetbox(txTitle)],
-        [widgetbox(txPre)],
         [widgetbox(slVar)],
         [widgetbox(cbOpts)],
         #[widgetbox(slHeight)],
         #[widgetbox(btShow)],
         [widgetbox(slCMap)],
-        [plot.state]
+        [plot.state],
+        [widgetbox(txPre)]
     ])
 
     curdoc().add_root(l)
