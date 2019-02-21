@@ -11,7 +11,7 @@ import holoviews as hv
 import numpy as np
 
 
-from holoviews.operation.datashader import datashade
+from holoviews.operation.datashader import datashade, rasterize
 
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
 
@@ -36,7 +36,7 @@ n4 = None
 tris = None
 verts = None
 
-COLORMAPS = ["Inferno","Magma","Plasma","Viridis"]
+COLORMAPS = ["Inferno","Magma","Plasma","Viridis","BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral","Blues","BuGn","BuPu","GnBu","Greens","Greys","Oranges","OrRd","PuBu","PuBuGn","PuRd","Purples","RdPu","Reds","YlGn","YlGnBu","YlOrBr","YlOrRd"]
 
 def getURL():
     #url = urlinput.value
@@ -46,7 +46,10 @@ def getURL():
 def graph():
     dm = hv.DynamicMap(triGraph, kdims=["hi"]).redim.range(hi=(0,89))
     print("DynamicMap:" + str(dm))
-    return datashade(dm)
+    cm = "Magma"
+    if slCMap is not None:
+        cm = slCMap.value
+    return rasterize(dm).opts(cmap=cm)
 
 
 def triGraph(h):
@@ -108,7 +111,7 @@ def loadMetaCallback():
 
     state = LOADEDMETA
     variables = ["None"]
-    meshOptions = ["calculate", "DOM1", "DOM2", "DOM3"]
+    meshOptions = ["calculate", "DOM1 (not implemented)", "DOM2 (not implemented)", "DOM3 (not implemented)"]
     for k,v in xrData.variables.items():
         variables.append(k)
 
@@ -135,9 +138,12 @@ def variableUpdate(attr,old,new):
     variable = new
     loadGraphCallback()
 
+def update(attr, old, new):
+    loadGraphCallback()
+
 def loadGraphCallback():
     global xrData, height, variable
-    global slHeight, slVar
+    global slHeight, slVar, slCMap
 
     state =LOADING
 
@@ -145,6 +151,10 @@ def loadGraphCallback():
         height = slHeight.value
     if slVar is not None:
         variable = slVar.value
+    if slCMap is not None:
+        cm = slCMap.value
+    else:
+        cm = COLORMAPS[0]
 
     variables = ["None"]
     for k,v in xrData.variables.items():
@@ -153,7 +163,7 @@ def loadGraphCallback():
     slVar = bokeh.models.Select(title="Variable", options=variables, value=variable)
     slHeight = bokeh.models.Slider(start=0, end=len(xrData.height)-1, value=height, step=1, title="Height")
 
-    slCMap = bokeh.models.Select(title="Colormap", options=["Inferno","Blue","Plasma"], value="Blue")
+    slCMap = bokeh.models.Select(title="Colormap", options=COLORMAPS, value=cm)
     txTitle = bokeh.models.TextInput(value="TR_stn, height ...", title="Title:")
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
     cbOpts = bokeh.models.CheckboxButtonGroup(
@@ -164,6 +174,7 @@ def loadGraphCallback():
     btShow.on_click(loadGraphCallback)
     #slHeight.on_change("value",sliderUpdate)
     slVar.on_change("value",variableUpdate)
+    slCMap.on_change("value",update)
 
     variable = slVar.value
 
