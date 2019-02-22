@@ -10,6 +10,8 @@ import xarray as xr
 import holoviews as hv
 import numpy as np
 import geoviews as gv
+import geoviews.feature as gf
+from cartopy import crs
 
 from holoviews.operation.datashader import datashade, rasterize
 
@@ -62,6 +64,8 @@ def triGraph(h):
     n2 = []
     n3 = []
 
+    selectors = {"height":h,"time":0}
+
     if n is None:
         xrData = xr.open_dataset(getURL(),decode_cf=False)
         verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
@@ -79,7 +83,7 @@ def triGraph(h):
         n3 = n2 + l
 
         n4 = np.column_stack((n1,n2,n3))
-        n = np.column_stack((n4,getattr(xrData,variable).isel(height=h,time=0)))
+        n = np.column_stack((n4,getattr(xrData, variable).isel(selectors)))
 
         verts = pd.DataFrame(verts,  columns=['Longitude', 'Latitude'])
         tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',"var"], dtype = np.float64)
@@ -87,11 +91,11 @@ def triGraph(h):
         tris['v1'] = tris["v1"].astype(np.int32)
         tris['v2'] = tris["v2"].astype(np.int32)
     else:
-        tris["var"] = getattr(xrData, variable).isel(height=h, time=0)
+        tris["var"] = getattr(xrData, variable).isel(selectors)
 
     print('vertices:', len(verts), 'triangles:', len(tris))
 
-    res = hv.TriMesh((tris,verts), label=(variable+" on height %d"%h)).options(filled=True)
+    res = hv.TriMesh((tris,verts), label=(variable)).options(filled=True)
     return res
 
 def loadMetaCallback():
@@ -181,7 +185,6 @@ def loadGraphCallback():
 
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(loadGraphCallback)
-    #slHeight.on_change("value",sliderUpdate)
     slVar.on_change("value",variableUpdate)
     slCMap.on_change("value",update)
 
@@ -195,8 +198,6 @@ def loadGraphCallback():
     ])
     curdoc().add_root(l)
 
-    height = slHeight.value
-    #plot = renderer.get_plot(graph(variable,int(height)))
     plot = renderer.get_widget(graph(),'widgets')
     print(plot.state)
     curdoc().clear()
@@ -204,8 +205,6 @@ def loadGraphCallback():
         [widgetbox(txTitle)],
         [widgetbox(slVar)],
         [widgetbox(cbOpts)],
-        #[widgetbox(slHeight)],
-        #[widgetbox(btShow)],
         [widgetbox(slCMap)],
         [plot.state],
         [widgetbox(txPre)]
@@ -226,15 +225,5 @@ def modify_doc(doc):
     ])
     doc.add_root(l)
 
-
-
-#urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
-#btLoad = bokeh.models.Button(label="load")
-#btLoad.on_click(loadCallback)
-
-
-#shaded = graph("")
-#doc = hv.renderer('bokeh').server_doc(shaded)
-#doc.title = 'HoloViews Bokeh App'
 
 modify_doc(curdoc())
