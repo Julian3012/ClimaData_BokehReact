@@ -9,8 +9,8 @@ import pandas as pd
 import xarray as xr
 import holoviews as hv
 import numpy as np
-import geoviews as gv
-import geoviews.feature as gf
+#import geoviews as gv
+#import geoviews.feature as gf
 from cartopy import crs
 
 from holoviews.operation.datashader import datashade, rasterize
@@ -63,6 +63,7 @@ def graph():
     ranges = {}
     for d in freedims:
         # WORKAROUND because Holoview is not working with a kdim with name "height"
+        # See issue
         if d != "hi":
             ranges[d] = (0,len(getattr(getattr(xrData,variable),d)))
         else:
@@ -78,25 +79,33 @@ def graph():
     #return datashade(dm)
 
 
-def triGraph(Time,h):
+def triGraph(*args):
     global n, n4, tris, xrData, verts, variable, freedims
 
-    print("Called with %d" % h)
     n1 = []
     n2 = []
     n3 = []
 
-    selectors = {"height":h,"time":Time}
+    selectors = {}
+    idx = 0
+    for d in freedims:
+        # WORKAROUND because Holoview is not working with a kdim with name "height"
+        # See issue
+        if d == "hi":
+            selectors["height"] = args[idx]
+        else:
+            selectors[d] = args[idx]
+        idx = idx +1
 
     if n is None:
         xrData = xr.open_dataset(getURL(),decode_cf=False)
         verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
 
         #not so performant
-        f = 180 / math.pi
-        for v in verts:
-            v[0] = v[0] * f
-            v[1] = v[1] * f
+        #f = 180 / math.pi
+        #for v in verts:
+        #    v[0] = v[0] * f
+        #    v[1] = v[1] * f
 
         l = len(xrData.clon_bnds)
 
