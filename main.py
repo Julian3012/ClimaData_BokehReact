@@ -40,6 +40,8 @@ n4 = None
 tris = None
 verts = None
 
+freedims = []
+
 COLORMAPS = ["Inferno","Magma","Plasma","Viridis","BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral","Blues","BuGn","BuPu","GnBu","Greens","Greys","Oranges","OrRd","PuBu","PuBuGn","PuRd","Purples","RdPu","Reds","YlGn","YlGnBu","YlOrBr","YlOrRd"]
 
 def getURL():
@@ -48,7 +50,26 @@ def getURL():
     return url
 
 def graph():
-    dm = hv.DynamicMap(triGraph, kdims=["hi"]).redim.range(hi=(0,89))
+    for d in getattr(xrData,variable).dims:
+        # WORKAROUND because Holoview is not working with a kdim with name "height"
+        # See issue
+        if d == "height":
+            freedims.append("hi")
+            continue
+        if d != "ncells":
+            freedims.append(d)
+    print("freedims:")
+    print(freedims)
+    ranges = {}
+    for d in freedims:
+        # WORKAROUND because Holoview is not working with a kdim with name "height"
+        if d != "hi":
+            ranges[d] = (0,len(getattr(getattr(xrData,variable),d)))
+        else:
+            ranges[d] = (0,len(getattr(getattr(xrData,variable),"height")))
+    print("range")
+    print(ranges)
+    dm = hv.DynamicMap(triGraph, kdims=freedims).redim.range(**ranges)
     print("DynamicMap:" + str(dm))
     cm = "Magma"
     if slCMap is not None:
@@ -57,14 +78,15 @@ def graph():
     #return datashade(dm)
 
 
-def triGraph(h):
-    global n, n4, tris, xrData, verts, variable
+def triGraph(Time,h):
+    global n, n4, tris, xrData, verts, variable, freedims
+
     print("Called with %d" % h)
     n1 = []
     n2 = []
     n3 = []
 
-    selectors = {"height":h,"time":0}
+    selectors = {"height":h,"time":Time}
 
     if n is None:
         xrData = xr.open_dataset(getURL(),decode_cf=False)
