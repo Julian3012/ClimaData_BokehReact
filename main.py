@@ -33,7 +33,6 @@ state = START
 urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 slVar = None
 slMesh = None
-slHeight = None
 slCMap = None
 variable = ""
 height = 0
@@ -186,12 +185,10 @@ def update(attr, old, new):
 
 def loadGraphCallback():
     global xrData, height, variable
-    global slHeight, slVar, slCMap
+    global slVar, slCMap
 
     state =LOADING
 
-    if slHeight is not None:
-        height = slHeight.value
     if slVar is not None:
         variable = slVar.value
     if slCMap is not None:
@@ -204,7 +201,6 @@ def loadGraphCallback():
         variables.append(k)
 
     slVar = bokeh.models.Select(title="Variable", options=variables, value=variable)
-    slHeight = bokeh.models.Slider(start=0, end=len(xrData.height)-1, value=height, step=1, title="Height")
 
     slCMap = bokeh.models.Select(title="Colormap", options=COLORMAPS, value=cm)
     txTitle = bokeh.models.TextInput(value="TR_stn, height ...", title="Title:")
