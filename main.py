@@ -3,17 +3,19 @@ from bokeh.layouts import layout, widgetbox
 from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
 from bokeh.io import curdoc
+#import geoviews
 
 import bokeh as bokeh
 import pandas as pd
 import xarray as xr
 import holoviews as hv
 import numpy as np
-#import geoviews as gv
-#import geoviews.feature as gf
+
 from cartopy import crs
 
 from holoviews.operation.datashader import datashade, rasterize
+
+
 
 import math
 
@@ -58,8 +60,7 @@ def graph():
             continue
         if d != "ncells":
             freedims.append(d)
-    print("freedims:")
-    print(freedims)
+
     ranges = {}
     for d in freedims:
         # WORKAROUND because Holoview is not working with a kdim with name "height"
@@ -68,8 +69,6 @@ def graph():
             ranges[d] = (0,len(getattr(getattr(xrData,variable),d)))
         else:
             ranges[d] = (0,len(getattr(getattr(xrData,variable),"height")))
-    print("range")
-    print(ranges)
     dm = hv.DynamicMap(triGraph, kdims=freedims).redim.range(**ranges)
     print("DynamicMap:" + str(dm))
     cm = "Magma"
@@ -102,10 +101,10 @@ def triGraph(*args):
         verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
 
         #not so performant
-        #f = 180 / math.pi
-        #for v in verts:
-        #    v[0] = v[0] * f
-        #    v[1] = v[1] * f
+        f = 180 / math.pi
+        for v in verts:
+            v[0] = v[0] * f
+            v[1] = v[1] * f
 
         l = len(xrData.clon_bnds)
 
