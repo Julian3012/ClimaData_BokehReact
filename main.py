@@ -43,14 +43,28 @@ verts = None
 
 freedims = []
 
+
 COLORMAPS = ["Inferno","Magma","Plasma","Viridis","BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral","Blues","BuGn","BuPu","GnBu","Greens","Greys","Oranges","OrRd","PuBu","PuBuGn","PuRd","Purples","RdPu","Reds","YlGn","YlGnBu","YlOrBr","YlOrRd"]
 
 def getURL():
+    """
+    Function to capsulate the url input.
+
+    Returns:
+        str: The entered data url
+    """
     #url = urlinput.value
     url = "/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     return url
 
-def graph():
+def buildDynamicMap():
+    """
+    Function to capsulate the free dimensions together with the actual
+    Trimeshgraph.
+
+    Returns:
+        : a rasterizes plot of the DynamicMap with the TriMesh graph in it.
+    """
     for d in getattr(xrData,variable).dims:
         # WORKAROUND because Holoview is not working with a kdim with name "height"
         # See issue https://github.com/pyviz/holoviews/issues/3448
@@ -68,16 +82,22 @@ def graph():
             ranges[d] = (0,len(getattr(getattr(xrData,variable),d)))
         else:
             ranges[d] = (0,len(getattr(getattr(xrData,variable),"height")))
-    dm = hv.DynamicMap(triGraph, kdims=freedims).redim.range(**ranges)
+    dm = hv.DynamicMap(buildTrimeshbuildDynamicMap, kdims=freedims).redim.range(**ranges)
     print("DynamicMap:" + str(dm))
     cm = "Magma"
     if slCMap is not None:
         cm = slCMap.value
     return rasterize(dm).opts(cmap=cm,colorbar=True)
-    #return datashade(dm)
 
 
-def triGraph(*args):
+def buildTrimeshbuildDynamicMap(*args):
+    """
+    Function that builds up the TriMesh-Graph
+    Args:
+        Take multiple arguments. A value for every free dimension.
+    Returns:
+        The TriMesh-Graph object
+    """
     global n, n4, tris, xrData, verts, variable, freedims
 
     n1 = []
@@ -124,10 +144,10 @@ def triGraph(*args):
 
     print('vertices:', len(verts), 'triangles:', len(tris))
 
-    res = hv.TriMesh((tris,verts), label=(variable)).options(filled=True)
+    res = hv.TriMesh((tris,verts), label=(variable))
     return res
 
-def loadMetaCallback():
+def prebuildDynamicMapingDialog():
     global slVar, slMesh, xrData
     state = LOADINGMETA
 
@@ -161,7 +181,7 @@ def loadMetaCallback():
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="calculate")
 
     btShow = bokeh.models.Button(label="show")
-    btShow.on_click(loadGraphCallback)
+    btShow.on_click(mainbuildDynamicMapDialog)
 
     curdoc().clear()
     l = layout([
@@ -172,18 +192,25 @@ def loadMetaCallback():
     curdoc().add_root(l)
 
 
-def sliderUpdate(attr, old, new):
-    height = new
-    loadGraphCallback()
-
 def variableUpdate(attr,old,new):
+    """
+    This function is only a wrapper round the main function for building the buildDynamicMap.
+    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
+    to be rebuild.
+    """
     variable = new
-    loadGraphCallback()
+    mainbuildDynamicMapDialog()
 
-def update(attr, old, new):
-    loadGraphCallback()
 
-def loadGraphCallback():
+def cmapUpdate(attr, old, new):
+    """
+    This function is only a wrapper round the main function for building the buildDynamicMap.
+    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
+    to be rebuild.
+    """
+    mainbuildDynamicMapDialog()
+
+def mainbuildDynamicMapDialog():
     global xrData, height, variable
     global slVar, slCMap
 
@@ -210,21 +237,21 @@ def loadGraphCallback():
 
 
     btShow = bokeh.models.Button(label="show")
-    btShow.on_click(loadGraphCallback)
+    btShow.on_click(mainbuildDynamicMapDialog)
     slVar.on_change("value",variableUpdate)
-    slCMap.on_change("value",update)
+    slCMap.on_change("value",cmapUpdate)
 
     variable = slVar.value
 
 
-    divLoading = Div(text="loading graph...")
+    divLoading = Div(text="loading buildDynamicMap...")
     curdoc().clear()
     l = layout([
         [widgetbox(divLoading)]
     ])
     curdoc().add_root(l)
 
-    plot = renderer.get_widget(graph(),'widgets')
+    plot = renderer.get_widget(buildDynamicMap(),'widgets')
     print(plot.state)
     curdoc().clear()
     l = layout([
@@ -239,10 +266,12 @@ def loadGraphCallback():
     curdoc().add_root(l)
     state = LOADED
 
-def modify_doc(doc):
+# This function is showing the landingpage. Here one could enter the url for the datasource.
+# Entering the url is the first step in the dialog
+def entry(doc):
     doc.title = 'ncview2'
     btLoad = bokeh.models.Button(label="load")
-    btLoad.on_click(loadMetaCallback)
+    btLoad.on_click(prebuildDynamicMapingDialog)
 
     doc.clear()
     l = layout([
@@ -252,4 +281,4 @@ def modify_doc(doc):
     doc.add_root(l)
 
 
-modify_doc(curdoc())
+entry(curdoc())
