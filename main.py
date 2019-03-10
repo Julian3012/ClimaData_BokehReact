@@ -53,7 +53,7 @@ def getURL():
 def graph():
     for d in getattr(xrData,variable).dims:
         # WORKAROUND because Holoview is not working with a kdim with name "height"
-        # See issue
+        # See issue https://github.com/pyviz/holoviews/issues/3448
         if d == "height":
             freedims.append("hi")
             continue
@@ -63,7 +63,7 @@ def graph():
     ranges = {}
     for d in freedims:
         # WORKAROUND because Holoview is not working with a kdim with name "height"
-        # See issue
+        # See issue https://github.com/pyviz/holoviews/issues/3448
         if d != "hi":
             ranges[d] = (0,len(getattr(getattr(xrData,variable),d)))
         else:
@@ -88,7 +88,7 @@ def triGraph(*args):
     idx = 0
     for d in freedims:
         # WORKAROUND because Holoview is not working with a kdim with name "height"
-        # See issue
+        # See issue https://github.com/pyviz/holoviews/issues/3448
         if d == "hi":
             selectors["height"] = args[idx]
         else:
