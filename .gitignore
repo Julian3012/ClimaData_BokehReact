@@ -2,3 +2,7 @@
 datashader-examples
 2016033000-ART-passive*
 
+__pycache__/**
+.idea/**
+*.nc
+data/**
