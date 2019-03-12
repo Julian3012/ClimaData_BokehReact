@@ -4,6 +4,7 @@ from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
 from bokeh.io import curdoc
 #import geoviews
+#import geoviews.feature as gf
 
 import bokeh as bokeh
 import pandas as pd
@@ -20,6 +21,7 @@ from holoviews.operation.datashader import datashade, rasterize
 import math
 
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
+#gv.extension('bokeh')
 
 START = 0
 LOADINGMETA = 1
@@ -35,16 +37,29 @@ slVar = None
 slMesh = None
 slCMap = None
 variable = ""
-height = 0
+
+
 n = None
-n4 = None
 tris = None
 verts = None
 
 freedims = []
-
-
+aggregates = []
 COLORMAPS = ["Inferno","Magma","Plasma","Viridis","BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral","Blues","BuGn","BuPu","GnBu","Greens","Greys","Oranges","OrRd","PuBu","PuBuGn","PuRd","Purples","RdPu","Reds","YlGn","YlGnBu","YlOrBr","YlOrRd"]
+
+
+class Aggregates():
+    def __init__(self, dim, f):
+        self.dim = dim
+        self.f = f
+
+class TriMeshPlot():
+    def __init__(self, xrData, cm, tris, verts):
+        self.xrData = xrData
+        self.cm = cm
+        self.tris = tris
+        self.verts = verts
+
 
 def getURL():
     """
@@ -83,12 +98,42 @@ def buildDynamicMap():
         else:
             ranges[d] = (0,len(getattr(getattr(xrData,variable),"height")))
     dm = hv.DynamicMap(buildTrimeshbuildDynamicMap, kdims=freedims).redim.range(**ranges)
-    print("DynamicMap:" + str(dm))
+
+
     cm = "Magma"
     if slCMap is not None:
         cm = slCMap.value
+
     return rasterize(dm).opts(cmap=cm,colorbar=True)
 
+def loadDataAndMesh():
+    xrData = xr.open_dataset(getURL(),decode_cf=False)
+    verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
+
+    #not so performant
+    f = 180 / math.pi
+    for v in verts:
+        v[0] = v[0] * f
+        v[1] = v[1] * f
+
+    l = len(xrData.clon_bnds)
+    n1 = []
+    n2 = []
+    n3 = []
+
+    n1 = np.arange(l)
+    n2 = n1 + l
+    n3 = n2 + l
+
+    n4 = np.column_stack((n1,n2,n3))
+    n = np.column_stack((n4,np.arange(l)))
+
+    verts = pd.DataFrame(verts,  columns=['Longitude', 'Latitude'])
+    tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',"var"], dtype = np.float64)
+    tris['v0'] = tris["v0"].astype(np.int32)
+    tris['v1'] = tris["v1"].astype(np.int32)
+    tris['v2'] = tris["v2"].astype(np.int32)
+    return (tris,verts, xrData)
 
 def buildTrimeshbuildDynamicMap(*args):
     """
@@ -98,11 +143,14 @@ def buildTrimeshbuildDynamicMap(*args):
     Returns:
         The TriMesh-Graph object
     """
-    global n, n4, tris, xrData, verts, variable, freedims
+    global tris, verts, xrData, variable, freedims
 
-    n1 = []
-    n2 = []
-    n3 = []
+
+    # Define aggregates
+    aggregateFunctions = ["mean","sum"]
+    aggregateDimensions = ["lon","height"]
+    slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
+    slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lon")
 
     selectors = {}
     idx = 0
@@ -115,32 +163,13 @@ def buildTrimeshbuildDynamicMap(*args):
             selectors[d] = args[idx]
         idx = idx +1
 
-    if n is None:
-        xrData = xr.open_dataset(getURL(),decode_cf=False)
-        verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
+    if tris is None:
+        (trisN, vertsN, xrDataN) = loadDataAndMesh()
+        tris  = trisN
+        verts = vertsN
+        xrData = xrDataN
 
-        #not so performant
-        f = 180 / math.pi
-        for v in verts:
-            v[0] = v[0] * f
-            v[1] = v[1] * f
-
-        l = len(xrData.clon_bnds)
-
-        n1 = np.arange(l)
-        n2 = n1 + l
-        n3 = n2 + l
-
-        n4 = np.column_stack((n1,n2,n3))
-        n = np.column_stack((n4,getattr(xrData, variable).isel(selectors)))
-
-        verts = pd.DataFrame(verts,  columns=['Longitude', 'Latitude'])
-        tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',"var"], dtype = np.float64)
-        tris['v0'] = tris["v0"].astype(np.int32)
-        tris['v1'] = tris["v1"].astype(np.int32)
-        tris['v2'] = tris["v2"].astype(np.int32)
-    else:
-        tris["var"] = getattr(xrData, variable).isel(selectors)
+    tris["var"] = getattr(xrData, variable).isel(selectors)
 
     print('vertices:', len(verts), 'triangles:', len(tris))
 
@@ -173,12 +202,12 @@ def prebuildDynamicMapingDialog():
 
     state = LOADEDMETA
     variables = ["None"]
-    meshOptions = ["calculate", "DOM1 (not implemented)", "DOM2 (not implemented)", "DOM3 (not implemented)"]
+    meshOptions = ["calculate", "DOM1", "DOM2 (not implemented)", "DOM3 (not implemented)"]
     for k,v in xrData.variables.items():
         variables.append(k)
 
     slVar = bokeh.models.Select(title="Variable", options=variables, value="None")
-    slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="calculate")
+    slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="DOM1")
 
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(mainbuildDynamicMapDialog)
