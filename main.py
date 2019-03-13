@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from bokeh.layouts import layout, widgetbox
+from bokeh.layouts import layout, widgetbox, row
 from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
 from bokeh.io import curdoc
@@ -34,6 +34,8 @@ urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 slVar = None
 slMesh = None
 slCMap = None
+slAggregateFunction = None
+slAggregateDimension = None
 txTitle = None
 
 aggregates = []
@@ -47,6 +49,114 @@ class Aggregates():
     def __init__(self, dim, f):
         self.dim = dim
         self.f = f
+
+class CurvePlot():
+    def __init__(self, xrData, aggDim, aggFn):
+        self.xrData = xrData
+        self.aggDim = aggDim
+        self.aggFn = aggFn
+
+        if self.aggDim is "lon":
+            self.cells = []
+            for i in range(0,360):
+                self.cells.append(np.loadtxt("dom01/dom01_lon_"+str(i)+"deg.dat",dtype='int16'))
+
+    def getPlotObject(self, variable, title):
+        self.variable = variable
+        self.title = title
+        return self.buildDynamicMap()
+
+    def buildDynamicMap(self):
+        self.freeDims = []
+        self.nonFreeDims = []
+
+        for d in getattr(self.xrData,self.variable).dims:
+            # WORKAROUND because Holoview is not working with a kdim with name "height"
+            # See issue https://github.com/pyviz/holoviews/issues/3448
+            if d is "height":
+                self.freeDims.append("hi")
+                continue
+            if d is self.aggDim:
+                # skip aggregates dimensions
+                continue
+            if d is not "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) > 0:
+                self.freeDims.append(d)
+            if d is not "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) == 0:
+                self.nonFreeDims.append(d)
+
+        ranges = {}
+        for d in self.freeDims:
+            # WORKAROUND because Holoview is not working with a kdim with name "height"
+            # See issue https://github.com/pyviz/holoviews/issues/3448
+            if d != "hi":
+                ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),d))-1)
+            else:
+                ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),"height"))-1)
+        dm = hv.DynamicMap(self.buildCurvePlot, kdims=self.freeDims).redim.range(**ranges)
+
+        return dm
+
+    def buildCurvePlot(self, *args):
+        """
+        Function that builds up the Curve-Graph
+        Args:
+            Take multiple arguments. A value for every free dimension.
+        Returns:
+            The Curve-Graph object
+        """
+
+        selectors = {}
+        idx = 0
+        # Build the data selector for the free dimensions. For those are the DynamicMap shows sliders to the right of the graph
+        for d in self.freeDims:
+            # WORKAROUND because Holoview is not working with a kdim with name "height"
+            # See issue https://github.com/pyviz/holoviews/issues/3448
+            if d == "hi":
+                selectors["height"] = args[idx]
+            else:
+                selectors[d] = args[idx]
+            idx = idx +1
+
+        # Also select non-free-dimensions. Those are dimensions that are of length 1
+        for d in self.nonFreeDims:
+            if d == "hi":
+                selectors["height"] = 0
+            else:
+                selectors[d] = 0
+            idx = idx +1
+
+        print("Selectors:")
+        print(selectors)
+
+        print("AggFn: "+self.aggFn)
+        print("AggDim: "+self.aggDim + " , "+ str(self.aggDim == "lon"))
+
+        if self.aggFn is "mean" and self.aggDim is not "lon":
+            dat = getattr(self.xrData, self.variable).isel(selectors)
+            dat = dat.mean(aggDim)
+
+        if self.aggFn is "sum" and self.aggDim is not "lon":
+            dat = getattr(self.xrData, self.variable).isel(selectors)
+            dat = dat.sum(aggDim)
+
+        if self.aggDim is "lon":
+            print("AggDim is lon")
+            dat = []
+            for i in range(0,360):
+                selectors["ncells"] = self.cells[i]
+                if self.aggFn is "mean":
+                    dat.append(getattr(self.xrData, self.variable).isel(selectors).mean())
+                if self.aggFn is "sum":
+                    dat.append(getattr(self.xrData, self.variable).isel(selectors).mean())
+
+        # Apply unit
+        #factor = 1
+        #dat = dat * factor
+
+        res = hv.Curve(dat, label=self.title)
+
+        return res
+
 
 class TriMeshPlot():
     def __init__(self, xrData, tris, verts, cm="Magma"):
@@ -93,11 +203,11 @@ class TriMeshPlot():
                 ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),d))-1)
             else:
                 ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),"height"))-1)
-        dm = hv.DynamicMap(self.buildTrimeshbuildDynamicMap, kdims=self.freeDims).redim.range(**ranges)
+        dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
 
         return rasterize(dm).opts(cmap=self.cm,colorbar=True)
 
-    def buildTrimeshbuildDynamicMap(self, *args):
+    def buildTrimesh(self, *args):
         """
         Function that builds up the TriMesh-Graph
         Args:
@@ -105,12 +215,6 @@ class TriMeshPlot():
         Returns:
             The TriMesh-Graph object
         """
-
-        # Define aggregates
-        #aggregateFunctions = ["mean","sum"]
-        #aggregateDimensions = ["lon","height"]
-        #slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
-        #slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lon")
 
         selectors = {}
         idx = 0
@@ -258,8 +362,15 @@ def cmapUpdate(attr, old, new):
     """
     mainbuildDynamicMapDialog()
 
+
+def aggDimUpdate(attr, old, new):
+    mainbuildDynamicMapDialog()
+
+def aggFnUpdate(attr, old, new):
+    mainbuildDynamicMapDialog()
+
 def mainbuildDynamicMapDialog():
-    global slVar, slCMap, txTitle
+    global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension
     global tmPlot, xrData
 
     state =LOADING
@@ -294,10 +405,26 @@ def mainbuildDynamicMapDialog():
     slVar.on_change("value",variableUpdate)
     slCMap.on_change("value",cmapUpdate)
 
+    # Define aggregates
+    aggregateFunctions = ["None","mean","sum"]
+    aggregateDimensions = ["None","lon","height"]
+
+    if slAggregateFunction is None:
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
+    if slAggregateDimension is None:
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lon")
+
+    slAggregateDimension.on_change("value",aggDimUpdate)
+    slAggregateFunction.on_change("value",aggFnUpdate)
 
     variable = slVar.value
     title = txTitle.value
     cm = slCMap.value
+    aggDim = slAggregateDimension.value
+    aggFn = slAggregateFunction.value
+
+    print("aggDim" + aggDim)
+    print("aggFn" + aggFn)
 
     divLoading = Div(text="loading buildDynamicMap...")
     curdoc().clear()
@@ -309,11 +436,15 @@ def mainbuildDynamicMapDialog():
     if xrData is None:
         xrData = loadData(getURL())
 
-    if tmPlot is None:
-        (tris, verts) = loadMesh(xrData)
-        tmPlot = TriMeshPlot(xrData, tris, verts, cm=cm)
+    if aggDim is not "None" and aggFn is not "None":
+        cuPlot = CurvePlot(xrData, aggDim, aggFn)
+        plot = renderer.get_widget(cuPlot.getPlotObject(variable=variable,title=title),'widgets')
+    else:
+        if tmPlot is None:
+            (tris, verts) = loadMesh(xrData)
+            tmPlot = TriMeshPlot(xrData, tris, verts, cm=cm)
+        plot = renderer.get_widget(tmPlot.getPlotObject(variable=variable,title=title,cm=cm),'widgets')
 
-    plot = renderer.get_widget(tmPlot.getPlotObject(variable=variable,title=title,cm=cm),'widgets')
     print(plot.state)
     curdoc().clear()
     l = layout([
@@ -321,6 +452,7 @@ def mainbuildDynamicMapDialog():
         [widgetbox(slVar)],
         [widgetbox(cbOpts)],
         [widgetbox(slCMap)],
+        [row(slAggregateDimension,slAggregateFunction)],
         [plot.state],
         [widgetbox(txPre)]
     ])
