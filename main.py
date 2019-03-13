@@ -73,17 +73,20 @@ class CurvePlot():
         for d in getattr(self.xrData,self.variable).dims:
             # WORKAROUND because Holoview is not working with a kdim with name "height"
             # See issue https://github.com/pyviz/holoviews/issues/3448
-            if d is "height":
+            if d == "height":
                 self.freeDims.append("hi")
+                print("appended hi")
                 continue
-            if d is self.aggDim:
+            if d == self.aggDim:
                 # skip aggregates dimensions
                 continue
-            if d is not "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) > 0:
+            if d != "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) > 0:
                 self.freeDims.append(d)
-            if d is not "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) == 0:
+                print("appended" +d )
+            if d != "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) == 0:
                 self.nonFreeDims.append(d)
 
+        print(self.freeDims)
         ranges = {}
         for d in self.freeDims:
             # WORKAROUND because Holoview is not working with a kdim with name "height"
@@ -131,23 +134,23 @@ class CurvePlot():
         print("AggFn: "+self.aggFn)
         print("AggDim: "+self.aggDim + " , "+ str(self.aggDim == "lon"))
 
-        if self.aggFn is "mean" and self.aggDim is not "lon":
+        if self.aggFn == "mean" and self.aggDim != "lon":
             dat = getattr(self.xrData, self.variable).isel(selectors)
             dat = dat.mean(aggDim)
 
-        if self.aggFn is "sum" and self.aggDim is not "lon":
+        if self.aggFn == "sum" and self.aggDim != "lon":
             dat = getattr(self.xrData, self.variable).isel(selectors)
             dat = dat.sum(aggDim)
 
-        if self.aggDim is "lon":
+        if self.aggDim == "lon":
             print("AggDim is lon")
             dat = []
             for i in range(0,360):
                 selectors["ncells"] = self.cells[i]
-                if self.aggFn is "mean":
+                if self.aggFn == "mean":
                     dat.append(getattr(self.xrData, self.variable).isel(selectors).mean())
-                if self.aggFn is "sum":
-                    dat.append(getattr(self.xrData, self.variable).isel(selectors).mean())
+                if self.aggFn == "sum":
+                    dat.append(getattr(self.xrData, self.variable).isel(selectors).sum())
 
         # Apply unit
         #factor = 1
