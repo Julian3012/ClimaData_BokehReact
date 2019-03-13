@@ -134,6 +134,10 @@ class TriMeshPlot():
 
         self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
 
+        # Apply unit
+        factor = 1
+        self.tris["var"] = self.tris["var"] * factor
+
         res = hv.TriMesh((self.tris,self.verts), label=(self.title))
         return res
 
