@@ -18,8 +18,8 @@ from holoviews.operation.datashader import datashade, rasterize
 
 import math
 
-from plots.TriMeshPlot import TriMeshPlot
-from plots.CurvePlot import CurvePlot
+from src.plots.TriMeshPlot import TriMeshPlot
+from src.plots.CurvePlot import CurvePlot
 
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
 #gv.extension('bokeh')
