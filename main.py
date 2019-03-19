@@ -168,12 +168,13 @@ class TriMeshPlot():
         self.tris = tris
         self.verts = verts
 
-    def getPlotObject(self, variable, title, cm="None"):
+    def getPlotObject(self, variable, title, cm="None", aggDim="None", aggFn="None"):
         self.variable = variable
+        self.aggDim = aggDim
+        self.aggFn = aggFn
 
         if cm is not "None":
             self.cm = cm
-        print(self.cm)
         self.title = title
         return self.buildDynamicMaps()
 
@@ -188,6 +189,12 @@ class TriMeshPlot():
         self.freeDims = []
         self.nonFreeDims = []
         for d in getattr(self.xrData,self.variable).dims:
+
+            # Skip aggregated dimensions only it a Aggregate-Function is specified
+            if d == self.aggDim and self.aggFn != "None":
+                # Skip aggregated dimensions
+                print("Skipped aggDim: "+self.aggDim)
+                continue
             # WORKAROUND because Holoview is not working with a kdim with name "height"
             # See issue https://github.com/pyviz/holoviews/issues/3448
             if d == "height":
@@ -206,7 +213,15 @@ class TriMeshPlot():
                 ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),d))-1)
             else:
                 ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),"height"))-1)
-        dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
+
+        print(self.freeDims)
+        print("length: "+ str(len(self.freeDims)))
+        if len(self.freeDims) > 0:
+            print("Show with DynamicMap")
+            dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
+        else:
+            print("Show without DynamicMap")
+            dm = self.buildTrimesh()
 
         return rasterize(dm).opts(cmap=self.cm,colorbar=True)
 
@@ -239,7 +254,14 @@ class TriMeshPlot():
                 selectors[d] = 0
             idx = idx +1
 
-        self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
+        if self.aggDim == "None" or self.aggFn == "None":
+            self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
+            #self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim,keep_attrs=True).isel({"time":0})
+        elif self.aggDim != "None":
+            if self.aggFn == "mean":
+                self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim,keep_attrs=True).isel(selectors)
+            elif self.aggFn == "sum":
+                self.tris["var"] = getattr(self.xrData, self.variable).sum(dim=self.aggDim,keep_attrs=True).isel(selectors)
 
         # Apply unit
         factor = 1
@@ -247,6 +269,7 @@ class TriMeshPlot():
 
         res = hv.TriMesh((self.tris,self.verts), label=(self.title))
         return res
+
 
 def getURL():
     """
@@ -413,9 +436,9 @@ def mainbuildDynamicMapDialog():
     aggregateDimensions = ["None","lon","height"]
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lon")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
 
     slAggregateDimension.on_change("value",aggDimUpdate)
     slAggregateFunction.on_change("value",aggFnUpdate)
@@ -426,8 +449,6 @@ def mainbuildDynamicMapDialog():
     aggDim = slAggregateDimension.value
     aggFn = slAggregateFunction.value
 
-    print("aggDim" + aggDim)
-    print("aggFn" + aggFn)
 
     divLoading = Div(text="loading buildDynamicMap...")
     curdoc().clear()
@@ -439,16 +460,23 @@ def mainbuildDynamicMapDialog():
     if xrData is None:
         xrData = loadData(getURL())
 
-    if aggDim is not "None" and aggFn is not "None":
+    if aggDim == "lon" and aggFn != "None":
         cuPlot = CurvePlot(xrData, aggDim, aggFn)
-        plot = renderer.get_widget(cuPlot.getPlotObject(variable=variable,title=title),'widgets')
+        plotObj = cuPlot.getPlotObject(variable=variable,title=title)
+        plot = renderer.get_widget(plotObj,'widgets')
     else:
         if tmPlot is None:
             (tris, verts) = loadMesh(xrData)
             tmPlot = TriMeshPlot(xrData, tris, verts, cm=cm)
-        plot = renderer.get_widget(tmPlot.getPlotObject(variable=variable,title=title,cm=cm),'widgets')
 
-    print(plot.state)
+        plotObj = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn)
+
+        if aggDim != "None" and aggFn != "None":
+            plot = renderer.get_plot(plotObj)
+        else:
+            plot = renderer.get_widget(plotObj,'widgets')
+
+
     curdoc().clear()
     l = layout([
         [widgetbox(txTitle)],
