@@ -24,7 +24,7 @@ class CurvePlot:
         self.aggDim = aggDim
         self.aggFn = aggFn
 
-        if self.aggDim is "lon":
+        if self.aggDim == "lon":
             self.cells = []
             for i in range(0,360):
                 self.cells.append(np.loadtxt("dom01/dom01_lon_"+str(i)+"deg.dat",dtype='int16'))

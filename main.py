@@ -219,9 +219,9 @@ def mainbuildDynamicMapDialog():
     aggregateDimensions = ["None","lon","height"]
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lon")
 
     slAggregateDimension.on_change("value",aggDimUpdate)
     slAggregateFunction.on_change("value",aggFnUpdate)
