@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 from bokeh.layouts import layout, widgetbox, row
 from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
@@ -43,18 +44,18 @@ class CurvePlot:
             # See issue https://github.com/pyviz/holoviews/issues/3448
             if d == "height":
                 self.freeDims.append("hi")
-                print("appended hi")
                 continue
-            if d == self.aggDim:
+            if d == self.aggDim and self.aggFn != "None":
                 # skip aggregates dimensions
                 continue
             if d != "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) > 0:
+                # Add all dimensions to freeDims if the dimension has a size of greater than one
                 self.freeDims.append(d)
-                print("appended" +d )
             if d != "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) == 0:
+                # Add all dimensions which have a size of one to nonFreeDims as there is no need for a slider here
                 self.nonFreeDims.append(d)
 
-        print(self.freeDims)
+
         ranges = {}
         for d in self.freeDims:
             # WORKAROUND because Holoview is not working with a kdim with name "height"
@@ -90,25 +91,22 @@ class CurvePlot:
 
         # Also select non-free-dimensions. Those are dimensions that are of length 1
         for d in self.nonFreeDims:
+            # WORKAROUND because Holoview is not working with a kdim with name "height"
+            # See issue https://github.com/pyviz/holoviews/issues/3448
             if d == "hi":
                 selectors["height"] = 0
             else:
                 selectors[d] = 0
             idx = idx +1
 
-        print("Selectors:")
-        print(selectors)
+        # This part is not needed as a TriMeshGraph is drawn instead
+        #if self.aggFn == "mean" and self.aggDim != "lon":
+        #    dat = getattr(self.xrData, self.variable).isel(selectors)
+        #    dat = dat.mean(aggDim)
 
-        print("AggFn: "+self.aggFn)
-        print("AggDim: "+self.aggDim + " , "+ str(self.aggDim == "lon"))
-
-        if self.aggFn == "mean" and self.aggDim != "lon":
-            dat = getattr(self.xrData, self.variable).isel(selectors)
-            dat = dat.mean(aggDim)
-
-        if self.aggFn == "sum" and self.aggDim != "lon":
-            dat = getattr(self.xrData, self.variable).isel(selectors)
-            dat = dat.sum(aggDim)
+        #if self.aggFn == "sum" and self.aggDim != "lon":
+        #    dat = getattr(self.xrData, self.variable).isel(selectors)
+        #    dat = dat.sum(aggDim)
 
         if self.aggDim == "lon":
             print("AggDim is lon")
@@ -120,7 +118,7 @@ class CurvePlot:
                 if self.aggFn == "sum":
                     dat.append(getattr(self.xrData, self.variable).isel(selectors).sum())
 
-        # Apply unit
+        # TODO Apply unit
         #factor = 1
         #dat = dat * factor
 

@@ -22,7 +22,6 @@ from src.plots.TriMeshPlot import TriMeshPlot
 from src.plots.CurvePlot import CurvePlot
 
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
-#gv.extension('bokeh')
 
 START = 0
 LOADINGMETA = 1
@@ -134,7 +133,9 @@ def prebuildDynamicMapingDialog():
 
     state = LOADEDMETA
     variables = ["None"]
+    # TODO implement DOM02, DOM03
     meshOptions = ["calculate", "DOM1", "DOM2 (not implemented)", "DOM3 (not implemented)"]
+    # TODO redundant
     for k,v in xrData.variables.items():
         variables.append(k)
 
@@ -192,6 +193,7 @@ def mainbuildDynamicMapDialog():
         cm = COLORMAPS[0]
 
     variables = ["None"]
+    # TODO redundant
     for k,v in xrData.variables.items():
         variables.append(k)
 
@@ -205,6 +207,8 @@ def mainbuildDynamicMapDialog():
         txTitle = bokeh.models.TextInput(value="TR_stn, height ...", title="Title:")
 
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
+
+    # TODO not used
     cbOpts = bokeh.models.CheckboxButtonGroup(
         labels=["Colorbar", "x-Axis", "y-Axis"], active=[1, 1, 1])
 
@@ -212,9 +216,11 @@ def mainbuildDynamicMapDialog():
     btShow.on_click(mainbuildDynamicMapDialog)
 
     slVar.on_change("value",variableUpdate)
+    # TODO show cmap only for Trimesh
     slCMap.on_change("value",cmapUpdate)
 
     # Define aggregates
+    # TODO allow other/own aggregateFunctions
     aggregateFunctions = ["None","mean","sum"]
     aggregateDimensions = ["None","lon","height"]
 
