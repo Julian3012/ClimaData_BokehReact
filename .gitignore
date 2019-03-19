@@ -6,3 +6,5 @@ __pycache__/**
 .idea/**
 *.nc
 data/**
+
+plot/__pycache__/*
