@@ -7,4 +7,4 @@ __pycache__/**
 *.nc
 data/**
 
-plot/__pycache__/*
+**/*.pyc
