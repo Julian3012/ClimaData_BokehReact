@@ -57,27 +57,7 @@ class CurvePlot(Plot):
             The Curve-Graph object
         """
 
-        selectors = {}
-        idx = 0
-        # Build the data selector for the free dimensions. For those are the DynamicMap shows sliders to the right of the graph
-        for d in self.freeDims:
-            # WORKAROUND because Holoview is not working with a kdim with name "height"
-            # See issue https://github.com/pyviz/holoviews/issues/3448
-            if d == "hi":
-                selectors["height"] = args[idx]
-            else:
-                selectors[d] = args[idx]
-            idx = idx +1
-
-        # Also select non-free-dimensions. Those are dimensions that are of length 1
-        for d in self.nonFreeDims:
-            # WORKAROUND because Holoview is not working with a kdim with name "height"
-            # See issue https://github.com/pyviz/holoviews/issues/3448
-            if d == "hi":
-                selectors["height"] = 0
-            else:
-                selectors[d] = 0
-            idx = idx +1
+        selectors = self.buildSelectors(args)
 
         # This part is not needed as a TriMeshGraph is drawn instead
         #if self.aggFn == "mean" and self.aggDim != "lon":
@@ -87,7 +67,6 @@ class CurvePlot(Plot):
         #if self.aggFn == "sum" and self.aggDim != "lon":
         #    dat = getattr(self.xrData, self.variable).isel(selectors)
         #    dat = dat.sum(aggDim)
-        self.logger.warning("Hallo!")
 
         if self.aggDim == "lon":
             dat = []
