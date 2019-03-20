@@ -56,7 +56,6 @@ class TriMeshPlot:
             # Skip aggregated dimensions only it a Aggregate-Function is specified
             if d == self.aggDim and self.aggFn != "None":
                 # Skip aggregated dimensions
-                print("Skipped aggDim: "+self.aggDim)
                 continue
             # WORKAROUND because Holoview is not working with a kdim with name "height"
             # See issue https://github.com/pyviz/holoviews/issues/3448
@@ -77,14 +76,12 @@ class TriMeshPlot:
             else:
                 ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),"height"))-1)
 
-        print(self.freeDims)
-        print("length: "+ str(len(self.freeDims)))
         if len(self.freeDims) > 0:
-            print("Show with DynamicMap")
+            self.logger.info("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
             return self.renderer.get_widget(rasterize(dm).opts(cmap=self.cm,colorbar=True),'widgets')
         else:
-            print("Show without DynamicMap")
+            self.logger.info("Show without DynamicMap")
             dm = self.buildTrimesh()
             return self.renderer.get_plot(rasterize(dm).opts(cmap=self.cm,colorbar=True))
 
