@@ -29,16 +29,6 @@ logging.basicConfig(format=FORMAT)
 logger = logging.getLogger('ncview2')
 
 
-
-START = 0
-LOADINGMETA = 1
-LOADEDMETA = 2
-LOADING = 3
-LOADED = 4
-ERROR = 1000
-
-state = START
-
 urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 slVar = None
 slMesh = None
@@ -116,7 +106,6 @@ def loadMesh(xrData):
 
 def prebuildDynamicMapingDialog():
     global slVar, slMesh, xrData
-    state = LOADINGMETA
 
     divLoading = Div(text="loading metadata...")
     curdoc().clear()
@@ -134,17 +123,18 @@ def prebuildDynamicMapingDialog():
         [widgetbox(divError)]
         ])
         curdoc().add_root(l)
-        state = ERROR
         return
 
 
-    state = LOADEDMETA
     variables = []
     # TODO implement DOM02, DOM03
     meshOptions = ["calculate", "DOM1", "DOM2 (not implemented)", "DOM3 (not implemented)"]
     # TODO redundant
     for k,v in xrData.variables.items():
         variables.append(k)
+
+    if len(variables) == 0:
+        logger.error("No variables found!")
 
     slVar = bokeh.models.Select(title="Variable", options=variables, value=variables[0])
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="DOM1")
@@ -193,8 +183,6 @@ def mainDialog():
     """
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension
     global tmPlot, xrData
-
-    state =LOADING
 
     if slVar is not None:
         variable = slVar.value
@@ -284,7 +272,6 @@ def mainDialog():
     l = layout(lArray)
 
     curdoc().add_root(l)
-    state = LOADED
 
 # This function is showing the landingpage. Here one could enter the url for the datasource.
 # Entering the url is the first step in the dialog
