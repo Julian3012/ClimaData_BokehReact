@@ -148,7 +148,7 @@ def prebuildDynamicMapingDialog():
 
     slVar = bokeh.models.Select(title="Variable", options=variables, value="None")
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="DOM1")
-
+    txPre = bokeh.models.PreText(text=str(xrData),width=800)
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(mainDialog)
 
@@ -156,6 +156,7 @@ def prebuildDynamicMapingDialog():
     l = layout([
     [widgetbox(slVar)],
     [widgetbox(slMesh)],
+    [widgetbox(txPre)],
     [widgetbox(btShow)]
     ])
     curdoc().add_root(l)
