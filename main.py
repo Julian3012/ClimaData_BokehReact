@@ -207,9 +207,6 @@ def mainDialog():
 
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
 
-    btShow = bokeh.models.Button(label="show")
-    btShow.on_click(mainDialog)
-
     slVar.on_change("value",variableUpdate)
     slCMap.on_change("value",cmapUpdate)
 
