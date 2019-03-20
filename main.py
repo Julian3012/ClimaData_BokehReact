@@ -267,15 +267,18 @@ def mainbuildDynamicMapDialog():
 
 
     curdoc().clear()
-    l = layout([
-        [widgetbox(txTitle)],
-        [widgetbox(slVar)],
-        [widgetbox(cbOpts)],
-        [widgetbox(slCMap)],
-        [row(slAggregateDimension,slAggregateFunction)],
-        [plot.state],
-        [widgetbox(txPre)]
-    ])
+    lArray = []
+    lArray.append([widgetbox(txTitle)])
+    lArray.append([widgetbox(slVar)])
+    # Hide colormap option if CurvePlot is used
+    if aggDim != "lon" or aggFn == "None":
+        lArray.append([widgetbox(slCMap)])
+
+    lArray.append([row(slAggregateDimension,slAggregateFunction)])
+    lArray.append([plot.state])
+    lArray.append([widgetbox(txPre)])
+
+    l = layout(lArray)
 
     curdoc().add_root(l)
     state = LOADED
