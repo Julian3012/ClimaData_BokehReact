@@ -3,8 +3,8 @@ from bokeh.layouts import layout, widgetbox, row
 from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
 from bokeh.io import curdoc
-#import geoviews
-#import geoviews.feature as gf
+import geoviews as gv
+import geoviews.feature as gf
 
 import bokeh as bokeh
 import pandas as pd
@@ -27,7 +27,7 @@ renderer = hv.renderer('bokeh').instance(mode='server',size=300)
 FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger('ncview2')
-
+logger.info({i.__name__:i.__version__ for i in [hv, np, pd]})
 
 urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
 slVar = None

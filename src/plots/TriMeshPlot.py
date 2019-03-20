@@ -4,8 +4,8 @@ from bokeh.layouts import layout, widgetbox, row
 from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
 from bokeh.io import curdoc
-#import geoviews
-#import geoviews.feature as gf
+import geoviews as gv
+import geoviews.feature as gf
 
 import bokeh as bokeh
 import pandas as pd
