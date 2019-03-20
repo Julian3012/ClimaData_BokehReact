@@ -184,20 +184,10 @@ def mainDialog():
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension
     global tmPlot, xrData
 
-    if slVar is not None:
-        variable = slVar.value
-    if slCMap is not None:
-        cm = slCMap.value
-    else:
-        cm = COLORMAPS[0]
-
-    variables = ["None"]
+    variables = []
     # TODO redundant
     for k,v in xrData.variables.items():
         variables.append(k)
-
-    if slVar is None:
-        slVar = bokeh.models.Select(title="Variable", options=variables, value="None")
 
     if slCMap is None:
         slCMap = bokeh.models.Select(title="Colormap", options=COLORMAPS, value=COLORMAPS[0])
