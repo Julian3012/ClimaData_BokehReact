@@ -19,9 +19,13 @@ from holoviews.operation.datashader import datashade, rasterize
 
 import math
 
+renderer = hv.renderer('bokeh').instance(mode='server',size=300)
+
 
 class TriMeshPlot:
-    def __init__(self, xrData, tris, verts, cm="Magma"):
+    def __init__(self, logger, renderer, xrData, tris, verts, cm="Magma"):
+        self.logger = logger
+        self.renderer = renderer
         self.xrData = xrData
         self.cm = cm
         self.tris = tris
@@ -78,11 +82,11 @@ class TriMeshPlot:
         if len(self.freeDims) > 0:
             print("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
+            return self.renderer.get_widget(rasterize(dm).opts(cmap=self.cm,colorbar=True),'widgets')
         else:
             print("Show without DynamicMap")
             dm = self.buildTrimesh()
-
-        return rasterize(dm).opts(cmap=self.cm,colorbar=True)
+            return self.renderer.get_plot(rasterize(dm).opts(cmap=self.cm,colorbar=True))
 
     def buildTrimesh(self, *args):
         """

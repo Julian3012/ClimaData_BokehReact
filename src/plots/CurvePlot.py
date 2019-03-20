@@ -20,7 +20,9 @@ from holoviews.operation.datashader import datashade, rasterize
 import math
 
 class CurvePlot:
-    def __init__(self, xrData, aggDim, aggFn):
+    def __init__(self, logger, renderer, xrData, aggDim, aggFn):
+        self.logger = logger
+        self.renderer = renderer
         self.xrData = xrData
         self.aggDim = aggDim
         self.aggFn = aggFn
@@ -66,7 +68,7 @@ class CurvePlot:
                 ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),d))-1)
         dm = hv.DynamicMap(self.buildCurvePlot, kdims=self.freeDims).redim.range(**ranges)
 
-        return dm
+        return self.renderer.get_widget(dm,'widgets')
 
     def buildCurvePlot(self, *args):
         """
@@ -107,9 +109,9 @@ class CurvePlot:
         #if self.aggFn == "sum" and self.aggDim != "lon":
         #    dat = getattr(self.xrData, self.variable).isel(selectors)
         #    dat = dat.sum(aggDim)
+        self.logger.warning("Hallo!")
 
         if self.aggDim == "lon":
-            print("AggDim is lon")
             dat = []
             for i in range(0,360):
                 selectors["ncells"] = self.cells[i]
@@ -122,6 +124,7 @@ class CurvePlot:
         #factor = 1
         #dat = dat * factor
 
-        res = hv.Curve(dat, label=self.title)
+        # TODO Height hardcoded
+        res = hv.Curve(dat, label=self.title).opts(xlabel=self.aggDim, ylabel=self.variable)
 
         return res

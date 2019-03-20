@@ -17,11 +17,18 @@ from cartopy import crs
 from holoviews.operation.datashader import datashade, rasterize
 
 import math
+import logging
 
 from src.plots.TriMeshPlot import TriMeshPlot
 from src.plots.CurvePlot import CurvePlot
 
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
+
+FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
+logging.basicConfig(format=FORMAT)
+logger = logging.getLogger('ncview2')
+
+
 
 START = 0
 LOADINGMETA = 1
@@ -143,7 +150,7 @@ def prebuildDynamicMapingDialog():
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="DOM1")
 
     btShow = bokeh.models.Button(label="show")
-    btShow.on_click(mainbuildDynamicMapDialog)
+    btShow.on_click(mainDialog)
 
     curdoc().clear()
     l = layout([
@@ -161,7 +168,7 @@ def variableUpdate(attr,old,new):
     to be rebuild.
     """
     variable = new
-    mainbuildDynamicMapDialog()
+    mainDialog()
 
 
 def cmapUpdate(attr, old, new):
@@ -170,16 +177,19 @@ def cmapUpdate(attr, old, new):
     It is called if at property like the cmap is changed and the whole buildDynamicMap needs
     to be rebuild.
     """
-    mainbuildDynamicMapDialog()
+    mainDialog()
 
 
 def aggDimUpdate(attr, old, new):
-    mainbuildDynamicMapDialog()
+    mainDialog()
 
 def aggFnUpdate(attr, old, new):
-    mainbuildDynamicMapDialog()
+    mainDialog()
 
-def mainbuildDynamicMapDialog():
+def mainDialog():
+    """
+    This function build up and manages the Main-Graph Dialog
+    """
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension
     global tmPlot, xrData
 
@@ -208,15 +218,10 @@ def mainbuildDynamicMapDialog():
 
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
 
-    # TODO not used
-    cbOpts = bokeh.models.CheckboxButtonGroup(
-        labels=["Colorbar", "x-Axis", "y-Axis"], active=[1, 1, 1])
-
     btShow = bokeh.models.Button(label="show")
-    btShow.on_click(mainbuildDynamicMapDialog)
+    btShow.on_click(mainDialog)
 
     slVar.on_change("value",variableUpdate)
-    # TODO show cmap only for Trimesh
     slCMap.on_change("value",cmapUpdate)
 
     # Define aggregates
@@ -225,9 +230,9 @@ def mainbuildDynamicMapDialog():
     aggregateDimensions = ["None","lon","height"]
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lon")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
 
     slAggregateDimension.on_change("value",aggDimUpdate)
     slAggregateFunction.on_change("value",aggFnUpdate)
@@ -238,7 +243,7 @@ def mainbuildDynamicMapDialog():
     aggDim = slAggregateDimension.value
     aggFn = slAggregateFunction.value
 
-
+    # Showing a Loading Infotext
     divLoading = Div(text="loading buildDynamicMap...")
     curdoc().clear()
     l = layout([
@@ -246,24 +251,21 @@ def mainbuildDynamicMapDialog():
     ])
     curdoc().add_root(l)
 
+    # Start loading data
     if xrData is None:
         xrData = loadData(getURL())
 
+    # Choose if a Curve or TriMesh is to be used
     if aggDim == "lon" and aggFn != "None":
-        cuPlot = CurvePlot(xrData, aggDim, aggFn)
-        plotObj = cuPlot.getPlotObject(variable=variable,title=title)
-        plot = renderer.get_widget(plotObj,'widgets')
+        cuPlot = CurvePlot(logger, renderer, xrData, aggDim, aggFn)
+        plot = cuPlot.getPlotObject(variable=variable,title=title)
     else:
         if tmPlot is None:
             (tris, verts) = loadMesh(xrData)
-            tmPlot = TriMeshPlot(xrData, tris, verts, cm=cm)
+            tmPlot = TriMeshPlot(logger, renderer, xrData, tris, verts, cm=cm)
 
-        plotObj = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn)
+        plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn)
 
-        if aggDim != "None" and aggFn != "None":
-            plot = renderer.get_plot(plotObj)
-        else:
-            plot = renderer.get_widget(plotObj,'widgets')
 
 
     curdoc().clear()
