@@ -200,10 +200,10 @@ def mainDialog():
         slVar = bokeh.models.Select(title="Variable", options=variables, value="None")
 
     if slCMap is None:
-        slCMap = bokeh.models.Select(title="Colormap", options=COLORMAPS, value="Magma")
+        slCMap = bokeh.models.Select(title="Colormap", options=COLORMAPS, value=COLORMAPS[0])
 
     if txTitle is None:
-        txTitle = bokeh.models.TextInput(value="TR_stn, height ...", title="Title:")
+        txTitle = bokeh.models.TextInput(value="title", title="Title:")
 
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
 
