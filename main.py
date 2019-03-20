@@ -279,9 +279,12 @@ def entry(doc):
     doc.title = 'ncview2'
     btLoad = bokeh.models.Button(label="load")
     btLoad.on_click(prebuildDynamicMapingDialog)
+    tx = "ncview II"
+    txPre = bokeh.models.PreText(text=tx,width=800)
 
     doc.clear()
     l = layout([
+    [widgetbox(txPre)],
     [widgetbox(urlinput)],
     [widgetbox(btLoad)]
     ])
