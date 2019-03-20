@@ -19,7 +19,9 @@ from holoviews.operation.datashader import datashade, rasterize
 
 import math
 
-class CurvePlot:
+from .Plot import Plot
+
+class CurvePlot(Plot):
     def __init__(self, logger, renderer, xrData, aggDim, aggFn):
         self.logger = logger
         self.renderer = renderer
@@ -35,37 +37,11 @@ class CurvePlot:
     def getPlotObject(self, variable, title):
         self.variable = variable
         self.title = title
+        self.buildDims()
         return self.buildDynamicMap()
 
     def buildDynamicMap(self):
-        self.freeDims = []
-        self.nonFreeDims = []
-
-        for d in getattr(self.xrData,self.variable).dims:
-            # WORKAROUND because Holoview is not working with a kdim with name "height"
-            # See issue https://github.com/pyviz/holoviews/issues/3448
-            if d == "height":
-                self.freeDims.append("hi")
-                continue
-            if d == self.aggDim and self.aggFn != "None":
-                # skip aggregates dimensions
-                continue
-            if d != "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) > 0:
-                # Add all dimensions to freeDims if the dimension has a size of greater than one
-                self.freeDims.append(d)
-            if d != "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) == 0:
-                # Add all dimensions which have a size of one to nonFreeDims as there is no need for a slider here
-                self.nonFreeDims.append(d)
-
-
-        ranges = {}
-        for d in self.freeDims:
-            # WORKAROUND because Holoview is not working with a kdim with name "height"
-            # See issue https://github.com/pyviz/holoviews/issues/3448
-            if d == "hi":
-                ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),"height"))-1)
-            else:
-                ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),d))-1)
+        ranges = self.getRanges()
         dm = hv.DynamicMap(self.buildCurvePlot, kdims=self.freeDims).redim.range(**ranges)
 
         return self.renderer.get_widget(dm,'widgets')

@@ -19,10 +19,9 @@ from holoviews.operation.datashader import datashade, rasterize
 
 import math
 
-renderer = hv.renderer('bokeh').instance(mode='server',size=300)
+from .Plot import Plot
 
-
-class TriMeshPlot:
+class TriMeshPlot(Plot):
     def __init__(self, logger, renderer, xrData, tris, verts, cm="Magma"):
         self.logger = logger
         self.renderer = renderer
@@ -39,6 +38,7 @@ class TriMeshPlot:
         if cm is not "None":
             self.cm = cm
         self.title = title
+        self.buildDims()
         return self.buildDynamicMaps()
 
     def buildDynamicMaps(self):
@@ -49,33 +49,8 @@ class TriMeshPlot:
         Returns:
             : a rasterizes plot of the DynamicMap with the TriMesh graph in it.
         """
-        self.freeDims = []
-        self.nonFreeDims = []
-        for d in getattr(self.xrData,self.variable).dims:
 
-            # Skip aggregated dimensions only it a Aggregate-Function is specified
-            if d == self.aggDim and self.aggFn != "None":
-                # Skip aggregated dimensions
-                continue
-            # WORKAROUND because Holoview is not working with a kdim with name "height"
-            # See issue https://github.com/pyviz/holoviews/issues/3448
-            if d == "height":
-                self.freeDims.append("hi")
-                continue
-            if d != "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) > 0:
-                self.freeDims.append(d)
-            if d != "ncells" and (len(getattr(getattr(self.xrData,self.variable),d))-1) == 0:
-                self.nonFreeDims.append(d)
-
-        ranges = {}
-        for d in self.freeDims:
-            # WORKAROUND because Holoview is not working with a kdim with name "height"
-            # See issue https://github.com/pyviz/holoviews/issues/3448
-            if d != "hi":
-                ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),d))-1)
-            else:
-                ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),"height"))-1)
-
+        ranges = self.getRanges()
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
