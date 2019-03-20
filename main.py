@@ -139,14 +139,14 @@ def prebuildDynamicMapingDialog():
 
 
     state = LOADEDMETA
-    variables = ["None"]
+    variables = []
     # TODO implement DOM02, DOM03
     meshOptions = ["calculate", "DOM1", "DOM2 (not implemented)", "DOM3 (not implemented)"]
     # TODO redundant
     for k,v in xrData.variables.items():
         variables.append(k)
 
-    slVar = bokeh.models.Select(title="Variable", options=variables, value="None")
+    slVar = bokeh.models.Select(title="Variable", options=variables, value=variables[0])
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="DOM1")
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
     btShow = bokeh.models.Button(label="show")
