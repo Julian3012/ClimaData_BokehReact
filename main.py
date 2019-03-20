@@ -104,7 +104,7 @@ def loadMesh(xrData):
     tris['v2'] = tris["v2"].astype(np.int32)
     return (tris,verts)
 
-def prebuildDynamicMapingDialog():
+def preDialog():
     global slVar, slMesh, xrData
 
     divLoading = Div(text="loading metadata...")
@@ -278,7 +278,7 @@ def mainDialog():
 def entry(doc):
     doc.title = 'ncview2'
     btLoad = bokeh.models.Button(label="load")
-    btLoad.on_click(prebuildDynamicMapingDialog)
+    btLoad.on_click(preDialog)
     tx = "ncview II"
     txPre = bokeh.models.PreText(text=tx,width=800)
 
