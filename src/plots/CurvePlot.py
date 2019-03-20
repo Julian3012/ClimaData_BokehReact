@@ -22,10 +22,14 @@ import math
 from .Plot import Plot
 
 class CurvePlot(Plot):
-    def __init__(self, logger, renderer, xrData, aggDim, aggFn):
-        self.logger = logger
-        self.renderer = renderer
-        self.xrData = xrData
+    def getPlotObject(self, variable, title, aggDim="None", aggFn="None"):
+        """
+        Function that builds up a plot object for Bokeh to display
+        Returns:
+            : a plot object
+        """
+        self.variable = variable
+        self.title = title
         self.aggDim = aggDim
         self.aggFn = aggFn
 
@@ -34,9 +38,7 @@ class CurvePlot(Plot):
             for i in range(0,360):
                 self.cells.append(np.loadtxt("dom01/dom01_lon_"+str(i)+"deg.dat",dtype='int16'))
 
-    def getPlotObject(self, variable, title):
-        self.variable = variable
-        self.title = title
+        # Builds up the free and non-free dimensions array
         self.buildDims()
         return self.buildDynamicMap()
 

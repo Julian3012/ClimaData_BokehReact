@@ -20,15 +20,18 @@ from holoviews.operation.datashader import datashade, rasterize
 import math
 
 class Plot:
-    def __init__(self, logger, renderer, xrData, aggDim, aggFn):
+    def __init__(self, logger, renderer, xrData):
         self.logger = logger
         self.renderer = renderer
         self.xrData = xrData
-        self.aggDim = aggDim
-        self.aggFn = aggFn
 
 
     def buildDims(self):
+        """
+        Function that builds up free and non-free dimensions array, according to the aggDim and aggFn fields
+        Returns:
+            nothing, but writes self.freeDims and self.nonFreeDims
+        """
         self.freeDims = []
         self.nonFreeDims = []
         for d in getattr(self.xrData,self.variable).dims:
@@ -49,6 +52,11 @@ class Plot:
                 self.nonFreeDims.append(d)
 
     def getRanges(self):
+        """
+        Function that returns the ranges of the free dims
+        Returns:
+            ranges
+        """
         ranges = {}
         for d in self.freeDims:
             # WORKAROUND because Holoview is not working with a kdim with name "height"

@@ -257,8 +257,8 @@ def mainDialog():
 
     # Choose if a Curve or TriMesh is to be used
     if aggDim == "lon" and aggFn != "None":
-        cuPlot = CurvePlot(logger, renderer, xrData, aggDim, aggFn)
-        plot = cuPlot.getPlotObject(variable=variable,title=title)
+        cuPlot = CurvePlot(logger, renderer, xrData)
+        plot = cuPlot.getPlotObject(variable, title, aggDim, aggFn)
     else:
         if tmPlot is None:
             (tris, verts) = loadMesh(xrData)

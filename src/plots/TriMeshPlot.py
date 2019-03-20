@@ -23,6 +23,9 @@ from .Plot import Plot
 
 class TriMeshPlot(Plot):
     def __init__(self, logger, renderer, xrData, tris, verts, cm="Magma"):
+        """
+        Overwrites Plot.__init__
+        """
         self.logger = logger
         self.renderer = renderer
         self.xrData = xrData
@@ -31,6 +34,11 @@ class TriMeshPlot(Plot):
         self.verts = verts
 
     def getPlotObject(self, variable, title, cm="None", aggDim="None", aggFn="None"):
+        """
+        Function that builds up a plot object for Bokeh to display
+        Returns:
+            : a plot object
+        """
         self.variable = variable
         self.aggDim = aggDim
         self.aggFn = aggFn
@@ -38,6 +46,7 @@ class TriMeshPlot(Plot):
         if cm is not "None":
             self.cm = cm
         self.title = title
+        # Builds up the free and non-free dimensions array
         self.buildDims()
         return self.buildDynamicMaps()
 
