@@ -136,7 +136,7 @@ def preDialog():
     if len(variables) == 0:
         logger.error("No variables found!")
 
-    slVar = bokeh.models.Select(title="Variable", options=variables, value=variables[0])
+    slVar = bokeh.models.Select(title="Variable", options=variables, value="TR_stn")
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="DOM1")
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
     btShow = bokeh.models.Button(label="show")
@@ -150,6 +150,9 @@ def preDialog():
     [widgetbox(btShow)]
     ])
     curdoc().add_root(l)
+
+    # Simulate Click
+    mainDialog()
 
 
 def variableUpdate(attr,old,new):
@@ -276,6 +279,8 @@ def entry(doc):
     [widgetbox(btLoad)]
     ])
     doc.add_root(l)
+
+    preDialog()
 
 
 entry(curdoc())
