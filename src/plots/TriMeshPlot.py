@@ -61,7 +61,6 @@ class TriMeshPlot(Plot):
         ranges = self.getRanges()
         coastln = gf.coastline.opts(projection=crs.PlateCarree(),line_width=3)
         rasterizedgraphopts = {"cmap":self.cm,"colorbar":True}
-        # TODO I dont know if opts.Image is right, but it works for now
         totalgraphopts = {"height":150, "width":300}
 
 
