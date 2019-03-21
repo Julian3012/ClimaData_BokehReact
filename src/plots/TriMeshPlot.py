@@ -58,16 +58,22 @@ class TriMeshPlot(Plot):
         Returns:
             : a rasterizes plot of the DynamicMap with the TriMesh graph in it.
         """
-
         ranges = self.getRanges()
+        coastln = gf.coastline.opts(projection=crs.PlateCarree(),line_width=3)
+        rasterizedgraphopts = {"cmap":self.cm,"colorbar":True}
+        # TODO I dont know if opts.Image is right, but it works for now
+        totalgraphopts = {"height":150, "width":300}
+
+
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
-            return self.renderer.get_widget(rasterize(dm).opts(cmap=self.cm,colorbar=True),'widgets')
+            return self.renderer.get_widget((rasterize(dm).opts(**rasterizedgraphopts)  * coastln).opts(**totalgraphopts),'widgets')
         else:
             self.logger.info("Show without DynamicMap")
             dm = self.buildTrimesh()
-            return self.renderer.get_plot(rasterize(dm).opts(cmap=self.cm,colorbar=True))
+            return self.renderer.get_plot((rasterize(dm).opts(**rasterizedgraphopts) * coastln).opts(**totalgraphopts))
+
 
     def buildTrimesh(self, *args):
         """
@@ -95,3 +101,4 @@ class TriMeshPlot(Plot):
 
         res = hv.TriMesh((self.tris,self.verts), label=(self.title))
         return res
+
