@@ -91,6 +91,7 @@ def loadMesh(xrData):
         array of triangles and vertices: Builds the mesh from the loaded xrData
     """
     try:
+        # If only one file is loaded has no attribute time, so we have to check this
         if hasattr(xrData.clon_bnds, "time"):
             # isel time to 0, as by globbing the clon_bnds array could have multiple times
             verts = np.column_stack((xrData.clon_bnds.isel(time=0).stack(z=('vertices','ncells')),
@@ -107,8 +108,10 @@ def loadMesh(xrData):
         v[0] = v[0] * f
         v[1] = v[1] * f
 
-    # isel time to 0, as by globbing the clon_bnds array could have multiple times
+
+    # If only one file is loaded has no attribute time, so we have to check this
     if hasattr(xrData.clon_bnds, "time"):
+        # isel time to 0, as by globbing the clon_bnds array could have multiple times
         l = len(xrData.clon_bnds.isel(time=0))
     else:
         l = len(xrData.clon_bnds.isel())
