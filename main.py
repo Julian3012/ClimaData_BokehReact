@@ -259,9 +259,9 @@ def mainDialog():
     aggregateDimensions = ["None","lon","height","time"]
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lon")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
 
     slAggregateDimension.on_change("value",aggDimUpdate)
     slAggregateFunction.on_change("value",aggFnUpdate)

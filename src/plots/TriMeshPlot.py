@@ -43,9 +43,11 @@ class TriMeshPlot(Plot):
         self.aggDim = aggDim
         self.aggFn = aggFn
 
-        if cm is not "None":
+        if cm != "None":
             self.cm = cm
+
         self.title = title
+
         # Builds up the free and non-free dimensions array
         self.buildDims()
 
