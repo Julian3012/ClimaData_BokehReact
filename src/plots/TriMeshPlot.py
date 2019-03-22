@@ -48,6 +48,7 @@ class TriMeshPlot(Plot):
         self.title = title
         # Builds up the free and non-free dimensions array
         self.buildDims()
+
         return self.buildDynamicMaps()
 
     def buildDynamicMaps(self):
@@ -59,7 +60,7 @@ class TriMeshPlot(Plot):
             : a rasterizes plot of the DynamicMap with the TriMesh graph in it.
         """
         ranges = self.getRanges()
-        coastln = gf.coastline.opts(projection=crs.PlateCarree(),line_width=3)
+        coastln = gf.coastline.opts(projection=crs.PlateCarree(),line_width=2)
         rasterizedgraphopts = {"cmap":self.cm,"colorbar":True}
         totalgraphopts = {"height":150, "width":300}
 
@@ -87,12 +88,12 @@ class TriMeshPlot(Plot):
 
         if self.aggDim == "None" or self.aggFn == "None":
             self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
-            #self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim,keep_attrs=True).isel({"time":0})
         elif self.aggDim != "None":
             if self.aggFn == "mean":
                 self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim,keep_attrs=True).isel(selectors)
             elif self.aggFn == "sum":
                 self.tris["var"] = getattr(self.xrData, self.variable).sum(dim=self.aggDim,keep_attrs=True).isel(selectors)
+
 
         # Apply unit
         factor = 1

@@ -24,6 +24,7 @@ from src.plots.CurvePlot import CurvePlot
 
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
 
+
 FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger('ncview2')
@@ -58,7 +59,10 @@ def getURL():
         str: The entered data url
     """
     #url = urlinput.value
-    url = "/home/max/Downloads/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    #url = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc,http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    url = "/home/max/Downloads/Test/*/*-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    #url = url.split(',')
     return url
 
 def loadData(url):
@@ -68,8 +72,9 @@ def loadData(url):
     Returns:
         xarray Dataset: Loads the url as xarray Dataset
     """
-    xrData = xr.open_dataset(url,decode_cf=False)
+    xrData = xr.open_mfdataset(url,decode_cf=False)
     return xrData
+
 
 def loadMesh(xrData):
     """
@@ -78,15 +83,20 @@ def loadMesh(xrData):
     Returns:
         array of triangles and vertices: Builds the mesh from the loaded xrData
     """
-    verts = np.column_stack((xrData.clon_bnds.stack(z=('vertices','ncells')),xrData.clat_bnds.stack(z=('vertices','ncells'))))
+    try:
+        # isel time to 0, as by globbing the clon_bnds array could have multiple times
+        verts = np.column_stack((xrData.clon_bnds.isel(time=0).stack(z=('vertices','ncells')),xrData.clat_bnds.isel(time=0).stack(z=('vertices','ncells'))))
+    except:
+        logger.error("Failed to build loadMesh():verts!")
 
-    #not so performant
+    # Calc degrees from radians
     f = 180 / math.pi
     for v in verts:
         v[0] = v[0] * f
         v[1] = v[1] * f
 
-    l = len(xrData.clon_bnds)
+    # isel time to 0, as by globbing the clon_bnds array could have multiple times
+    l = len(xrData.clon_bnds.isel(time=0))
     n1 = []
     n2 = []
     n3 = []
@@ -95,29 +105,38 @@ def loadMesh(xrData):
     n2 = n1 + l
     n3 = n2 + l
 
+    # Use n1 as dummy. It will get overwritten later.
     n = np.column_stack((n1,n2,n3,n1))
 
     verts = pd.DataFrame(verts,  columns=['Longitude', 'Latitude'])
     tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',"var"], dtype = np.float64)
+
+    # As those values are use as indecies in the verts array, they must be int, but the forth column
+    # needs to be float, as it contains the data
     tris['v0'] = tris["v0"].astype(np.int32)
     tris['v1'] = tris["v1"].astype(np.int32)
     tris['v2'] = tris["v2"].astype(np.int32)
+
     return (tris,verts)
 
 def preDialog():
     global slVar, slMesh, xrData
 
-    divLoading = Div(text="loading metadata...")
+    divLoading = Div(text="Loading metadata...")
     curdoc().clear()
     l = layout([
     [widgetbox(divLoading)]
     ])
     curdoc().add_root(l)
 
+    url = getURL()
+
     try:
-        xrData = xr.open_dataset(getURL(),decode_cf=False)
+        xrData = loadData(url)
+        assert xrData != None
     except:
-        divError = Div(text="Failed to load metadata")
+        logger.error("Failed to load metadata for url " + url)
+        divError = Div(text="Failed to load metadata for url " + url)
         curdoc().clear()
         l = layout([
         [widgetbox(divError)]
@@ -128,7 +147,7 @@ def preDialog():
 
     variables = []
     # TODO implement DOM02, DOM03
-    meshOptions = ["calculate", "DOM1", "DOM2 (not implemented)", "DOM3 (not implemented)"]
+    meshOptions = ["reg","calculate", "DOM1", "DOM2"]
     # TODO redundant
     for k,v in xrData.variables.items():
         variables.append(k)
@@ -187,6 +206,9 @@ def mainDialog():
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension
     global tmPlot, xrData
 
+    btApply = bokeh.models.Button(label="apply")
+    btApply.on_click(mainDialog)
+
     variables = []
     # TODO redundant
     for k,v in xrData.variables.items():
@@ -206,7 +228,8 @@ def mainDialog():
     # Define aggregates
     # TODO allow other/own aggregateFunctions
     aggregateFunctions = ["None","mean","sum"]
-    aggregateDimensions = ["None","lon","height"]
+    # TODO load this array from the data
+    aggregateDimensions = ["None","lon","height","time"]
 
     if slAggregateFunction is None:
         slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
@@ -236,15 +259,16 @@ def mainDialog():
 
     # Choose if a Curve or TriMesh is to be used
     if aggDim == "lon" and aggFn != "None":
-        cuPlot = CurvePlot(logger, renderer, xrData)
-        plot = cuPlot.getPlotObject(variable, title, aggDim, aggFn)
+        if cuPlot is None:
+            cuPlot = CurvePlot(logger, renderer, xrData)
+
+        plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn)
     else:
         if tmPlot is None:
             (tris, verts) = loadMesh(xrData)
             tmPlot = TriMeshPlot(logger, renderer, xrData, tris, verts, cm=cm)
 
         plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn)
-
 
 
     curdoc().clear()
@@ -256,6 +280,7 @@ def mainDialog():
         lArray.append([widgetbox(slCMap)])
 
     lArray.append([row(slAggregateDimension,slAggregateFunction)])
+    lArray.append([widgetbox(btApply)])
     lArray.append([plot.state])
     lArray.append([widgetbox(txPre)])
 
@@ -280,6 +305,7 @@ def entry(doc):
     ])
     doc.add_root(l)
 
+    # Simulate the click
     preDialog()
 
 
