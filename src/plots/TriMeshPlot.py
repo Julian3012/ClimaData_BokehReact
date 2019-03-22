@@ -71,7 +71,7 @@ class TriMeshPlot(Plot):
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
-            return self.renderer.get_widget((rasterize(dm).opts(**rasterizedgraphopts)  * coastln).opts(**totalgraphopts),'widgets')
+            return self.renderer.get_widget((rasterize(dm).opts(**rasterizedgraphopts) * coastln).opts(**totalgraphopts),'widgets')
         else:
             self.logger.info("Show without DynamicMap")
             dm = self.buildTrimesh()
