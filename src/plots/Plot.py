@@ -92,4 +92,5 @@ class Plot:
             else:
                 selectors[d] = 0
             idx = idx +1
+
         return selectors

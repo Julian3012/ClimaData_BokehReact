@@ -59,10 +59,12 @@ def getURL():
         str: The entered data url
     """
     #url = urlinput.value
-    #url = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    url = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc,http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
-    url = "/home/max/Downloads/Test/*/*-ART-passive_grid_pmn_DOM01_ML_0002.nc"
-    #url = url.split(',')
+    #url = "/home/max/Downloads/Test/*/*-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    # Build list if multiple urls are entered
+    if ',' in url:
+        url = url.split(',')
     return url
 
 def loadData(url):
@@ -72,7 +74,12 @@ def loadData(url):
     Returns:
         xarray Dataset: Loads the url as xarray Dataset
     """
-    xrData = xr.open_mfdataset(url,decode_cf=False)
+    # As issue: https://github.com/pydata/xarray/issues/1385 writes, open_mfdata is much slower. Opening the
+    # same file and preparing it for the curve graph is taking minutes with open_mfdataset, but seconds with open_dataset
+    if '*' in url or isinstance(url,list):
+        xrData = xr.open_mfdataset(url,decode_cf=False,decode_times=False)
+    else:
+        xrData = xr.open_dataset(url, decode_cf=False, decode_times=False)
     return xrData
 
 
@@ -84,8 +91,13 @@ def loadMesh(xrData):
         array of triangles and vertices: Builds the mesh from the loaded xrData
     """
     try:
-        # isel time to 0, as by globbing the clon_bnds array could have multiple times
-        verts = np.column_stack((xrData.clon_bnds.isel(time=0).stack(z=('vertices','ncells')),xrData.clat_bnds.isel(time=0).stack(z=('vertices','ncells'))))
+        if hasattr(xrData.clon_bnds, "time"):
+            # isel time to 0, as by globbing the clon_bnds array could have multiple times
+            verts = np.column_stack((xrData.clon_bnds.isel(time=0).stack(z=('vertices','ncells')),
+                                     xrData.clat_bnds.isel(time=0).stack(z=('vertices','ncells'))))
+        else:
+            verts = np.column_stack((xrData.clon_bnds.isel().stack(z=('vertices', 'ncells')),
+                                     xrData.clat_bnds.isel().stack(z=('vertices', 'ncells'))))
     except:
         logger.error("Failed to build loadMesh():verts!")
 
@@ -96,7 +108,10 @@ def loadMesh(xrData):
         v[1] = v[1] * f
 
     # isel time to 0, as by globbing the clon_bnds array could have multiple times
-    l = len(xrData.clon_bnds.isel(time=0))
+    if hasattr(xrData.clon_bnds, "time"):
+        l = len(xrData.clon_bnds.isel(time=0))
+    else:
+        l = len(xrData.clon_bnds.isel())
     n1 = []
     n2 = []
     n3 = []
@@ -241,9 +256,9 @@ def mainDialog():
     aggregateDimensions = ["None","lon","height","time"]
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lon")
 
     slAggregateDimension.on_change("value",aggDimUpdate)
     slAggregateFunction.on_change("value",aggFnUpdate)
@@ -268,9 +283,7 @@ def mainDialog():
 
     # Choose if a Curve or TriMesh is to be used
     if aggDim == "lon" and aggFn != "None":
-        if cuPlot is None:
-            cuPlot = CurvePlot(logger, renderer, xrData)
-
+        cuPlot = CurvePlot(logger, renderer, xrData)
         plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn)
     else:
         if tmPlot is None:
