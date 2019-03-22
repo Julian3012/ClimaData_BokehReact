@@ -91,11 +91,13 @@ class TriMeshPlot(Plot):
 
         if self.aggDim == "None" or self.aggFn == "None":
             self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
-        elif self.aggDim != "None":
+        else:
             if self.aggFn == "mean":
                 self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim,keep_attrs=True).isel(selectors)
             elif self.aggFn == "sum":
                 self.tris["var"] = getattr(self.xrData, self.variable).sum(dim=self.aggDim,keep_attrs=True).isel(selectors)
+            else:
+                logger.error("Unknown Error! AggFn not None, mean, sum")
 
 
         # Apply unit
