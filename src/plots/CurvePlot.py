@@ -33,7 +33,7 @@ class CurvePlot(Plot):
         self.aggDim = aggDim
         self.aggFn = aggFn
 
-        if self.aggDim == "lon":
+        if self.aggDim == "lat":
             self.cells = []
             for i in range(0,360):
                 self.cells.append(np.loadtxt("dom01/dom01_lon_"+str(i)+"deg.dat",dtype='int16'))
@@ -63,15 +63,15 @@ class CurvePlot(Plot):
         selectors = self.buildSelectors(args)
 
         # This part is not needed as a TriMeshGraph is drawn instead
-        #if self.aggFn == "mean" and self.aggDim != "lon":
+        #if self.aggFn == "mean" and self.aggDim != "lat":
         #    dat = getattr(self.xrData, self.variable).isel(selectors)
         #    dat = dat.mean(aggDim)
 
-        #if self.aggFn == "sum" and self.aggDim != "lon":
+        #if self.aggFn == "sum" and self.aggDim != "lat":
         #    dat = getattr(self.xrData, self.variable).isel(selectors)
         #    dat = dat.sum(aggDim)
 
-        if self.aggDim == "lon":
+        if self.aggDim == "lat":
             dat = []
             for i in range(0,360):
                 selectors["ncells"] = self.cells[i]

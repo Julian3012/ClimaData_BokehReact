@@ -59,9 +59,9 @@ def getURL():
         str: The entered data url
     """
     #url = urlinput.value
-    #url = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    url = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc,http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
-    url = "/home/max/Downloads/Test/*/*-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    #url = "/home/max/Downloads/Test/*/*-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     # Build list if multiple urls are entered
     if ',' in url:
         url = url.split(',')
@@ -256,7 +256,7 @@ def mainDialog():
     # TODO allow other/own aggregateFunctions
     aggregateFunctions = ["None","mean","sum"]
     # TODO load this array from the data
-    aggregateDimensions = ["None","lon","height"]
+    aggregateDimensions = ["None","lat","height"]
 
     if hasattr(xrData.clon_bnds, "time"):
         aggregateDimensions.append("time")
@@ -288,7 +288,7 @@ def mainDialog():
         xrData = loadData(getURL())
 
     # Choose if a Curve or TriMesh is to be used
-    if aggDim == "lon" and aggFn != "None":
+    if aggDim == "lat" and aggFn != "None":
         cuPlot = CurvePlot(logger, renderer, xrData)
         plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn)
     else:
@@ -304,7 +304,7 @@ def mainDialog():
     lArray.append([widgetbox(txTitle)])
     lArray.append([widgetbox(slVar)])
     # Hide colormap option if CurvePlot is used
-    if aggDim != "lon" or aggFn == "None":
+    if aggDim != "lat" or aggFn == "None":
         lArray.append([widgetbox(slCMap)])
 
     lArray.append([row(slAggregateDimension,slAggregateFunction)])
