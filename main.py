@@ -202,9 +202,6 @@ def mainDialog():
 
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
 
-
-
-
     # Define aggregates
     # TODO allow other/own aggregateFunctions
     aggregateFunctions = ["None","mean","sum"]
