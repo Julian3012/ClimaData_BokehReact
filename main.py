@@ -84,60 +84,6 @@ def loadData(url):
     return xrData
 
 
-def loadMesh(xrData):
-    """
-    Function to build up a mesh
-
-    Returns:
-        array of triangles and vertices: Builds the mesh from the loaded xrData
-    """
-    try:
-        # If only one file is loaded has no attribute time, so we have to check this
-        if hasattr(xrData.clon_bnds, "time"):
-            # isel time to 0, as by globbing the clon_bnds array could have multiple times
-            verts = np.column_stack((xrData.clon_bnds.isel(time=0).stack(z=('vertices','ncells')),
-                                     xrData.clat_bnds.isel(time=0).stack(z=('vertices','ncells'))))
-        else:
-            verts = np.column_stack((xrData.clon_bnds.isel().stack(z=('vertices', 'ncells')),
-                                     xrData.clat_bnds.isel().stack(z=('vertices', 'ncells'))))
-    except:
-        logger.error("Failed to build loadMesh():verts!")
-
-    # Calc degrees from radians
-    f = 180 / math.pi
-    for v in verts:
-        v[0] = v[0] * f
-        v[1] = v[1] * f
-
-
-    # If only one file is loaded has no attribute time, so we have to check this
-    if hasattr(xrData.clon_bnds, "time"):
-        # isel time to 0, as by globbing the clon_bnds array could have multiple times
-        l = len(xrData.clon_bnds.isel(time=0))
-    else:
-        l = len(xrData.clon_bnds.isel())
-    n1 = []
-    n2 = []
-    n3 = []
-
-    n1 = np.arange(l)
-    n2 = n1 + l
-    n3 = n2 + l
-
-    # Use n1 as dummy. It will get overwritten later.
-    n = np.column_stack((n1,n2,n3,n1))
-
-    verts = pd.DataFrame(verts,  columns=['Longitude', 'Latitude'])
-    tris  = pd.DataFrame(n, columns=['v0', 'v1', 'v2',"var"], dtype = np.float64)
-
-    # As those values are use as indecies in the verts array, they must be int, but the forth column
-    # needs to be float, as it contains the data
-    tris['v0'] = tris["v0"].astype(np.int32)
-    tris['v1'] = tris["v1"].astype(np.int32)
-    tris['v2'] = tris["v2"].astype(np.int32)
-
-    return (tris,verts)
-
 def preDialog():
     global slVar, slMesh, xrData
 
@@ -304,8 +250,7 @@ def mainDialog():
         plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn)
     else:
         if tmPlot is None:
-            (tris, verts) = loadMesh(xrData)
-            tmPlot = TriMeshPlot(logger, renderer, xrData, tris, verts, cm=cm)
+            tmPlot = TriMeshPlot(logger, renderer, xrData)
 
         plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline)
 

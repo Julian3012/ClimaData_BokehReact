@@ -1,24 +1,5 @@
 #!/usr/bin/python
 
-from bokeh.layouts import layout, widgetbox, row
-from bokeh.models import ColumnDataSource, Div
-from bokeh.models.widgets import TextInput
-from bokeh.io import curdoc
-import geoviews as gv
-import geoviews.feature as gf
-
-import bokeh as bokeh
-import pandas as pd
-import xarray as xr
-import holoviews as hv
-import numpy as np
-
-from cartopy import crs
-
-from holoviews.operation.datashader import datashade, rasterize
-
-import math
-
 class Plot:
     def __init__(self, logger, renderer, xrData):
         self.logger = logger
