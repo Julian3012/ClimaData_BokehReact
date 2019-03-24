@@ -33,7 +33,7 @@ class TriMeshPlot(Plot):
         self.tris = tris
         self.verts = verts
 
-    def getPlotObject(self, variable, title, cm="None", aggDim="None", aggFn="None"):
+    def getPlotObject(self, variable, title, cm="None", aggDim="None", aggFn="None", showCoastline=True):
         """
         Function that builds up a plot object for Bokeh to display
         Returns:
@@ -42,6 +42,7 @@ class TriMeshPlot(Plot):
         self.variable = variable
         self.aggDim = aggDim
         self.aggFn = aggFn
+        self.showCoastline = showCoastline
 
         if cm != "None":
             self.cm = cm
@@ -71,11 +72,17 @@ class TriMeshPlot(Plot):
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
-            return self.renderer.get_widget((rasterize(dm).opts(**rasterizedgraphopts) * coastln).opts(**totalgraphopts),'widgets')
+            if self.showCoastline == True:
+                return self.renderer.get_widget((rasterize(dm).opts(**rasterizedgraphopts) * coastln).opts(**totalgraphopts),'widgets')
+            else:
+                return self.renderer.get_widget((rasterize(dm).opts(**rasterizedgraphopts)).opts(**totalgraphopts), 'widgets')
         else:
             self.logger.info("Show without DynamicMap")
             dm = self.buildTrimesh()
-            return self.renderer.get_plot((rasterize(dm).opts(**rasterizedgraphopts) * coastln).opts(**totalgraphopts))
+            if self.showCoastline == True:
+                return self.renderer.get_plot((rasterize(dm).opts(**rasterizedgraphopts) * coastln).opts(**totalgraphopts))
+            else:
+                return self.renderer.get_plot((rasterize(dm).opts(**rasterizedgraphopts)).opts(**totalgraphopts))
 
 
     def buildTrimesh(self, *args):

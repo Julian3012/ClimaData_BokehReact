@@ -36,6 +36,7 @@ slMesh = None
 slCMap = None
 slAggregateFunction = None
 slAggregateDimension = None
+cbCoastlineOverlay = None
 txTitle = None
 
 aggregates = []
@@ -140,6 +141,8 @@ def loadMesh(xrData):
 def preDialog():
     global slVar, slMesh, xrData
 
+    logger.info("Started preDialog()")
+
     divLoading = Div(text="Loading metadata...")
     curdoc().clear()
     l = layout([
@@ -226,12 +229,18 @@ def aggDimUpdate(attr, old, new):
 def aggFnUpdate(attr, old, new):
     mainDialog()
 
+def coastlineUpdate(new):
+    logger.info("coastlineUpdate")
+    mainDialog()
+
 def mainDialog():
     """
     This function build up and manages the Main-Graph Dialog
     """
-    global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension
+    global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay
     global tmPlot, xrData
+
+    logger.info("Started mainDialog()")
 
     btApply = bokeh.models.Button(label="apply")
     btApply.on_click(mainDialog)
@@ -263,17 +272,20 @@ def mainDialog():
 
     if slAggregateFunction is None:
         slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
+        slAggregateFunction.on_change("value", aggFnUpdate)
     if slAggregateDimension is None:
         slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
-
-    slAggregateDimension.on_change("value",aggDimUpdate)
-    slAggregateFunction.on_change("value",aggFnUpdate)
+        slAggregateDimension.on_change("value", aggDimUpdate)
+    if cbCoastlineOverlay is None:
+        cbCoastlineOverlay = bokeh.models.CheckboxGroup(labels=["Show coastline"], active=[0])
+        cbCoastlineOverlay.on_click(coastlineUpdate)
 
     variable = slVar.value
     title = txTitle.value
     cm = slCMap.value
     aggDim = slAggregateDimension.value
     aggFn = slAggregateFunction.value
+    showCoastline = len(cbCoastlineOverlay.active) > 0
 
     # Showing a Loading Infotext
     divLoading = Div(text="loading buildDynamicMap...")
@@ -296,7 +308,7 @@ def mainDialog():
             (tris, verts) = loadMesh(xrData)
             tmPlot = TriMeshPlot(logger, renderer, xrData, tris, verts, cm=cm)
 
-        plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn)
+        plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline)
 
 
     curdoc().clear()
@@ -306,6 +318,7 @@ def mainDialog():
     # Hide colormap option if CurvePlot is used
     if aggDim != "lat" or aggFn == "None":
         lArray.append([widgetbox(slCMap)])
+        lArray.append([widgetbox(cbCoastlineOverlay)])
 
     lArray.append([row(slAggregateDimension,slAggregateFunction)])
     lArray.append([widgetbox(btApply)])
