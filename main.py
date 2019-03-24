@@ -245,21 +245,19 @@ def mainDialog():
     btApply = bokeh.models.Button(label="apply")
     btApply.on_click(mainDialog)
 
-    variables = []
-    # TODO redundant
-    for k,v in xrData.variables.items():
-        variables.append(k)
+    slVar.on_change("value", variableUpdate)
 
     if slCMap is None:
         slCMap = bokeh.models.Select(title="Colormap", options=COLORMAPS, value=COLORMAPS[0])
+        slCMap.on_change("value", cmapUpdate)
 
     if txTitle is None:
         txTitle = bokeh.models.TextInput(value="title", title="Title:")
 
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
 
-    slVar.on_change("value",variableUpdate)
-    slCMap.on_change("value",cmapUpdate)
+
+
 
     # Define aggregates
     # TODO allow other/own aggregateFunctions
@@ -267,14 +265,15 @@ def mainDialog():
     # TODO load this array from the data
     aggregateDimensions = ["None","lat","height"]
 
+    # time could only be aggregated if it exist
     if hasattr(xrData.clon_bnds, "time"):
         aggregateDimensions.append("time")
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
         slAggregateFunction.on_change("value", aggFnUpdate)
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="height")
         slAggregateDimension.on_change("value", aggDimUpdate)
     if cbCoastlineOverlay is None:
         cbCoastlineOverlay = bokeh.models.CheckboxGroup(labels=["Show coastline"], active=[0])

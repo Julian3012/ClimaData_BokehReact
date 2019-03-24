@@ -95,16 +95,20 @@ class TriMeshPlot(Plot):
         """
 
         selectors = self.buildSelectors(args)
+        self.logger.info("Selectors: " + str(selectors))
 
         if self.aggDim == "None" or self.aggFn == "None":
+            self.logger.info("No aggregation")
             self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
         else:
             if self.aggFn == "mean":
-                self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim,keep_attrs=True).isel(selectors)
+                self.logger.info("mean aggregation with %s" % self.aggDim)
+                self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim).isel(selectors)
             elif self.aggFn == "sum":
-                self.tris["var"] = getattr(self.xrData, self.variable).sum(dim=self.aggDim,keep_attrs=True).isel(selectors)
+                self.logger.info("sum aggregation %s" % self.aggDim)
+                self.tris["var"] = getattr(self.xrData, self.variable).sum(dim=self.aggDim).isel(selectors)
             else:
-                logger.error("Unknown Error! AggFn not None, mean, sum")
+                self.logger.error("Unknown Error! AggFn not None, mean, sum")
 
 
         # Apply unit
