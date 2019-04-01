@@ -80,7 +80,8 @@ def loadData(url):
     if '*' in url or isinstance(url,list):
         xrData = xr.open_mfdataset(url,decode_cf=False,decode_times=False)
     else:
-        xrData = xr.open_dataset(url, decode_cf=False, decode_times=False)
+        logger.info("Loading with open_data")
+        xrData = xr.open_dataset(url, decode_cf=False, decode_times=False,chunks={} )
     return xrData
 
 
