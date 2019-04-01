@@ -30,7 +30,10 @@ logging.basicConfig(format=FORMAT)
 logger = logging.getLogger('ncview2')
 logger.info({i.__name__:i.__version__ for i in [hv, np, pd]})
 
-urlinput = TextInput(value="default", title="netCFD/OpenDAP Source URL:")
+
+defaultinput = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+#defaultinput = "eos.scc.kit.edu"
+urlinput = TextInput(value=defaultinput, title="netCDF file -OR- OPeNDAP URL:")
 slVar = None
 slMesh = None
 slCMap = None
@@ -60,10 +63,6 @@ def getURL():
         str: The entered data url
     """
     url = urlinput.value
-    #url = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
-    #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc,http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
-    #url = "/home/max/Downloads/Test/*/*-ART-passive_grid_pmn_DOM01_ML_0002.nc"
-    #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     # Build list if multiple urls are entered
     if ',' in url:
         url = url.split(',')
@@ -115,12 +114,12 @@ def preDialog():
         return
 
 
-    variables = []
+    variables = [x for x in xrData.variables.keys()]
     # TODO implement DOM02, DOM03
     meshOptions = ["reg","calculate", "DOM1", "DOM2"]
     # TODO redundant
-    for k,v in xrData.variables.items():
-        variables.append(k)
+    #for k,v in xrData.variables.items():
+    #    variables.append(k)
 
 
 
@@ -148,9 +147,6 @@ def preDialog():
     [widgetbox(btShow)]
     ])
     curdoc().add_root(l)
-
-    # Simulate Click
-    #mainDialog()
 
 
 def variableUpdate(attr,old,new):
@@ -209,17 +205,17 @@ def mainDialog():
     # TODO allow other/own aggregateFunctions
     aggregateFunctions = ["None","mean","sum"]
     # TODO load this array from the data
-    aggregateDimensions = ["None","lat","height"]
+    aggregateDimensions = ["None", "height"]
 
     # time could only be aggregated if it exist
     if hasattr(xrData.clon_bnds, "time"):
         aggregateDimensions.append("time")
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
         slAggregateFunction.on_change("value", aggFnUpdate)
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="height")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
         slAggregateDimension.on_change("value", aggDimUpdate)
     if cbCoastlineOverlay is None:
         cbCoastlineOverlay = bokeh.models.CheckboxGroup(labels=["Show coastline"], active=[0])
@@ -289,9 +285,6 @@ def entry(doc):
     [widgetbox(btLoad)]
     ])
     doc.add_root(l)
-
-    # Simulate the click
-    #preDialog()
 
 
 entry(curdoc())
