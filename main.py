@@ -63,6 +63,7 @@ def getURL():
     #url = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc,http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     #url = "/home/max/Downloads/Test/*/*-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     # Build list if multiple urls are entered
     if ',' in url:
         url = url.split(',')
