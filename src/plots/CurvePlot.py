@@ -59,14 +59,20 @@ class CurvePlot(Plot):
         #    dat = getattr(self.xrData, self.variable).isel(selectors)
         #    dat = dat.sum(aggDim)
 
-        if self.aggDim == "lat":
-            dat = []
-            for i in range(0,360):
-                selectors["ncells"] = self.cells[i]
-                if self.aggFn == "mean":
-                    dat.append(getattr(self.xrData, self.variable).isel(selectors).mean())
-                if self.aggFn == "sum":
-                    dat.append(getattr(self.xrData, self.variable).isel(selectors).sum())
+
+        if self.aggDim == "lat" and self.aggFn == "mean":
+            dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).mean() for i in range(0,360)]
+        elif self.addDim == "lat" and self.aggFn == "sum":
+            dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).sum() for i in range(0,360)]
+
+        #if self.aggDim == "lat":
+        #    dat = []
+        #    for i in range(0,360):
+        #        selectors["ncells"] = self.cells[i]
+        #        if self.aggFn == "mean":
+        #            dat.append(getattr(self.xrData, self.variable).isel(selectors).mean())
+        #        if self.aggFn == "sum":
+        #            dat.append(getattr(self.xrData, self.variable).isel(selectors).sum())
 
         # TODO Apply unit
         #factor = 1

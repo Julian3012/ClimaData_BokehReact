@@ -116,15 +116,13 @@ def preDialog():
 
     variables = [x for x in xrData.variables.keys()]
     # TODO implement DOM02, DOM03
-    meshOptions = ["reg","calculate", "DOM1", "DOM2"]
-    # TODO redundant
-    #for k,v in xrData.variables.items():
-    #    variables.append(k)
+    meshOptions = ["DOM1", "DOM2"]
+    #meshOptions = ["reg","calculate", "DOM1", "DOM2"]
 
 
-
+    default_dom = "DOM1" if "DOM01" in urlinput.value else "DOM2"
     slVar = bokeh.models.Select(title="Variable", options=variables, value="TR_stn")
-    slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value="DOM1")
+    slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value=default_dom)
     txPre = bokeh.models.PreText(text=str(xrData),width=800)
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(mainDialog)
@@ -205,7 +203,14 @@ def mainDialog():
     # TODO allow other/own aggregateFunctions
     aggregateFunctions = ["None","mean","sum"]
     # TODO load this array from the data
-    aggregateDimensions = ["None", "height"]
+
+    if "ML" in urlinput.value:
+        height = "height"
+    elif "PL" in urlinput.value:
+        height = "lev"
+    else:
+        height = "alt"
+    aggregateDimensions = ["None", height] # removed lat since it takes too long
 
     # time could only be aggregated if it exist
     if hasattr(xrData.clon_bnds, "time"):
