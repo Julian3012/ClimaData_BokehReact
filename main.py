@@ -216,7 +216,7 @@ def mainDialog():
         aggregateDimensions.append("time")
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
         slAggregateFunction.on_change("value", aggFnUpdate)
     if slAggregateDimension is None:
         slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="height")
