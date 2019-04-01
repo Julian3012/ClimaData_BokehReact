@@ -111,7 +111,7 @@ class TriMeshPlot(Plot):
         factor = 1
         self.tris["var"] = self.tris["var"] * factor
 
-        res = hv.TriMesh((self.tris,self.verts), label=(self.title))
+        res = hv.TriMesh((self.tris,self.verts), label=(self.title) )
         return res
 
     def loadMesh(self, xrData):

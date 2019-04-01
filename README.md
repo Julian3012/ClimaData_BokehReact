@@ -1,8 +1,13 @@
 # praktClimaAnalyse
 
+## install
+```
+conda create -name ncview2 --file=spec-file.txt
+```
+
 ## run
 ```
-source activate ncview2
+conda activate ncview2
 bash run.sh
 ```
 
