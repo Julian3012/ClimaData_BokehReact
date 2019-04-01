@@ -63,6 +63,7 @@ def getURL():
     #url = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc,http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     #url = "/home/max/Downloads/Test/*/*-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+    #url = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016032100/2016032100-ART-passive_grid_pmn_DOM01_ML_0002.nc"
     # Build list if multiple urls are entered
     if ',' in url:
         url = url.split(',')
@@ -78,9 +79,11 @@ def loadData(url):
     # As issue: https://github.com/pydata/xarray/issues/1385 writes, open_mfdata is much slower. Opening the
     # same file and preparing it for the curve graph is taking minutes with open_mfdataset, but seconds with open_dataset
     if '*' in url or isinstance(url,list):
-        xrData = xr.open_mfdataset(url,decode_cf=False,decode_times=False)
+        logger.info("Loading with open_mfdataset")
+        xrData = xr.open_mfdataset(url,decode_cf=False,decode_times=False,chunks={} )
     else:
-        xrData = xr.open_dataset(url, decode_cf=False, decode_times=False)
+        logger.info("Loading with open_data")
+        xrData = xr.open_dataset(url, decode_cf=False, decode_times=False,chunks={} )
     return xrData
 
 
