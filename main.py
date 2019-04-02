@@ -32,9 +32,9 @@ logger = logging.getLogger('ncview2')
 logger.info({i.__name__:i.__version__ for i in [hv, np, pd]})
 
 
-#defaultinput = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+defaultinput = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
 #defaultinput = "eos.scc.kit.edu"
-defaultinput = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+#defaultinput = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
 
 urlinput = TextInput(value=defaultinput, title="netCDF file -OR- OPeNDAP URL:")
 slVar = None
@@ -51,6 +51,7 @@ COLORMAPS = ["Blues","Inferno","Magma","Plasma","Viridis","BrBG","PiYG","PRGn","
 
 tmPlot = None
 xrData = None
+xrDataMeta = None
 
 class Aggregates():
     def __init__(self, dim, f):
@@ -82,15 +83,32 @@ def loadData(url):
     # same file and preparing it for the curve graph is taking minutes with open_mfdataset, but seconds with open_dataset
     if '*' in url or isinstance(url,list):
         logger.info("Loading with open_mfdataset")
-        xrData = xr.open_mfdataset(url,decode_cf=False,decode_times=False,chunks={} )
+        xrData = xr.open_mfdataset(url,decode_cf=False,decode_times=False)
     else:
         logger.info("Loading with open_data")
-        xrData = xr.open_dataset(url, decode_cf=False, decode_times=False,chunks={} )
+        xrData = xr.open_dataset(url, decode_cf=False, decode_times=False)
+    return xrData
+
+def loadDataMeta(url):
+    """
+    Function load OPeNDAP data
+
+    Returns:
+        xarray Dataset: Loads the url as xarray Dataset
+    """
+    # As issue: https://github.com/pydata/xarray/issues/1385 writes, open_mfdata is much slower. Opening the
+    # same file and preparing it for the curve graph is taking minutes with open_mfdataset, but seconds with open_dataset
+    if '*' in url or isinstance(url,list):
+        logger.info("Loading with open_mfdataset")
+        xrData = xr.open_mfdataset(url,decode_cf=False,decode_times=False, chunks={})
+    else:
+        logger.info("Loading with open_data")
+        xrData = xr.open_dataset(url, decode_cf=False, decode_times=False, chunks={})
     return xrData
 
 
 def preDialog():
-    global slVar, slMesh, xrData
+    global slVar, slMesh, xrDataMeta
 
     logger.info("Started preDialog()")
 
@@ -104,8 +122,8 @@ def preDialog():
     url = getURL()
 
     try:
-        xrData = loadData(url)
-        assert xrData != None
+        xrDataMeta = loadDataMeta(url)
+        assert xrDataMeta != None
     except:
         logger.error("Failed to load metadata for url " + url)
         divError = Div(text="Failed to load metadata for url " + url)
@@ -117,7 +135,7 @@ def preDialog():
         return
 
 
-    variables = [x for x in xrData.variables.keys()]
+    variables = [x for x in xrDataMeta.variables.keys()]
     # TODO implement DOM02, DOM03
     meshOptions = ["DOM1", "DOM2"]
     #meshOptions = ["reg","calculate", "DOM1", "DOM2"]
@@ -126,7 +144,7 @@ def preDialog():
     default_dom = "DOM1" if "DOM01" in urlinput.value else "DOM2"
     slVar = bokeh.models.Select(title="Variable", options=variables, value="TR_stn")
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value=default_dom)
-    txPre = bokeh.models.PreText(text=str(xrData),width=800)
+    txPre = bokeh.models.PreText(text=str(xrDataMeta),width=800)
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(mainDialog)
 
@@ -184,7 +202,7 @@ def mainDialog():
     This function build up and manages the Main-Graph Dialog
     """
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay
-    global tmPlot, xrData
+    global tmPlot, xrData, xrDataMeta
 
     logger.info("Started mainDialog()")
 
@@ -200,7 +218,7 @@ def mainDialog():
     if txTitle is None:
         txTitle = bokeh.models.TextInput(value="title", title="Title:")
 
-    txPre = bokeh.models.PreText(text=str(xrData),width=800)
+    txPre = bokeh.models.PreText(text=str(xrDataMeta),width=800)
 
     # Define aggregates
     # TODO allow other/own aggregateFunctions
@@ -216,7 +234,7 @@ def mainDialog():
     aggregateDimensions = ["None", height, "lat"] # removed lat since it takes too long
 
     # time could only be aggregated if it exist
-    if hasattr(xrData.clon_bnds, "time"):
+    if hasattr(xrDataMeta.clon_bnds, "time"):
         aggregateDimensions.append("time")
 
     if slAggregateFunction is None:
@@ -244,18 +262,25 @@ def mainDialog():
     ])
     curdoc().add_root(l)
 
-    # Start loading data
-    if xrData is None:
-        xrData = loadData(getURL())
-
     # Choose if a Curve or TriMesh is to be used
     if aggDim == "lat" and aggFn != "None":
+        if xrData is None:
+            logger.info("Loading unchunked data for curveplot")
+            try:
+                url = getURL()
+                xrData = loadData(url)
+                assert xrData != None
+            except:
+                logger.error("Error for loading unchunked data.")
+        logger.info("Build CurvePlot")
         cuPlot = CurvePlot(logger, renderer, xrData)
         plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn)
         logger.info("Returned plot")
     else:
         if tmPlot is None:
-            tmPlot = TriMeshPlot(logger, renderer, xrData)
+            logger.info("Build TriMeshPlot")
+            logger.info(xrDataMeta is None)
+            tmPlot = TriMeshPlot(logger, renderer, xrDataMeta)
 
         plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline)
 
