@@ -64,7 +64,7 @@ class CurvePlot(Plot):
 
         if self.aggDim == "lat" and self.aggFn == "mean":
             dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).mean() for i in range(0,360)]
-        elif self.addDim == "lat" and self.aggFn == "sum":
+        elif self.aggDim == "lat" and self.aggFn == "sum":
             dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).sum() for i in range(0,360)]
 
         self.logger.info("Loaded data")
