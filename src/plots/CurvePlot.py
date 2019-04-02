@@ -25,6 +25,7 @@ class CurvePlot(Plot):
             self.cells = []
             for i in range(0,360):
                 self.cells.append(np.loadtxt("dom01/dom01_lon_"+str(i)+"deg.dat",dtype='int16'))
+            self.logger.info("Loaded dom files!")
 
         # Builds up the free and non-free dimensions array
         self.buildDims()
@@ -36,7 +37,7 @@ class CurvePlot(Plot):
         # TODO do not hardcode the sizes
         totalgraphopts = {"height": 150, "width": 300}
         dm = hv.DynamicMap(self.buildCurvePlot, kdims=self.freeDims).redim.range(**ranges)
-
+        self.logger.info("Build into Dynamic Map")
         return self.renderer.get_widget(dm.opts(**totalgraphopts),'widgets')
 
     def buildCurvePlot(self, *args):
@@ -59,20 +60,14 @@ class CurvePlot(Plot):
         #    dat = getattr(self.xrData, self.variable).isel(selectors)
         #    dat = dat.sum(aggDim)
 
+        self.logger.info("Loading data")
 
         if self.aggDim == "lat" and self.aggFn == "mean":
             dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).mean() for i in range(0,360)]
         elif self.addDim == "lat" and self.aggFn == "sum":
             dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).sum() for i in range(0,360)]
 
-        #if self.aggDim == "lat":
-        #    dat = []
-        #    for i in range(0,360):
-        #        selectors["ncells"] = self.cells[i]
-        #        if self.aggFn == "mean":
-        #            dat.append(getattr(self.xrData, self.variable).isel(selectors).mean())
-        #        if self.aggFn == "sum":
-        #            dat.append(getattr(self.xrData, self.variable).isel(selectors).sum())
+        self.logger.info("Loaded data")
 
         # TODO Apply unit
         #factor = 1

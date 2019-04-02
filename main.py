@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#from bokeh.server.server import Server
 from bokeh.layouts import layout, widgetbox, row
 from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
@@ -31,8 +32,10 @@ logger = logging.getLogger('ncview2')
 logger.info({i.__name__:i.__version__ for i in [hv, np, pd]})
 
 
-defaultinput = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+#defaultinput = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
 #defaultinput = "eos.scc.kit.edu"
+defaultinput = "/home/max/Downloads/Test/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
+
 urlinput = TextInput(value=defaultinput, title="netCDF file -OR- OPeNDAP URL:")
 slVar = None
 slMesh = None
@@ -210,17 +213,17 @@ def mainDialog():
         height = "lev"
     else:
         height = "alt"
-    aggregateDimensions = ["None", height] # removed lat since it takes too long
+    aggregateDimensions = ["None", height, "lat"] # removed lat since it takes too long
 
     # time could only be aggregated if it exist
     if hasattr(xrData.clon_bnds, "time"):
         aggregateDimensions.append("time")
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
         slAggregateFunction.on_change("value", aggFnUpdate)
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lat")
         slAggregateDimension.on_change("value", aggDimUpdate)
     if cbCoastlineOverlay is None:
         cbCoastlineOverlay = bokeh.models.CheckboxGroup(labels=["Show coastline"], active=[0])
@@ -249,6 +252,7 @@ def mainDialog():
     if aggDim == "lat" and aggFn != "None":
         cuPlot = CurvePlot(logger, renderer, xrData)
         plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn)
+        logger.info("Returned plot")
     else:
         if tmPlot is None:
             tmPlot = TriMeshPlot(logger, renderer, xrData)
@@ -291,5 +295,12 @@ def entry(doc):
     ])
     doc.add_root(l)
 
+#server = Server({'/': entry}, num_procs=4)
+#server.start()
+
+#if __name__ == '__main__':
+#    print('Opening Bokeh application on http://localhost:5006/')
+#    server.io_loop.add_callback(server.show, "/")
+#    server.io_loop.start()
 
 entry(curdoc())
