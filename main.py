@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#from bokeh.server.server import Server
+from bokeh.server.server import Server
 from bokeh.layouts import layout, widgetbox, row
 from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
@@ -19,17 +19,24 @@ from holoviews.operation.datashader import datashade, rasterize
 
 import math
 import logging
+import time
+
+
+
 
 from src.plots.TriMeshPlot import TriMeshPlot
 from src.plots.CurvePlot import CurvePlot
 
+hv.extension('bokeh')
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
+
 
 
 FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger('ncview2')
 logger.info({i.__name__:i.__version__ for i in [hv, np, pd]})
+
 
 
 defaultinput = "http://eos.scc.kit.edu/thredds/dodsC/polstracc0new/2016033000/2016033000-ART-passive_grid_pmn_DOM01_ML_0002.nc"
@@ -79,6 +86,7 @@ def loadData(url):
     Returns:
         xarray Dataset: Loads the url as xarray Dataset
     """
+    start = time.time()
     # As issue: https://github.com/pydata/xarray/issues/1385 writes, open_mfdata is much slower. Opening the
     # same file and preparing it for the curve graph is taking minutes with open_mfdataset, but seconds with open_dataset
     if '*' in url or isinstance(url,list):
@@ -87,6 +95,8 @@ def loadData(url):
     else:
         logger.info("Loading with open_data")
         xrData = xr.open_dataset(url, decode_cf=False, decode_times=False)
+    end = time.time()
+    logger.info("LoadData took %d" % (end - start))
     return xrData
 
 def loadDataMeta(url):
@@ -96,6 +106,7 @@ def loadDataMeta(url):
     Returns:
         xarray Dataset: Loads the url as xarray Dataset
     """
+    start = time.time()
     # As issue: https://github.com/pydata/xarray/issues/1385 writes, open_mfdata is much slower. Opening the
     # same file and preparing it for the curve graph is taking minutes with open_mfdataset, but seconds with open_dataset
     if '*' in url or isinstance(url,list):
@@ -104,12 +115,14 @@ def loadDataMeta(url):
     else:
         logger.info("Loading with open_data")
         xrData = xr.open_dataset(url, decode_cf=False, decode_times=False, chunks={})
+    end = time.time()
+    logger.info("LoadDataMeta took %d" % (end - start))
     return xrData
 
 
 def preDialog():
     global slVar, slMesh, xrDataMeta
-
+    start = time.time()
     logger.info("Started preDialog()")
 
     divLoading = Div(text="Loading metadata...")
@@ -166,6 +179,8 @@ def preDialog():
     [widgetbox(btShow)]
     ])
     curdoc().add_root(l)
+    end = time.time()
+    logger.info("preDialog took %d" % (end - start))
 
 
 def variableUpdate(attr,old,new):
@@ -201,9 +216,11 @@ def mainDialog():
     """
     This function build up and manages the Main-Graph Dialog
     """
+
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay
     global tmPlot, xrData, xrDataMeta
 
+    start = time.time()
     logger.info("Started mainDialog()")
 
     btApply = bokeh.models.Button(label="apply")
@@ -238,10 +255,10 @@ def mainDialog():
         aggregateDimensions.append("time")
 
     if slAggregateFunction is None:
-        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="mean")
+        slAggregateFunction = bokeh.models.Select(title="Aggregate Function", options=aggregateFunctions, value="None")
         slAggregateFunction.on_change("value", aggFnUpdate)
     if slAggregateDimension is None:
-        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="lat")
+        slAggregateDimension = bokeh.models.Select(title="Aggregate Dimension", options=aggregateDimensions, value="None")
         slAggregateDimension.on_change("value", aggDimUpdate)
     if cbCoastlineOverlay is None:
         cbCoastlineOverlay = bokeh.models.CheckboxGroup(labels=["Show coastline"], active=[0])
@@ -279,7 +296,6 @@ def mainDialog():
     else:
         if tmPlot is None:
             logger.info("Build TriMeshPlot")
-            logger.info(xrDataMeta is None)
             tmPlot = TriMeshPlot(logger, renderer, xrDataMeta)
 
         plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline)
@@ -302,6 +318,8 @@ def mainDialog():
     l = layout(lArray)
 
     curdoc().add_root(l)
+    end = time.time()
+    logger.info("MainDialog took %d" % (end - start))
 
 # This function is showing the landingpage. Here one could enter the url for the datasource.
 # Entering the url is the first step in the dialog
