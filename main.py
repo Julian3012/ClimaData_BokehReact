@@ -48,6 +48,7 @@ cbColoring = None
 txTitle = None
 txFixColoringMin = None
 txFixColoringMax = None
+txCLevels = None
 
 aggregates = []
 
@@ -221,7 +222,7 @@ def mainDialog():
 
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay, cbColoring
     global tmPlot, cuPlot, xrData, xrDataMeta
-    global txFixColoringMin, txFixColoringMax
+    global txFixColoringMin, txFixColoringMax, txCLevels
     try:
         start = time.time()
         logger.info("Started mainDialog()")
@@ -243,6 +244,9 @@ def mainDialog():
 
         if txFixColoringMax is None:
             txFixColoringMax = bokeh.models.TextInput(value="", title="Fix color maxmum:")
+
+        if txCLevels is None:
+            txCLevels = bokeh.models.TextInput(value="0", title="Colorlevels (0:inf):")
 
         txPre = bokeh.models.PreText(text=str(xrDataMeta),width=800)
 
@@ -287,6 +291,13 @@ def mainDialog():
         cLogZ = 2 in cbColoring.active
 
         try:
+            cLevels = int(txCLevels.value)
+        except Exception as e:
+            print(e)
+            cLevels = 0
+
+
+        try:
             fixColorMin = float(txFixColoringMin.value)
         except Exception as e:
             print(e)
@@ -326,8 +337,7 @@ def mainDialog():
                 logger.info("Build TriMeshPlot")
                 tmPlot = TriMeshPlot(logger, renderer, xrDataMeta)
 
-            plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline, useFixColoring=useFixColoring, fixColoringMin=fixColorMin, fixColoringMax=fixColorMax,cSymmetric=cSymmetric,cLogZ=cLogZ)
-
+            plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline, useFixColoring=useFixColoring, fixColoringMin=fixColorMin, fixColoringMax=fixColorMax,cSymmetric=cSymmetric,cLogZ=cLogZ,cLevels=cLevels)
 
         curdoc().clear()
         lArray = []
@@ -341,6 +351,7 @@ def mainDialog():
         if useFixColoring:
             lArray.append([row(txFixColoringMin,txFixColoringMax)])
 
+        lArray.append([widgetbox(txCLevels)])
         lArray.append([row(slAggregateDimension,slAggregateFunction)])
         lArray.append([widgetbox(btApply)])
         lArray.append([plot.state])
