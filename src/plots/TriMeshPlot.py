@@ -27,9 +27,13 @@ class TriMeshPlot(Plot):
         self.renderer = renderer
         self.xrData = xrData
 
+        self.useFixColoring = False
+        self.fixColoringMin = None
+        self.fixColoringMax = None
+
         self.loadMesh(xrData)
 
-    def getPlotObject(self, variable, title, cm="Magma", aggDim="None", aggFn="None", showCoastline=True):
+    def getPlotObject(self, variable, title, cm="Magma", aggDim="None", aggFn="None", showCoastline=True, useFixColoring=False, fixColoringMin=None, fixColoringMax=None):
         """
         Function that builds up a plot object for Bokeh to display
         Returns:
@@ -39,6 +43,9 @@ class TriMeshPlot(Plot):
         self.aggDim = aggDim
         self.aggFn = aggFn
         self.showCoastline = showCoastline
+        self.useFixColoring = useFixColoring
+        self.fixColoringMin = fixColoringMin
+        self.fixColoringMax = fixColoringMax
 
         if cm != "None":
             self.cm = cm
@@ -68,10 +75,27 @@ class TriMeshPlot(Plot):
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
+            self.logger.info("Checking for coloring mode...")
+            try:
+                if self.useFixColoring is True and self.fixColoringMin is not None and self.fixColoringMax is not None:
+                    self.logger.info("Use fixed coloring with %f to %f" % (self.fixColoringMin, self.fixColoringMax))
+                    preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(clim=(self.fixColoringMin, self.fixColoringMax))
+                elif self.useFixColoring is True:
+                    # Calculate min and max values:
+                    maxValue = getattr(self.xrData, self.variable).max(dim=getattr(self.xrData,self.variable).dims)
+                    minValue = getattr(self.xrData, self.variable).min(dim=getattr(self.xrData,self.variable).dims)
+                    self.logger.info("Use fixed coloring with calculated min (%f) and max(%f)" % ( minValue, maxValue))
+                    preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(clim=(float(minValue), float(maxValue)))
+                else:
+                    self.logger.info("Use no fixed coloring")
+                    preGraph = rasterize(dm).opts(**rasterizedgraphopts)
+            except Exception as e: print(e)
+
+
             if self.showCoastline == True:
-                graph = rasterize(dm).opts(**rasterizedgraphopts) * coastln
+                graph = preGraph * coastln
             else:
-                graph = rasterize(dm).opts(**rasterizedgraphopts)
+                graph = preGraph
             graph = graph.opts(**totalgraphopts)
             return self.renderer.get_widget(graph.opts(**totalgraphopts),'widgets')
         else:
@@ -114,7 +138,7 @@ class TriMeshPlot(Plot):
         factor = 1
         self.tris["var"] = self.tris["var"] * factor
 
-        res = hv.TriMesh((self.tris,self.verts), label=(self.title) ).redim.range(z=(0,0.1))
+        res = hv.TriMesh((self.tris,self.verts), label=(self.title) )
         return res
 
     def loadMesh(self, xrData):
