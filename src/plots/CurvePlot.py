@@ -78,6 +78,6 @@ class CurvePlot(Plot):
         #dat = dat * factor
 
         # TODO Height hardcoded
-        res = hv.Curve(dat, label=self.title).opts(xlabel=self.aggDim, ylabel=self.variable, logy=self.logY, logx=self.logX)
+        res = hv.Curve(dat, label=self.title).opts(xlabel="Longitude", ylabel=self.variable, logy=self.logY, logx=self.logX)
 
         return res

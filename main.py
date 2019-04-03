@@ -23,6 +23,7 @@ import time
 
 from src.plots.TriMeshPlot import TriMeshPlot
 from src.plots.CurvePlot import CurvePlot
+from src.plots.HeightProfilePlot import HeightProfilePlot
 
 hv.extension('bokeh')
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
@@ -57,6 +58,7 @@ COLORMAPS = ["Blues","Inferno","Magma","Plasma","Viridis","BrBG","PiYG","PRGn","
 
 tmPlot = None
 cuPlot = None
+hpPlot = None
 xrData = None
 xrDataMeta = None
 
@@ -222,7 +224,8 @@ def mainDialog():
     """
 
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay, cbColoring, cbAxis
-    global tmPlot, cuPlot, xrData, xrDataMeta
+    global tmPlot, cuPlot, hpPlot
+    global xrData, xrDataMeta
     global txFixColoringMin, txFixColoringMax, txCLevels
     try:
         start = time.time()
@@ -262,7 +265,7 @@ def mainDialog():
             height = "lev"
         else:
             height = "alt"
-        aggregateDimensions = ["None", height, "lat"] # removed lat since it takes too long
+        aggregateDimensions = ["None", height, "lat", "heightProfile"] # removed lat since it takes too long
 
         # time could only be aggregated if it exist
         if hasattr(xrDataMeta.clon_bnds, "time"):
@@ -338,6 +341,20 @@ def mainDialog():
                 logger.info("Build CurvePlot")
                 cuPlot = CurvePlot(logger, renderer, xrData)
             plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn,logX=logX, logY=logY)
+            logger.info("Returned plot")
+        elif aggDim == "heightProfile" and aggFn != "None":
+            if xrData is None:
+                logger.info("Loading unchunked data for curveplot")
+                try:
+                    url = getURL()
+                    xrData = loadData(url)
+                    assert xrData != None
+                except:
+                    logger.error("Error for loading unchunked data.")
+            if hpPlot is None:
+                logger.info("Build HeightProfilePlot")
+                hpPlot = HeightProfilePlot(logger, renderer, xrData)
+            plot = hpPlot.getPlotObject(variable=variable, title=title,aggDim=aggDim,aggFn=aggFn,cm=cm,cSymmetric=cSymmetric,cLogZ=cLogZ,cLevels=cLevels)
             logger.info("Returned plot")
         else:
             if tmPlot is None:

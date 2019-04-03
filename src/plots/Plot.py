@@ -56,6 +56,7 @@ class Plot:
         """
         selectors = {}
         idx = 0
+
         # Build the data selector for the free dimensions. For those are the DynamicMap shows sliders to the right of the graph
         for d in self.freeDims:
             # WORKAROUND because Holoview is not working with a kdim with name "height"
