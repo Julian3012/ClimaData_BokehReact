@@ -46,6 +46,8 @@ slAggregateDimension = None
 cbCoastlineOverlay = None
 cbUseFixColoring = None
 txTitle = None
+txFixColoringMin = None
+txFixColoringMax = None
 
 aggregates = []
 
@@ -219,6 +221,7 @@ def mainDialog():
 
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay, cbUseFixColoring
     global tmPlot, cuPlot, xrData, xrDataMeta
+    global txFixColoringMin, txFixColoringMax
     try:
         start = time.time()
         logger.info("Started mainDialog()")
@@ -234,6 +237,12 @@ def mainDialog():
 
         if txTitle is None:
             txTitle = bokeh.models.TextInput(value="title", title="Title:")
+
+        if txFixColoringMin is None:
+            txFixColoringMin = bokeh.models.TextInput(value="", title="Fix color minimum:")
+
+        if txFixColoringMax is None:
+            txFixColoringMax = bokeh.models.TextInput(value="", title="Fix color maxmum:")
 
         txPre = bokeh.models.PreText(text=str(xrDataMeta),width=800)
 
@@ -264,7 +273,7 @@ def mainDialog():
             cbCoastlineOverlay = bokeh.models.CheckboxGroup(labels=["Show coastline"], active=[0])
             cbCoastlineOverlay.on_click(coastlineUpdate)
         if cbUseFixColoring is None:
-            cbUseFixColoring = bokeh.models.CheckboxGroup(labels=["Use fixed coloring"], active=[0])
+            cbUseFixColoring = bokeh.models.CheckboxGroup(labels=["Use fixed coloring"], active=[])
             cbUseFixColoring.on_click(useFixColoringUpdate)
 
         variable = slVar.value
@@ -274,6 +283,18 @@ def mainDialog():
         aggFn = slAggregateFunction.value
         showCoastline = len(cbCoastlineOverlay.active) > 0
         useFixColoring = len(cbUseFixColoring.active) > 0
+
+        try:
+            fixColorMin = float(txFixColoringMin.value)
+        except Exception as e:
+            print(e)
+            fixColorMin = None
+
+        try:
+            fixColorMax = float(txFixColoringMax.value)
+        except Exception as e:
+            print(e)
+            fixColorMax = None
 
         # Showing a Loading Infotext
         divLoading = Div(text="loading buildDynamicMap...")
@@ -303,7 +324,7 @@ def mainDialog():
                 logger.info("Build TriMeshPlot")
                 tmPlot = TriMeshPlot(logger, renderer, xrDataMeta)
 
-            plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline, useFixColoring=useFixColoring)
+            plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline, useFixColoring=useFixColoring, fixColoringMin=fixColorMin, fixColoringMax=fixColorMax)
 
 
         curdoc().clear()
@@ -315,6 +336,8 @@ def mainDialog():
             lArray.append([widgetbox(slCMap)])
             lArray.append([widgetbox(cbCoastlineOverlay)])
             lArray.append([widgetbox(cbUseFixColoring)])
+        if useFixColoring:
+            lArray.append([row(txFixColoringMin,txFixColoringMax)])
 
         lArray.append([row(slAggregateDimension,slAggregateFunction)])
         lArray.append([widgetbox(btApply)])

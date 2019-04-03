@@ -89,7 +89,8 @@ class TriMeshPlot(Plot):
                 else:
                     self.logger.info("Use no fixed coloring")
                     preGraph = rasterize(dm).opts(**rasterizedgraphopts)
-            except Exception as e: print(e)
+            except Exception as e:
+                print(e)
 
 
             if self.showCoastline == True:
