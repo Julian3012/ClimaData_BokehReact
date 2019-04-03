@@ -75,38 +75,41 @@ class TriMeshPlot(Plot):
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
-            self.logger.info("Checking for coloring mode...")
-            try:
-                if self.useFixColoring is True and self.fixColoringMin is not None and self.fixColoringMax is not None:
-                    self.logger.info("Use fixed coloring with %f to %f" % (self.fixColoringMin, self.fixColoringMax))
-                    preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(clim=(self.fixColoringMin, self.fixColoringMax))
-                elif self.useFixColoring is True:
-                    # Calculate min and max values:
-                    maxValue = getattr(self.xrData, self.variable).max(dim=getattr(self.xrData,self.variable).dims)
-                    minValue = getattr(self.xrData, self.variable).min(dim=getattr(self.xrData,self.variable).dims)
-                    self.logger.info("Use fixed coloring with calculated min (%f) and max(%f)" % ( minValue, maxValue))
-                    preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(clim=(float(minValue), float(maxValue)))
-                else:
-                    self.logger.info("Use no fixed coloring")
-                    preGraph = rasterize(dm).opts(**rasterizedgraphopts)
-            except Exception as e:
-                print(e)
-
-
-            if self.showCoastline == True:
-                graph = preGraph * coastln
-            else:
-                graph = preGraph
-            graph = graph.opts(**totalgraphopts)
-            return self.renderer.get_widget(graph.opts(**totalgraphopts),'widgets')
         else:
             # This is needed as DynamicMap is not working with an empty kdims array.
             self.logger.info("Show without DynamicMap")
             dm = self.buildTrimesh()
-            if self.showCoastline == True:
-                return self.renderer.get_plot((rasterize(dm).opts(**rasterizedgraphopts) * coastln).opts(**totalgraphopts))
+
+        self.logger.info("Checking for coloring mode...")
+        try:
+            if self.useFixColoring is True and self.fixColoringMin is not None and self.fixColoringMax is not None:
+                self.logger.info("Use fixed coloring with %f to %f" % (self.fixColoringMin, self.fixColoringMax))
+                preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(clim=(self.fixColoringMin, self.fixColoringMax))
+            elif self.useFixColoring is True:
+                # Calculate min and max values:
+                maxValue = getattr(self.xrData, self.variable).max(dim=getattr(self.xrData,self.variable).dims)
+                minValue = getattr(self.xrData, self.variable).min(dim=getattr(self.xrData,self.variable).dims)
+                self.logger.info("Use fixed coloring with calculated min (%f) and max(%f)" % ( minValue, maxValue))
+                preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(clim=(float(minValue), float(maxValue)))
             else:
-                return self.renderer.get_plot((rasterize(dm).opts(**rasterizedgraphopts)).opts(**totalgraphopts))
+                self.logger.info("Use no fixed coloring")
+                preGraph = rasterize(dm).opts(**rasterizedgraphopts)
+        except Exception as e:
+            print(e)
+
+
+        if self.showCoastline == True:
+            graph = preGraph * coastln
+        else:
+            graph = preGraph
+        graph = graph.opts(**totalgraphopts)
+
+
+        if len(self.freeDims) > 0:
+            return self.renderer.get_widget(graph.opts(**totalgraphopts),'widgets')
+        else:
+            return self.renderer.get_plot(graph.opts(**totalgraphopts))
+
 
 
     def buildTrimesh(self, *args):
