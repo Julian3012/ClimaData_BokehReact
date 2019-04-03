@@ -21,16 +21,11 @@ import math
 import logging
 import time
 
-
-
-
 from src.plots.TriMeshPlot import TriMeshPlot
 from src.plots.CurvePlot import CurvePlot
 
 hv.extension('bokeh')
 renderer = hv.renderer('bokeh').instance(mode='server',size=300)
-
-
 
 FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -57,6 +52,7 @@ aggregates = []
 COLORMAPS = ["Blues","Inferno","Magma","Plasma","Viridis","BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral","BuGn","BuPu","GnBu","Greens","Greys","Oranges","OrRd","PuBu","PuBuGn","PuRd","Purples","RdPu","Reds","YlGn","YlGnBu","YlOrBr","YlOrRd"]
 
 tmPlot = None
+cuPlot = None
 xrData = None
 xrDataMeta = None
 
@@ -218,7 +214,7 @@ def mainDialog():
     """
 
     global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay
-    global tmPlot, xrData, xrDataMeta
+    global tmPlot, cuPlot, xrData, xrDataMeta
 
     start = time.time()
     logger.info("Started mainDialog()")
@@ -289,8 +285,9 @@ def mainDialog():
                 assert xrData != None
             except:
                 logger.error("Error for loading unchunked data.")
-        logger.info("Build CurvePlot")
-        cuPlot = CurvePlot(logger, renderer, xrData)
+        if cuPlot is None:
+            logger.info("Build CurvePlot")
+            cuPlot = CurvePlot(logger, renderer, xrData)
         plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn)
         logger.info("Returned plot")
     else:

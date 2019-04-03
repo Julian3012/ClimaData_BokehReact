@@ -62,6 +62,7 @@ class CurvePlot(Plot):
 
         self.logger.info("Loading data")
 
+        # PERFORMANCE: Not optimal. Load cells via isel only one time should be faster
         if self.aggDim == "lat" and self.aggFn == "mean":
             dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).mean() for i in range(0,360)]
         elif self.aggDim == "lat" and self.aggFn == "sum":

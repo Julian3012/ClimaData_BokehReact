@@ -69,10 +69,13 @@ class TriMeshPlot(Plot):
             self.logger.info("Show with DynamicMap")
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(**ranges)
             if self.showCoastline == True:
-                return self.renderer.get_widget((rasterize(dm).opts(**rasterizedgraphopts) * coastln).opts(**totalgraphopts),'widgets')
+                graph = rasterize(dm).opts(**rasterizedgraphopts) * coastln
             else:
-                return self.renderer.get_widget((rasterize(dm).opts(**rasterizedgraphopts)).opts(**totalgraphopts), 'widgets')
+                graph = rasterize(dm).opts(**rasterizedgraphopts)
+            graph = graph.opts(**totalgraphopts)
+            return self.renderer.get_widget(graph.opts(**totalgraphopts),'widgets')
         else:
+            # This is needed as DynamicMap is not working with an empty kdims array.
             self.logger.info("Show without DynamicMap")
             dm = self.buildTrimesh()
             if self.showCoastline == True:
@@ -111,7 +114,7 @@ class TriMeshPlot(Plot):
         factor = 1
         self.tris["var"] = self.tris["var"] * factor
 
-        res = hv.TriMesh((self.tris,self.verts), label=(self.title) )
+        res = hv.TriMesh((self.tris,self.verts), label=(self.title) ).redim.range(z=(0,0.1))
         return res
 
     def loadMesh(self, xrData):
