@@ -31,9 +31,12 @@ class TriMeshPlot(Plot):
         self.fixColoringMin = None
         self.fixColoringMax = None
 
+        self.cSymmetric= False
+        self.cLogZ = False
+
         self.loadMesh(xrData)
 
-    def getPlotObject(self, variable, title, cm="Magma", aggDim="None", aggFn="None", showCoastline=True, useFixColoring=False, fixColoringMin=None, fixColoringMax=None):
+    def getPlotObject(self, variable, title, cm="Magma", aggDim="None", aggFn="None", showCoastline=True, useFixColoring=False, fixColoringMin=None, fixColoringMax=None, cSymmetric=False, cLogZ=False):
         """
         Function that builds up a plot object for Bokeh to display
         Returns:
@@ -46,6 +49,9 @@ class TriMeshPlot(Plot):
         self.useFixColoring = useFixColoring
         self.fixColoringMin = fixColoringMin
         self.fixColoringMax = fixColoringMax
+
+        self.cSymmetric = cSymmetric
+        self.cLogZ = cLogZ
 
         if cm != "None":
             self.cm = cm
@@ -84,18 +90,20 @@ class TriMeshPlot(Plot):
         try:
             if self.useFixColoring is True and self.fixColoringMin is not None and self.fixColoringMax is not None:
                 self.logger.info("Use fixed coloring with %f to %f" % (self.fixColoringMin, self.fixColoringMax))
-                preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(clim=(self.fixColoringMin, self.fixColoringMax))
+                preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(symmetric=self.cSymmetric,logz=self.cLogZ,clim=(self.fixColoringMin, self.fixColoringMax))
             elif self.useFixColoring is True:
                 # Calculate min and max values:
                 maxValue = getattr(self.xrData, self.variable).max(dim=getattr(self.xrData,self.variable).dims)
                 minValue = getattr(self.xrData, self.variable).min(dim=getattr(self.xrData,self.variable).dims)
                 self.logger.info("Use fixed coloring with calculated min (%f) and max(%f)" % ( minValue, maxValue))
-                preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(clim=(float(minValue), float(maxValue)))
+                preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(symmetric=self.cSymmetric,logz=self.cLogZ,clim=(float(minValue), float(maxValue)))
             else:
                 self.logger.info("Use no fixed coloring")
-                preGraph = rasterize(dm).opts(**rasterizedgraphopts)
+                preGraph = rasterize(dm).opts(**rasterizedgraphopts).opts(symmetric=self.cSymmetric,logz=self.cLogZ)
         except Exception as e:
             print(e)
+
+
 
 
         if self.showCoastline == True:

@@ -44,7 +44,7 @@ slCMap = None
 slAggregateFunction = None
 slAggregateDimension = None
 cbCoastlineOverlay = None
-cbUseFixColoring = None
+cbColoring = None
 txTitle = None
 txFixColoringMin = None
 txFixColoringMax = None
@@ -210,8 +210,8 @@ def coastlineUpdate(new):
     logger.info("coastlineUpdate")
     mainDialog()
 
-def useFixColoringUpdate(new):
-    logger.info("useFixColoringUpdate")
+def ColoringUpdate(new):
+    logger.info("ColoringUpdate")
     mainDialog()
 
 def mainDialog():
@@ -219,7 +219,7 @@ def mainDialog():
     This function build up and manages the Main-Graph Dialog
     """
 
-    global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay, cbUseFixColoring
+    global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay, cbColoring
     global tmPlot, cuPlot, xrData, xrDataMeta
     global txFixColoringMin, txFixColoringMax
     try:
@@ -272,17 +272,19 @@ def mainDialog():
         if cbCoastlineOverlay is None:
             cbCoastlineOverlay = bokeh.models.CheckboxGroup(labels=["Show coastline"], active=[0])
             cbCoastlineOverlay.on_click(coastlineUpdate)
-        if cbUseFixColoring is None:
-            cbUseFixColoring = bokeh.models.CheckboxGroup(labels=["Use fixed coloring"], active=[])
-            cbUseFixColoring.on_click(useFixColoringUpdate)
+        if cbColoring is None:
+            cbColoring = bokeh.models.CheckboxGroup(labels=["Use fixed coloring","symmetric coloring","logz coloring"], active=[])
+            cbColoring.on_click(ColoringUpdate)
 
         variable = slVar.value
         title = txTitle.value
         cm = slCMap.value
         aggDim = slAggregateDimension.value
         aggFn = slAggregateFunction.value
-        showCoastline = len(cbCoastlineOverlay.active) > 0
-        useFixColoring = len(cbUseFixColoring.active) > 0
+        showCoastline = 0 in cbCoastlineOverlay.active
+        useFixColoring = 0 in cbColoring.active
+        cSymmetric = 1 in cbColoring.active
+        cLogZ = 2 in cbColoring.active
 
         try:
             fixColorMin = float(txFixColoringMin.value)
@@ -324,7 +326,7 @@ def mainDialog():
                 logger.info("Build TriMeshPlot")
                 tmPlot = TriMeshPlot(logger, renderer, xrDataMeta)
 
-            plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline, useFixColoring=useFixColoring, fixColoringMin=fixColorMin, fixColoringMax=fixColorMax)
+            plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline, useFixColoring=useFixColoring, fixColoringMin=fixColorMin, fixColoringMax=fixColorMax,cSymmetric=cSymmetric,cLogZ=cLogZ)
 
 
         curdoc().clear()
@@ -335,7 +337,7 @@ def mainDialog():
         if aggDim != "lat" or aggFn == "None":
             lArray.append([widgetbox(slCMap)])
             lArray.append([widgetbox(cbCoastlineOverlay)])
-            lArray.append([widgetbox(cbUseFixColoring)])
+            lArray.append([widgetbox(cbColoring)])
         if useFixColoring:
             lArray.append([row(txFixColoringMin,txFixColoringMax)])
 
