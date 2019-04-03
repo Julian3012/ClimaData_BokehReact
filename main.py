@@ -45,6 +45,7 @@ slAggregateFunction = None
 slAggregateDimension = None
 cbCoastlineOverlay = None
 cbColoring = None
+cbAxis = None
 txTitle = None
 txFixColoringMin = None
 txFixColoringMax = None
@@ -220,7 +221,7 @@ def mainDialog():
     This function build up and manages the Main-Graph Dialog
     """
 
-    global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay, cbColoring
+    global slVar, slCMap, txTitle, slAggregateFunction, slAggregateDimension, cbCoastlineOverlay, cbColoring, cbAxis
     global tmPlot, cuPlot, xrData, xrDataMeta
     global txFixColoringMin, txFixColoringMax, txCLevels
     try:
@@ -280,6 +281,10 @@ def mainDialog():
             cbColoring = bokeh.models.CheckboxGroup(labels=["Use fixed coloring","symmetric coloring","logz coloring"], active=[])
             cbColoring.on_click(ColoringUpdate)
 
+        if cbAxis is None:
+            cbAxis = bokeh.models.CheckboxGroup(labels=["logX","logY"], active=[])
+            cbAxis.on_click(ColoringUpdate)
+
         variable = slVar.value
         title = txTitle.value
         cm = slCMap.value
@@ -289,6 +294,8 @@ def mainDialog():
         useFixColoring = 0 in cbColoring.active
         cSymmetric = 1 in cbColoring.active
         cLogZ = 2 in cbColoring.active
+        logX = 0 in cbAxis.active
+        logY = 1 in cbAxis.active
 
         try:
             cLevels = int(txCLevels.value)
@@ -330,7 +337,7 @@ def mainDialog():
             if cuPlot is None:
                 logger.info("Build CurvePlot")
                 cuPlot = CurvePlot(logger, renderer, xrData)
-            plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn)
+            plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn,logX=logX, logY=logY)
             logger.info("Returned plot")
         else:
             if tmPlot is None:
@@ -341,17 +348,19 @@ def mainDialog():
 
         curdoc().clear()
         lArray = []
-        lArray.append([widgetbox(txTitle)])
-        lArray.append([widgetbox(slVar)])
+        lArray.append([row(txTitle,slVar)])
         # Hide colormap option if CurvePlot is used
         if aggDim != "lat" or aggFn == "None":
-            lArray.append([widgetbox(slCMap)])
             lArray.append([widgetbox(cbCoastlineOverlay)])
+            lArray.append([widgetbox(slCMap)])
             lArray.append([widgetbox(cbColoring)])
+            lArray.append([widgetbox(txCLevels)])
         if useFixColoring:
             lArray.append([row(txFixColoringMin,txFixColoringMax)])
 
-        lArray.append([widgetbox(txCLevels)])
+        if aggDim == "lat" or aggFn != "None":
+            lArray.append([row(cbAxis)])
+
         lArray.append([row(slAggregateDimension,slAggregateFunction)])
         lArray.append([widgetbox(btApply)])
         lArray.append([plot.state])

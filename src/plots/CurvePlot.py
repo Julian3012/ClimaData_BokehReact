@@ -10,7 +10,7 @@ import numpy as np
 from .Plot import Plot
 
 class CurvePlot(Plot):
-    def getPlotObject(self, variable, title, aggDim="None", aggFn="None"):
+    def getPlotObject(self, variable, title, aggDim="None", aggFn="None", logX=False, logY=False):
         """
         Function that builds up a plot object for Bokeh to display
         Returns:
@@ -20,6 +20,9 @@ class CurvePlot(Plot):
         self.title = title
         self.aggDim = aggDim
         self.aggFn = aggFn
+
+        self.logX = logX
+        self.logY = logY
 
         if self.aggDim == "lat":
             self.cells = []
@@ -75,6 +78,6 @@ class CurvePlot(Plot):
         #dat = dat * factor
 
         # TODO Height hardcoded
-        res = hv.Curve(dat, label=self.title).opts(xlabel=self.aggDim, ylabel=self.variable)
+        res = hv.Curve(dat, label=self.title).opts(xlabel=self.aggDim, ylabel=self.variable, logy=self.logY, logx=self.logX)
 
         return res
