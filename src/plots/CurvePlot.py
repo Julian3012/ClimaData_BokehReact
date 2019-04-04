@@ -29,8 +29,12 @@ class CurvePlot(Plot):
         if self.aggDim == "lat":
             self.cells = []
             for i in range(0,360):
-                self.cells.append(np.loadtxt("dom01/dom01_lon_"+str(i)+"deg.dat",dtype='int16'))
+                self.cells.append((np.loadtxt("dom01/dom01_lon_"+str(i)+"deg.dat",dtype='int16')))
+
+            self.cells = [getattr(self.xrData, self.variable).isel(ncells=self.cells[i]) for i in range(0, 360)]
             self.logger.info("Loaded dom files!")
+
+
 
         # Builds up the free and non-free dimensions array
         self.buildDims()
@@ -70,9 +74,9 @@ class CurvePlot(Plot):
 
             # PERFORMANCE: Not optimal. Load cells via isel only one time should be faster
             if self.aggDim == "lat" and self.aggFn == "mean":
-                self.dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).mean() for i in range(0,360)]
+                self.dat = [self.cells[i].isel(**selectors).mean() for i in range(0,360)]
             elif self.aggDim == "lat" and self.aggFn == "sum":
-                self.dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).sum() for i in range(0,360)]
+                self.dat = [self.cells[i].isel(**selectors).sum() for i in range(0,360)]
 
             self.logger.info("Loaded data")
 
