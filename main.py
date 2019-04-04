@@ -226,6 +226,9 @@ def ColoringUpdate(new):
     logger.info("ColoringUpdate")
     mainDialog(False)
 
+def btApplyClick():
+    mainDialog(False)
+
 def btClick():
     mainDialog(True)
 
@@ -243,7 +246,7 @@ def mainDialog(dataUpdate=True):
         logger.info("Started mainDialog()")
 
         btApply = bokeh.models.Button(label="apply")
-        btApply.on_click(btClick)
+        btApply.on_click(btApplyClick)
 
         slVar.on_change("value", variableUpdate)
 
