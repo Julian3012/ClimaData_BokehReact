@@ -24,6 +24,7 @@ class HeightProfilePlot(Plot):
 
         self.cm = cm
 
+        # Implement maximum and minimum to use this part TODO
         #self.useFixColoring = useFixColoring
         #self.fixColoringMin = fixColoringMin
         #self.fixColoringMax = fixColoringMax
