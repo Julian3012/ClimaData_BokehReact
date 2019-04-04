@@ -10,7 +10,7 @@ import numpy as np
 from .Plot import Plot
 
 class CurvePlot(Plot):
-    def getPlotObject(self, variable, title, aggDim="None", aggFn="None", logX=False, logY=False):
+    def getPlotObject(self, variable, title, aggDim="None", aggFn="None", logX=False, logY=False,dataUpdate=True):
         """
         Function that builds up a plot object for Bokeh to display
         Returns:
@@ -23,6 +23,8 @@ class CurvePlot(Plot):
 
         self.logX = logX
         self.logY = logY
+
+        self.dataUpdate = dataUpdate
 
         if self.aggDim == "lat":
             self.cells = []
@@ -63,21 +65,22 @@ class CurvePlot(Plot):
         #    dat = getattr(self.xrData, self.variable).isel(selectors)
         #    dat = dat.sum(aggDim)
 
-        self.logger.info("Loading data")
+        if self.dataUpdate == True:
+            self.logger.info("Loading data")
 
-        # PERFORMANCE: Not optimal. Load cells via isel only one time should be faster
-        if self.aggDim == "lat" and self.aggFn == "mean":
-            dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).mean() for i in range(0,360)]
-        elif self.aggDim == "lat" and self.aggFn == "sum":
-            dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).sum() for i in range(0,360)]
+            # PERFORMANCE: Not optimal. Load cells via isel only one time should be faster
+            if self.aggDim == "lat" and self.aggFn == "mean":
+                self.dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).mean() for i in range(0,360)]
+            elif self.aggDim == "lat" and self.aggFn == "sum":
+                self.dat = [getattr(self.xrData, self.variable).isel(**selectors, ncells=self.cells[i]).sum() for i in range(0,360)]
 
-        self.logger.info("Loaded data")
+            self.logger.info("Loaded data")
 
         # TODO Apply unit
         #factor = 1
         #dat = dat * factor
 
         # TODO Height hardcoded
-        res = hv.Curve(dat, label=self.title).opts(xlabel="Longitude", ylabel=self.variable, logy=self.logY, logx=self.logX)
+        res = hv.Curve(self.dat, label=self.title).opts(xlabel="Longitude", ylabel=self.variable, logy=self.logY, logx=self.logX)
 
         return res

@@ -26,6 +26,7 @@ class TriMeshPlot(Plot):
         self.logger = logger
         self.renderer = renderer
         self.xrData = xrData
+        self.dataUpdate = True
 
         self.useFixColoring = False
         self.fixColoringMin = None
@@ -38,7 +39,7 @@ class TriMeshPlot(Plot):
 
         self.loadMesh(xrData)
 
-    def getPlotObject(self, variable, title, cm="Magma", aggDim="None", aggFn="None", showCoastline=True, useFixColoring=False, fixColoringMin=None, fixColoringMax=None, cSymmetric=False, cLogZ=False, cLevels=0):
+    def getPlotObject(self, variable, title, cm="Magma", aggDim="None", aggFn="None", showCoastline=True, useFixColoring=False, fixColoringMin=None, fixColoringMax=None, cSymmetric=False, cLogZ=False, cLevels=0, dataUpdate=True):
         """
         Function that builds up a plot object for Bokeh to display
         Returns:
@@ -56,6 +57,8 @@ class TriMeshPlot(Plot):
         self.cLogZ = cLogZ
 
         self.cLevels = cLevels
+
+        self.dataUpdate = dataUpdate
 
         if cm != "None":
             self.cm = cm
@@ -132,27 +135,26 @@ class TriMeshPlot(Plot):
         Returns:
             The TriMesh-Graph object
         """
+        if self.dataUpdate == True:
+            selectors = self.buildSelectors(args)
+            self.logger.info("Selectors: " + str(selectors))
 
-        selectors = self.buildSelectors(args)
-        self.logger.info("Selectors: " + str(selectors))
-
-        if self.aggDim == "None" or self.aggFn == "None":
-            self.logger.info("No aggregation")
-            self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
-        else:
-            if self.aggFn == "mean":
-                self.logger.info("mean aggregation with %s" % self.aggDim)
-                self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim).isel(selectors)
-            elif self.aggFn == "sum":
-                self.logger.info("sum aggregation %s" % self.aggDim)
-                self.tris["var"] = getattr(self.xrData, self.variable).sum(dim=self.aggDim).isel(selectors)
+            if self.aggDim == "None" or self.aggFn == "None":
+                self.logger.info("No aggregation")
+                self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
             else:
-                self.logger.error("Unknown Error! AggFn not None, mean, sum")
+                if self.aggFn == "mean":
+                    self.logger.info("mean aggregation with %s" % self.aggDim)
+                    self.tris["var"] = getattr(self.xrData, self.variable).mean(dim=self.aggDim).isel(selectors)
+                elif self.aggFn == "sum":
+                    self.logger.info("sum aggregation %s" % self.aggDim)
+                    self.tris["var"] = getattr(self.xrData, self.variable).sum(dim=self.aggDim).isel(selectors)
+                else:
+                    self.logger.error("Unknown Error! AggFn not None, mean, sum")
 
-
-        # Apply unit
-        factor = 1
-        self.tris["var"] = self.tris["var"] * factor
+            # Apply unit
+            factor = 1
+            self.tris["var"] = self.tris["var"] * factor
 
         res = hv.TriMesh((self.tris,self.verts), label=(self.title) )
         return res

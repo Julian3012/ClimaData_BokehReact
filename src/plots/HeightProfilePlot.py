@@ -10,7 +10,7 @@ import numpy as np
 from .Plot import Plot
 
 class HeightProfilePlot(Plot):
-    def getPlotObject(self, variable, title, aggDim="None", aggFn="None",cm="Magma", cSymmetric=False, cLogZ=False, cLevels=0):
+    def getPlotObject(self, variable, title, aggDim="None", aggFn="None",cm="Magma", cSymmetric=False, cLogZ=False, cLevels=0, dataUpdate=True):
         """
         Function that builds up a plot object for Bokeh to display
         Returns:
@@ -32,6 +32,8 @@ class HeightProfilePlot(Plot):
         self.cLogZ = cLogZ
 
         self.cLevels = cLevels
+
+        self.dataUpdate = dataUpdate
 
         # Dirty! Fix this TODO
         if self.aggDim == "heightProfile":
@@ -74,12 +76,11 @@ class HeightProfilePlot(Plot):
         self.logger.info("Loading data")
 
         # PERFORMANCE: Not optimal. Load cells via isel only one time should be faster
-
-        if self.aggFn == "mean":
-
-            dat = [[getattr(self.xrData, self.variable).isel(**selectors, height=h, ncells=self.cells[i]).mean() for i in range(0,360)] for h in range(0,90)]
-        elif self.aggFn == "sum":
-            dat = [[getattr(self.xrData, self.variable).isel(**selectors, height=h, ncells=self.cells[i]).sum() for i in range(0,360)] for h in range(0,90)]
+        if self.dataUpdate == True:
+            if self.aggFn == "mean":
+                self.dat = [[getattr(self.xrData, self.variable).isel(**selectors, height=h, ncells=self.cells[i]).mean() for i in range(0,360)] for h in range(0,90)]
+            elif self.aggFn == "sum":
+                self.dat = [[getattr(self.xrData, self.variable).isel(**selectors, height=h, ncells=self.cells[i]).sum() for i in range(0,360)] for h in range(0,90)]
 
 
         # TODO Apply unit
@@ -87,6 +88,6 @@ class HeightProfilePlot(Plot):
         #dat = dat * factor
 
         # TODO Dimensions hardcoded
-        res = hv.Image((range(360), range(90), dat), datatype=['grid'], label=self.title).opts(xlabel="Longitude", ylabel="height",cmap=self.cm,symmetric=self.cSymmetric,logz=self.cLogZ,color_levels=self.cLevels,colorbar=True)
+        res = hv.Image((range(360), range(90), self.dat), datatype=['grid'], label=self.title).opts(xlabel="Longitude", ylabel="height",cmap=self.cm,symmetric=self.cSymmetric,logz=self.cLogZ,color_levels=self.cLevels,colorbar=True)
 
         return res

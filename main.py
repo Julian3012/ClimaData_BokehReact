@@ -161,7 +161,7 @@ def preDialog():
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value=default_dom)
     txPre = bokeh.models.PreText(text=str(xrDataMeta),width=800)
     btShow = bokeh.models.Button(label="show")
-    btShow.on_click(mainDialog)
+    btShow.on_click(btClick)
 
     if len(variables) == 0:
         logger.error("No variables found!")
@@ -192,7 +192,7 @@ def variableUpdate(attr,old,new):
     to be rebuild.
     """
     variable = new
-    mainDialog()
+    mainDialog(True)
 
 
 def cmapUpdate(attr, old, new):
@@ -201,24 +201,35 @@ def cmapUpdate(attr, old, new):
     It is called if at property like the cmap is changed and the whole buildDynamicMap needs
     to be rebuild.
     """
-    mainDialog()
+    mainDialog(False)
 
 
 def aggDimUpdate(attr, old, new):
-    mainDialog()
+    global slAggregateFunction
+    if slAggregateFunction.value != "None":
+        mainDialog(True)
+    else:
+        mainDialog(False)
 
 def aggFnUpdate(attr, old, new):
-    mainDialog()
+    global slAggregateDimension
+    if slAggregateDimension.value != "None":
+        mainDialog(True)
+    else:
+        mainDialog(False)
 
 def coastlineUpdate(new):
     logger.info("coastlineUpdate")
-    mainDialog()
+    mainDialog(False)
 
 def ColoringUpdate(new):
     logger.info("ColoringUpdate")
-    mainDialog()
+    mainDialog(False)
 
-def mainDialog():
+def btClick():
+    mainDialog(True)
+
+def mainDialog(dataUpdate=True):
     """
     This function build up and manages the Main-Graph Dialog
     """
@@ -232,7 +243,7 @@ def mainDialog():
         logger.info("Started mainDialog()")
 
         btApply = bokeh.models.Button(label="apply")
-        btApply.on_click(mainDialog)
+        btApply.on_click(btClick)
 
         slVar.on_change("value", variableUpdate)
 
@@ -340,7 +351,7 @@ def mainDialog():
             if cuPlot is None:
                 logger.info("Build CurvePlot")
                 cuPlot = CurvePlot(logger, renderer, xrData)
-            plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn,logX=logX, logY=logY)
+            plot = cuPlot.getPlotObject(variable=variable,title=title,aggDim=aggDim,aggFn=aggFn,logX=logX, logY=logY,dataUpdate=dataUpdate)
             logger.info("Returned plot")
         elif aggDim == "heightProfile" and aggFn != "None":
             if xrData is None:
@@ -354,14 +365,14 @@ def mainDialog():
             if hpPlot is None:
                 logger.info("Build HeightProfilePlot")
                 hpPlot = HeightProfilePlot(logger, renderer, xrData)
-            plot = hpPlot.getPlotObject(variable=variable, title=title,aggDim=aggDim,aggFn=aggFn,cm=cm,cSymmetric=cSymmetric,cLogZ=cLogZ,cLevels=cLevels)
+            plot = hpPlot.getPlotObject(variable=variable, title=title,aggDim=aggDim,aggFn=aggFn,cm=cm,cSymmetric=cSymmetric,cLogZ=cLogZ,cLevels=cLevels,dataUpdate=dataUpdate)
             logger.info("Returned plot")
         else:
             if tmPlot is None:
                 logger.info("Build TriMeshPlot")
                 tmPlot = TriMeshPlot(logger, renderer, xrDataMeta)
 
-            plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline, useFixColoring=useFixColoring, fixColoringMin=fixColorMin, fixColoringMax=fixColorMax,cSymmetric=cSymmetric,cLogZ=cLogZ,cLevels=cLevels)
+            plot = tmPlot.getPlotObject(variable=variable,title=title,cm=cm,aggDim=aggDim,aggFn=aggFn, showCoastline=showCoastline, useFixColoring=useFixColoring, fixColoringMin=fixColorMin, fixColoringMax=fixColorMax,cSymmetric=cSymmetric,cLogZ=cLogZ,cLevels=cLevels,dataUpdate=dataUpdate)
 
         curdoc().clear()
         lArray = []
@@ -394,19 +405,22 @@ def mainDialog():
 # This function is showing the landingpage. Here one could enter the url for the datasource.
 # Entering the url is the first step in the dialog
 def entry(doc):
-    doc.title = 'ncview2'
-    btLoad = bokeh.models.Button(label="load")
-    btLoad.on_click(preDialog)
-    tx = "ncview II"
-    txPre = bokeh.models.PreText(text=tx,width=800)
+    try:
+        doc.title = 'ncview2'
+        btLoad = bokeh.models.Button(label="load")
+        btLoad.on_click(preDialog)
+        tx = "ncview II"
+        txPre = bokeh.models.PreText(text=tx,width=800)
 
-    doc.clear()
-    l = layout([
-    [widgetbox(txPre)],
-    [widgetbox(urlinput)],
-    [widgetbox(btLoad)]
-    ])
-    doc.add_root(l)
+        doc.clear()
+        l = layout([
+        [widgetbox(txPre)],
+        [widgetbox(urlinput)],
+        [widgetbox(btLoad)]
+        ])
+        doc.add_root(l)
+    except Exception as e:
+        print(e)
 
 #server = Server({'/': entry}, num_procs=4)
 #server.start()
