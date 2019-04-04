@@ -87,6 +87,6 @@ class HeightProfilePlot(Plot):
         #dat = dat * factor
 
         # TODO Dimensions hardcoded
-        res = hv.Image((range(360), range(90), dat), datatype=['grid']).opts(xlabel="Longitude", ylabel="height",cmap=self.cm,symmetric=self.cSymmetric,logz=self.cLogZ,color_levels=self.cLevels)
+        res = hv.Image((range(360), range(90), dat), datatype=['grid'], label=self.title).opts(xlabel="Longitude", ylabel="height",cmap=self.cm,symmetric=self.cSymmetric,logz=self.cLogZ,color_levels=self.cLevels,colorbar=True)
 
         return res
