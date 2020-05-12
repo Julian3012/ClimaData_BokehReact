@@ -67,6 +67,7 @@ class TriMeshPlot(Plot):
 
         # Builds up the free and non-free dimensions array
         self.buildDims()
+        self.logger.info("build dims")
 
         return self.buildDynamicMaps()
 
@@ -110,15 +111,11 @@ class TriMeshPlot(Plot):
         except Exception as e:
             print(e)
 
-
-
-
         if self.showCoastline == True:
             graph = preGraph * coastln
         else:
             graph = preGraph
         graph = graph.opts(**totalgraphopts)
-
 
         if len(self.freeDims) > 0:
             return self.renderer.get_widget(graph.opts(**totalgraphopts),'widgets')
@@ -142,6 +139,7 @@ class TriMeshPlot(Plot):
             if self.aggDim == "None" or self.aggFn == "None":
                 self.logger.info("No aggregation")
                 self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
+                self.logger.info("aggregation end")
             else:
                 if self.aggFn == "mean":
                     self.logger.info("mean aggregation with %s" % self.aggDim)
@@ -166,6 +164,7 @@ class TriMeshPlot(Plot):
         Returns:
             array of triangles and vertices: Builds the mesh from the loaded xrData
         """
+
         try:
             # If only one file is loaded has no attribute time, so we have to check this
             if hasattr(xrData.clon_bnds, "time"):

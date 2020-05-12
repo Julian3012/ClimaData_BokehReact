@@ -1,0 +1,11 @@
+2016032700-ART-chemtracer_grid_pmn_DOM01_ML_0001.nc
+2016032700-ART-chemtracer_grid_DOM01_PL_0007.nc
+
+
+Parameter:
+1. Default Input: Input for plot
+2. slVar: shows variables
+3. slMesh: Shows doms
+4. btApply: Runs post request
+5. btShow: Changes plot
+6. 
