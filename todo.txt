@@ -8,4 +8,26 @@ Parameter:
 3. slMesh: Shows doms
 4. btApply: Runs post request
 5. btShow: Changes plot
-6. 
+6. slCMap: Colormap
+7. txTitle: Title of plot
+8. txFixColoringMin: 
+9. txFixColoringMax: 
+10. txCLevels: 
+11. slAggregateFunction: 
+12. slAggregateDimension
+13. cbCoastlineOverlay
+14. cbColoring: Checkboxgroup coloring
+15. cbAxis
+
+
+"dataPath": ,
+"mesh": ,
+"variable": ,
+"showCoastline": , 
+"colorMap": ,
+"fixColoring": ,
+"symColoring": ,
+"logzColoring": ,
+"colorLevels": ,
+"aggregateDim": ,
+"aggregateFun": 

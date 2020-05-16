@@ -51,7 +51,7 @@ class HeightProfilePlot(Plot):
         ranges = self.getRanges()
 
         # TODO do not hardcode the sizes
-        totalgraphopts = {"height": 150, "width": 300}
+        totalgraphopts = {"height":150, "width":300}
 
         self.freeDims.remove("hi")
         if len(self.freeDims) > 0:
