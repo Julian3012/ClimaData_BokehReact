@@ -2,7 +2,7 @@ import math
 import logging
 import time
 
-import main_local_new as plots
+from main_local_new import PlotGenerator
 
 import json
 from bokeh.embed import json_item
@@ -20,22 +20,27 @@ params = {
     "dataPath": None
 }
 
-@app.route("/params", methods=["POST"])
+logger = None
+
+@app.route("/params", methods=["POST","GET"])
 def postParams():
     global params
 
     json_request = {}
     if request.method == "POST":
         json_request = request.get_json()["state"]
-
+        logger.info("Params loaded")
+  
     params = json_request
-    plots.logger.info("Params loaded")
-
     return ""
 
 @app.route("/plot1")
 def startPlot1():
-    return plots.mainDialog(True)
+    global logger
+
+    plot = PlotGenerator()
+    logger = plot.logger
+    return plot.mainDialog(True)
 
 # @app.route("/plot2")
 # def startPlot2():
