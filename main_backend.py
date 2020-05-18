@@ -26,26 +26,35 @@ from src.plots.HeightProfilePlot import HeightProfilePlot
 import json
 from bokeh.embed import json_item
 
-class PlotGenerator():
+
+class PlotGenerator:
     def __init__(self):
-        self.slVar = "TR_stn"
-        self.slMesh = None
-        self.slCMap = "Blues"
-        self.slAggregateFunction = "None"
-        self.slAggregateDimension = "None"
-        self.cbCoastlineOverlay = True
-        self.cbColoring = [False,False,False]
+
+        self.parameter = {
+            "dataPath": "2016032700-ART-chemtracer_grid_DOM01_PL_0007.nc",
+            "mesh": "DOM1",
+            "variable": "TR_stn",
+            "showCoastline": True,
+            "colorMap": "Blues",
+            "fixColoring": False,
+            "symColoring": False,
+            "logzColoring": False,
+            "colorLevels": 0,
+            "aggregateDim": "None",
+            "aggregateFun": "None",
+            "aggDimSelect": [],
+            "variables": [] 
+        }
+
         self.cbAxis = None
         self.txFixColoringMin = ""
         self.txFixColoringMax = ""
-        self.txCLevels = 0   # colorlevels                   
         self.variables = None
         self.tmPlot = None
         self.cuPlot = None
         self.hpPlot = None
         self.xrData = None
         self.xrDataMeta = None
-        self.defaultinput = "2016032700-ART-chemtracer_grid_DOM01_PL_0007.nc"
 
         hv.extension("bokeh")
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
@@ -54,7 +63,6 @@ class PlotGenerator():
         logging.basicConfig(format=FORMAT)
         self.logger = logging.getLogger("ncview2")
         self.logger.info({i.__name__: i.__version__ for i in [hv, np, pd]})
-
 
     def mainDialog(self, dataUpdate=True):
         """
@@ -65,31 +73,34 @@ class PlotGenerator():
             self.logger.info("Started mainDialog()")
             start = time.time()
 
-            link = "./data/" + self.defaultinput
+            link = "./data/" + self.parameter["dataPath"]
             self.xrDataMeta = xr.open_dataset(link)
+
             self.logger.info("File: " + link)
 
             self.variables = [x for x in self.xrDataMeta.variables.keys()]
 
             # Param15
             if self.cbAxis is None:
-                self.cbAxis = bokeh.models.CheckboxGroup(labels=["logX", "logY"], active=[])
+                self.cbAxis = bokeh.models.CheckboxGroup(
+                    labels=["logX", "logY"], active=[]
+                )
                 self.cbAxis.on_click(self.coloringUpdate)
 
-            variable = self.slVar
-            cm = self.slCMap
-            aggDim = self.slAggregateDimension
-            aggFn = self.slAggregateFunction
-            showCoastline = self.cbCoastlineOverlay
-            useFixColoring = self.cbColoring[0]
-            cSymmetric = self.cbColoring[1]
-            cLogZ = self.cbColoring[2]
+            variable = self.parameter["variable"]
+            cm = self.parameter["colorMap"]
+            aggDim = self.parameter["aggregateDim"]
+            aggFn = self.parameter["aggregateFun"]
+            showCoastline = self.parameter["showCoastline"]
+            useFixColoring = self.parameter["fixColoring"]
+            cSymmetric = self.parameter["symColoring"]
+            cLogZ = self.parameter["logzColoring"]
 
             logX = 0 in self.cbAxis.active
             logY = 1 in self.cbAxis.active
 
             try:
-                cLevels = int(self.txCLevels)
+                cLevels = int(self.parameter["colorLevels"])
             except Exception as e:
                 print(e)
                 cLevels = 0
@@ -128,7 +139,9 @@ class PlotGenerator():
                         self.logger.error("Error for loading unchunked data.")
                 if self.hpPlot is None:
                     self.logger.info("Build HeightProfilePlot")
-                    self.hpPlot = HeightProfilePlot(self.logger, self.renderer, self.xrData)
+                    self.hpPlot = HeightProfilePlot(
+                        self.logger, self.renderer, self.xrData
+                    )
                 plot = self.hpPlot.getPlotObject(
                     variable=variable,
                     title="title",
@@ -143,7 +156,9 @@ class PlotGenerator():
             else:
                 if self.tmPlot is None:
                     self.logger.info("Build TriMeshPlot")
-                    self.tmPlot = TriMeshPlot(self.logger, self.renderer, self.xrDataMeta)
+                    self.tmPlot = TriMeshPlot(
+                        self.logger, self.renderer, self.xrDataMeta
+                    )
                 plot = self.tmPlot.getPlotObject(
                     variable=variable,
                     title="title",
@@ -171,20 +186,27 @@ class PlotGenerator():
         except Exception as e:
             print(e)
 
-    # Getter 
-    def getVariables(self, ):
+    # Getter
+    def getVariables(self):
         """
         Get self.variables for front-end
         """
-        return self.variables
+        arr_var = []
+        try:
+            for i in self.variables:
+                arr_var.append({"value": i, "label": i})
+        except:
+            self.logger.error("getAggDim(): Please call MainDialog() first.")
 
-    def getAggDim(self, ):
+        return json.dumps(arr_var)
+
+    def getAggDim(self):
         """
         Get dimensions for front-end
         """
-        if "ML" in self.defaultinput:
-                height = "height"
-        elif "PL" in self.defaultinput:
+        if "ML" in self.parameter["dataPath"]:
+            height = "height"
+        elif "PL" in self.parameter["dataPath"]:
             height = "lev"
         else:
             height = "alt"
@@ -194,38 +216,30 @@ class PlotGenerator():
             height,
             "lat",
             "heightProfile",
-        ] 
+        ]
+
+        aggregateDimensions = [
+            {"value": "None", "label": "None"},
+            {"value": height, "label": height},
+            {"value": "lat", "label": "lat"},
+            {"value": "heightProfile", "label": "heightProfile"},
+        ]
 
         # time could only be aggregated if it exist
-        if hasattr(self.xrDataMeta.clon_bnds, "time"):
-            aggregateDimensions.append("time")
+        try:
+            if hasattr(self.xrDataMeta.clon_bnds, "time"):
+                aggregateDimensions.append({"value": "time", "label": "time"})
+        except:
+            # print(e)
+            self.logger.error("getAggDim(): Please call MainDialog() first.")
 
-        return aggregateDimensions
+        self.logger.error("Retrieve aggregate dimensions")
+
+        return json.dumps(aggregateDimensions)
 
     # Setter
-    def setFixCol(self, bool):
-        self.cbColoring[0] = bool
-
-    def setSymCol(self, bool):
-        self.cbColoring[1] = bool
-
-    def setLogZCol(self, bool):
-        self.cbColoring[2] = bool
-
-    def setColorMaps(self, color):
-        self.slCMap = color
-
-    def setInputData(self, link):
-        self.defaultinput = link
-
-    def setslVar(self, newslVar):
-        self.slVar = newslVar
-
-    def setAggregateFunction(self, aggregate):
-        self.slAggregateFunction = aggregate
-
-    def setAggregateDimension(self, dim):
-        self.slAggregateDimension = dim
+    def setParams(self, param):
+        self.parameter = param
 
     def variableUpdate(self, attr, old, new):
         """
@@ -235,7 +249,6 @@ class PlotGenerator():
         """
         self.variables = new
         self.mainDialog(True)
-
 
     def cmapUpdate(self, attr, old, new):
         """
@@ -281,6 +294,6 @@ class PlotGenerator():
         Returns:
             str: The entered data url
         """
-        link = "./data/" + self.defaultinput
+        link = "./data/" + self.parameter["dataPath"]
 
         return link

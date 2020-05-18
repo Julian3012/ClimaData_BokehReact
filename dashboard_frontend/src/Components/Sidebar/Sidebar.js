@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Aux from "../../Hoc/Aux"
+import Plot from "../Plot/Plot"
 import { Button, Checkbox, FormControlLabel } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
@@ -7,12 +8,9 @@ import * as constants from "./constants"
 
 import Axios from 'axios';
 
-// ran into this issue (hence no npm import of bokehjs):
-// https://github.com/bokeh/bokeh/issues/8197
-
 class Sidebar extends Component {
     state = {
-        dataPath: "",
+        dataPath: "2016032700-ART-chemtracer_grid_DOM01_PL_0007.nc",
         mesh: "DOM1", // Selection
         variable: "TR_stn", // Selection
         showCoastline: true,  // Checkbox
@@ -22,12 +20,21 @@ class Sidebar extends Component {
         logzColoring: false, // Checkbox
         colorLevels: 0, // Selection
         aggregateDim: "None", // Selection
-        aggregateFun: "None" // Selection
+        aggregateFun: "None", // Selection
+        aggDimSelect: [], // Placeholder for variables from server
+        variables: [] // Placeholder for variables from server
     };
 
+    componentDidMount() {
+        this.getAggDim();
+        this.getVariables();
+        this.getParameter();
+        this.getPlot1();
+
+    }
 
     postData = () => {
-        Axios.post("http://localhost:5000/params", {
+        Axios.post("http://localhost:5000/postParams", {
             state: this.state
         }).then((response) => {
             console.log(response);
@@ -35,6 +42,24 @@ class Sidebar extends Component {
             console.log(error);
         });
     }
+
+    getParameter = () => {
+        Axios.get("http://localhost:5000/pushParams").then((response) => {
+            this.setState(response.data)
+        });
+    };
+
+    getAggDim = () => {
+        Axios.get("http://localhost:5000/pushAggDim").then((response) => {
+            this.setState({ aggDimSelect: response.data })
+        });
+    };
+
+    getVariables = () => {
+        Axios.get("http://localhost:5000/pushVariables").then((response) => {
+            this.setState({ variables: response.data })
+        });
+    };
 
     setShowCoastline = (event) => {
         const doesShow = this.state.showCoastline;
@@ -90,6 +115,11 @@ class Sidebar extends Component {
         console.log("State colorLevels changed")
     };
 
+    setVariable = (event) => {
+        this.setState({ variable: event.target.value })
+        console.log("State variable changed")
+    };
+
     setHeight = () => {
         let height = "";
         if (this.state.datapath.includes("ML")) {
@@ -100,17 +130,41 @@ class Sidebar extends Component {
             height = "alt"
         };
         return height;
-    } 
+    }
+
+    getPlot1 = () => {
+        Axios.get("http://localhost:5000/plot1").then(resp => window.Bokeh.embed.embed_item(resp.data, 'plot1'))
+    }
 
     render() {
         const meshSelect = constants.meshSelect;
         const cmSelect = constants.cmSelect;
-        const dimSelect = constants.dimSelect;
         const funcSelect = constants.funcSelect;
 
         return (
             <Aux>
-                <p> <TextField id="standard-basic" label="Fill in data path" onChange={this.setDataPath} /> </p>
+                <p>
+                    <TextField
+                        id="standard-basic"
+                        value={this.state.dataPath}
+                        label="Fill in data path"
+                        onChange={this.setDataPath} />
+                    <TextField
+                        style={{ marginLeft: 20 }}
+                        id="standard-select-currency"
+                        select
+                        label="Variable"
+                        value={this.state.variable}
+                        onChange={this.setVariable}
+                        helperText="Please select Variable for file"
+                    >
+                        {this.state.variables.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </p>
                 <p>
                     <FormControlLabel
                         control={
@@ -153,7 +207,7 @@ class Sidebar extends Component {
 
                 <p>
                     <TextField
-                        id="standard-select-currency"
+                        // id="standard-select-currency"
                         select
                         label="Mesh"
                         value={this.state.mesh}
@@ -169,7 +223,7 @@ class Sidebar extends Component {
 
                     <TextField
                         style={{ marginLeft: 20 }}
-                        id="standard-select-currency"
+                        // id="standard-select-currency"
                         select
                         label="Color Map"
                         value={this.state.colorMap}
@@ -185,14 +239,14 @@ class Sidebar extends Component {
 
                     <TextField
                         style={{ marginLeft: 20 }}
-                        id="standard-select-currency"
+                        // id="standard-select-currency"
                         select
                         label="Aggregate dimension"
                         value={this.state.aggregateDim}
                         onChange={this.setAggregateDim}
                         helperText="Please select aggregate dimension"
                     >
-                        {dimSelect.map((option) => (
+                        {this.state.aggDimSelect.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
                                 {option.label}
                             </MenuItem>
@@ -201,7 +255,7 @@ class Sidebar extends Component {
 
                     <TextField
                         style={{ marginLeft: 20 }}
-                        id="standard-select-currency"
+                        // id="standard-select-currency"
                         select
                         label="Aggregate function"
                         value={this.state.aggregateFun}
@@ -224,6 +278,10 @@ class Sidebar extends Component {
                 <p>
                     <Button variant="contained" onClick={this.postData}>Apply</Button>
                 </p>
+                <div id='plot1' className="bk-root" ></div>
+
+                {/* <Plot
+                /> */}
             </Aux>
         );
     }

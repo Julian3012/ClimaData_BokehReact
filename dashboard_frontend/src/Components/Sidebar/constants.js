@@ -1,3 +1,5 @@
+import Axios from 'axios';
+
 export const meshSelect = [
     {
         value: "DOM1",
@@ -6,26 +8,6 @@ export const meshSelect = [
     {
         value: "DOM2",
         label: "DOM2",
-    }
-]
-
-// Depends on input value
-export const dimSelect = [
-    {
-        value: "None",
-        label: "None",
-    },
-    {
-        value: "lev",
-        label: "lev",
-    },
-    {
-        value: "lat",
-        label: "lat",
-    },
-    {
-        value: "heightProfile",
-        label: "heightProfile",
     }
 ]
 

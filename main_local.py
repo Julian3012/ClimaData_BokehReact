@@ -112,30 +112,23 @@ def getFile():
 
     return link
 
-def preDialog():
-    global slVar, slMesh, xrDataMeta
-    start = time.time()
-    logger.info("Started preDialog()")
 
-    divLoading = Div(text="Loading metadata...")
-    curdoc().clear()
-    l = layout([[widgetbox(divLoading)]])
-    curdoc().add_root(l)
-
+def initMainDialog():
+    global xrDataMeta, urlinput, slVar, slMesh
     link = getFile()
     xrDataMeta = xr.open_dataset(link)
 
     variables = [x for x in xrDataMeta.variables.keys()]
-    # TODO implement DOM02, DOM03
     meshOptions = ["DOM1", "DOM2"]
-    # meshOptions = ["reg","calculate", "DOM1", "DOM2"]
-
     default_dom = "DOM1" if "DOM01" in urlinput.value else "DOM2"
-    slVar = bokeh.models.Select(title="Variable", options=variables, value="TR_stn")
-    slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value=default_dom)
-    txPre = bokeh.models.PreText(text=str(xrDataMeta), width=800)
+
     btShow = bokeh.models.Button(label="show")
     btShow.on_click(btClick)
+
+    slVar = bokeh.models.Select(title="Variable", options=variables, value="TR_stn")
+    slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value=default_dom)
+    
+    slVar.on_change("value", variableUpdate)
 
     if len(variables) == 0:
         logger.error("No variables found!")
@@ -145,72 +138,15 @@ def preDialog():
         curdoc().add_root(l)
         return
 
-    curdoc().clear()
     l = layout(
         [
+            [widgetbox(urlinput)],
             [widgetbox(slVar)],
             [widgetbox(slMesh)],
-            [widgetbox(txPre)],
             [widgetbox(btShow)],
         ]
     )
     curdoc().add_root(l)
-    end = time.time()
-    logger.info("preDialog took %d" % (end - start))
-
-
-def variableUpdate(attr, old, new):
-    """
-    This function is only a wrapper round the main function for building the buildDynamicMap.
-    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
-    to be rebuild.
-    """
-    variable = new
-    mainDialog(True)
-
-
-def cmapUpdate(attr, old, new):
-    """
-    This function is only a wrapper round the main function for building the buildDynamicMap.
-    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
-    to be rebuild.
-    """
-    mainDialog(False)
-
-
-def aggDimUpdate(attr, old, new):
-    global slAggregateFunction
-    if slAggregateFunction.value != "None":
-        mainDialog(True)
-    else:
-        mainDialog(False)
-
-
-def aggFnUpdate(attr, old, new):
-    global slAggregateDimension
-    if slAggregateDimension.value != "None":
-        mainDialog(True)
-    else:
-        mainDialog(False)
-
-
-def coastlineUpdate(new):
-    logger.info("coastlineUpdate")
-    mainDialog(False)
-
-
-def ColoringUpdate(new):
-    logger.info("ColoringUpdate")
-    mainDialog(False)
-
-
-def btApplyClick():
-    mainDialog(False)
-
-
-def btClick():
-    mainDialog(True)
-
 
 def mainDialog(dataUpdate=True):
     """
@@ -221,12 +157,26 @@ def mainDialog(dataUpdate=True):
     global tmPlot, cuPlot, hpPlot
     global xrData, xrDataMeta
     global txFixColoringMin, txFixColoringMax, txCLevels
+
     try:
         start = time.time()
         logger.info("Started mainDialog()")
 
         btApply = bokeh.models.Button(label="apply")
         btApply.on_click(btApplyClick)
+        
+        btShow = bokeh.models.Button(label="Show Plot")
+        btShow.on_click(btClick)
+
+        meshOptions = ["DOM1", "DOM2"]
+        default_dom = "DOM1" if "DOM01" in urlinput.value else "DOM2"
+
+        slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value=default_dom)
+
+        link = getFile()
+        xrDataMeta = xr.open_dataset(link)
+
+        logger.info("File: " + link)
 
         slVar.on_change("value", variableUpdate)
 
@@ -407,8 +357,22 @@ def mainDialog(dataUpdate=True):
             )
 
         curdoc().clear()
+
+        
+        
+        l = layout(
+            [
+                [widgetbox(urlinput)],
+                [widgetbox(slMesh)],
+                [widgetbox(btShow)],
+            ]
+        )
+        
+        curdoc().add_root(l)
+
         lArray = []
         lArray.append([row(txTitle, slVar)])
+
         # Hide colormap option if CurvePlot is used
         if aggDim != "lat" or aggFn == "None":
             lArray.append([widgetbox(cbCoastlineOverlay)])
@@ -435,6 +399,63 @@ def mainDialog(dataUpdate=True):
         print(e)
 
 
+def variableUpdate(attr, old, new):
+    """
+    This function is only a wrapper round the main function for building the buildDynamicMap.
+    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
+    to be rebuild.
+    """
+    variable = new
+    mainDialog(True)
+
+
+def cmapUpdate(attr, old, new):
+    """
+    This function is only a wrapper round the main function for building the buildDynamicMap.
+    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
+    to be rebuild.
+    """
+    mainDialog(False)
+
+
+def aggDimUpdate(attr, old, new):
+    global slAggregateFunction
+    if slAggregateFunction.value != "None":
+        mainDialog(True)
+    else:
+        mainDialog(False)
+
+
+def aggFnUpdate(attr, old, new):
+    global slAggregateDimension
+    if slAggregateDimension.value != "None":
+        mainDialog(True)
+    else:
+        mainDialog(False)
+
+
+def coastlineUpdate(new):
+    logger.info("coastlineUpdate")
+    mainDialog(False)
+
+
+def ColoringUpdate(new):
+    logger.info("ColoringUpdate")
+    mainDialog(False)
+
+
+def btApplyClick():
+    mainDialog(False)
+
+
+def btClick():
+    global tmPlot, cuPlot, hpPlot 
+    
+    tmPlot = cuPlot = hpPlot = None
+    mainDialog(True)
+
+
+
 # This function is showing the landingpage. Here one could enter the url for the datasource.
 # Entering the url is the first step in the dialog
 def entry(doc):
@@ -452,6 +473,16 @@ def entry(doc):
         print(e)
 
 
+# This function is showing the landingpage. Here one could enter the url for the datasource.
+# Entering the url is the first step in the dialog
+def entryNew(doc):
+    try:
+        initMainDialog()
+
+    except Exception as e:
+        print(e)
+
+
 # server = Server({'/': entry}, num_procs=4)
 # server.start()
 
@@ -460,4 +491,4 @@ def entry(doc):
 #    server.io_loop.add_callback(server.show, "/")
 #    server.io_loop.start()
 
-entry(curdoc())
+entryNew(curdoc())
