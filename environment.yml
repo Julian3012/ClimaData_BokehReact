@@ -1,0 +1,24 @@
+name: ncview
+channels:
+  - conda-forge
+dependencies:
+  - bokeh=2.0.2
+  - cartopy=0.18.0
+  - colorcet=2.0.1
+  - datashader=0.8.0
+  #- fastparquet=0.3.2
+  - geopandas=0.6.1
+  - geoviews=1.6.5 #1.6.2
+  - holoviews=1.13.2
+  #- hvplot=0.5.2
+  #- intake=0.5.3conda 
+  #- intake-xarray=0.3.1
+  - numpy=1.17.3
+  - pandas=0.25.2
+  - pip=20.0.2
+  - python=3.7.3
+  #- rasterio=1.1.0
+  - tqdm=4.46.0
+  - xarray=0.15.0
+  - pip:
+    - rio-toa==0.3.0

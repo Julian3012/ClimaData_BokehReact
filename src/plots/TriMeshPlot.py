@@ -103,6 +103,7 @@ class TriMeshPlot(Plot):
 
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")
+
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(
                 **ranges
             )
@@ -156,6 +157,7 @@ class TriMeshPlot(Plot):
                 )
             else:
                 self.logger.info("Use no fixed coloring")
+                print("hier ")
                 preGraph = (
                     rasterize(dm)
                     .opts(**rasterizedgraphopts)
@@ -173,12 +175,13 @@ class TriMeshPlot(Plot):
         else:
             graph = preGraph
         graph = graph.opts(**totalgraphopts)
+        # print("Graph Atributes: ", graph.__dict__.keys())
 
         if len(self.freeDims) > 0:
+            # print("Renderer Atributes: ", self.renderer.get_widget(graph.opts(**totalgraphopts), "widgets").__dict__.keys())
             return self.renderer.get_widget(graph.opts(**totalgraphopts), "widgets")
         else:
             return self.renderer.get_plot(graph.opts(**totalgraphopts))
-
 
     def buildTrimesh(self, *args):
         """
@@ -219,6 +222,7 @@ class TriMeshPlot(Plot):
             self.tris["var"] = self.tris["var"] * factor
 
         res = hv.TriMesh((self.tris, self.verts), label=(self.title))
+
         return res
 
     def loadMesh(self, xrData):
@@ -281,5 +285,21 @@ class TriMeshPlot(Plot):
         tris["v1"] = tris["v1"].astype(np.int32)
         tris["v2"] = tris["v2"].astype(np.int32)
 
+        self.logger.info(tris.head())
+        self.logger.info(verts.head())
+
         self.tris = tris
         self.verts = verts
+
+    def sortAndIndex(self, higherThan, lowerThan, attr1, attr2, data1, data2):
+        data1_sorted = data1[
+            (data1[attr1] > higherThan)
+            & (data1[attr1] < lowerThan)
+            & (data1[attr2] > higherThan)
+            & (data1[attr2] < lowerThan)
+        ]
+
+        data2_newIndex = data2.reindex(data1_sorted.index).reset_index()
+        data_sorted = data1_sorted.reset_index()
+
+        return data_sorted, data2_newIndex

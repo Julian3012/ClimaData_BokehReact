@@ -1,11 +1,13 @@
+import bokeh as bokeh
 from bokeh.server.server import Server
-from bokeh.layouts import layout, widgetbox, row
+from bokeh.layouts import layout, widgetbox, row, column
 from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
+from bokeh.io import curdoc
+
 import geoviews as gv
 import geoviews.feature as gf
 
-import bokeh as bokeh
 import pandas as pd
 import xarray as xr
 import holoviews as hv
@@ -43,8 +45,54 @@ class PlotGenerator:
             "aggregateDim": "None",
             "aggregateFun": "None",
             "aggDimSelect": [],
-            "variables": [] 
+            "variables": [],
         }
+        self.COLORMAPS = [
+            "Blues",
+            "Inferno",
+            "Magma",
+            "Plasma",
+            "Viridis",
+            "BrBG",
+            "PiYG",
+            "PRGn",
+            "PuOr",
+            "RdBu",
+            "RdGy",
+            "RdYlBu",
+            "RdYlGn",
+            "Spectral",
+            "BuGn",
+            "BuPu",
+            "GnBu",
+            "Greens",
+            "Greys",
+            "Oranges",
+            "OrRd",
+            "PuBu",
+            "PuBuGn",
+            "PuRd",
+            "Purples",
+            "RdPu",
+            "Reds",
+            "YlGn",
+            "YlGnBu",
+            "YlOrBr",
+            "YlOrRd",
+        ]
+
+        self.slCMap = None 
+        self.txTitle = None 
+        self.txFixColoringMin = None 
+        self.txFixColoringMax = None 
+        self.txCLevels = None 
+        self.slAggregateFunction = None 
+        self.slAggregateDimension = None 
+        self.cbCoastlineOverlay = None 
+        self.cbColoring = None 
+        self.cbAxis = None 
+        self.cbCoastlineOverlay = None 
+        self.cbCoastlineOverlay = None
 
         self.cbAxis = None
         self.txFixColoringMin = ""
@@ -56,7 +104,7 @@ class PlotGenerator:
         self.xrData = None
         self.xrDataMeta = None
 
-        hv.extension("bokeh")
+        # hv.extension("bokeh")
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
 
         FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
@@ -72,6 +120,7 @@ class PlotGenerator:
         try:
             self.logger.info("Started mainDialog()")
             start = time.time()
+            
 
             link = "./data/" + self.parameter["dataPath"]
             self.xrDataMeta = xr.open_dataset(link)
@@ -80,27 +129,118 @@ class PlotGenerator:
 
             self.variables = [x for x in self.xrDataMeta.variables.keys()]
 
-            # Param15
-            if self.cbAxis is None:
-                self.cbAxis = bokeh.models.CheckboxGroup(
-                    labels=["logX", "logY"], active=[]
+
+            #====================================================================
+            urlinput = TextInput(
+                value=self.parameter["dataPath"], title="netCDF file -OR- OPeNDAP URL:"
+            )
+
+            # define Widgets
+            slVar = bokeh.models.Select(
+                title="Variable", options=self.variables, value="TR_stn"
+            )
+            slVar.on_change("value", self.variableUpdate)
+
+            meshOptions = ["DOM1", "DOM2"]
+            default_dom = "DOM1" if "DOM01" in urlinput.value else "DOM2"
+            slMesh = bokeh.models.Select(
+                title="Mesh", options=meshOptions, value=default_dom
+            )
+
+            if self.slCMap is None:
+                self.slCMap = bokeh.models.Select(
+                    title="Colormap", options=self.COLORMAPS, value=self.COLORMAPS[0]
                 )
+                self.slCMap.on_change("value", self.cmapUpdate)
+
+            if self.txTitle is None:
+                self.txTitle = bokeh.models.TextInput(value="title", title="Title:")
+
+            if self.txFixColoringMin is None:
+                self.txFixColoringMin = bokeh.models.TextInput(
+                    value="", title="Fix color minimum:"
+                )
+
+            if self.txFixColoringMax is None:
+                self.txFixColoringMax = bokeh.models.TextInput(
+                    value="", title="Fix color maxmum:"
+                )
+
+            if self.txCLevels is None:
+                self.txCLevels = bokeh.models.TextInput(
+                    value="0", title="Colorlevels (0:inf):"
+                )
+
+            aggregateFunctions = ["None", "mean", "sum"]
+
+            if "ML" in urlinput.value:
+                height = "height"
+            elif "PL" in urlinput.value:
+                height = "lev"
+            else:
+                height = "alt"
+            aggregateDimensions = [
+                "None",
+                height,
+                "lat",
+                "heightProfile",
+            ]  # removed lat since it takes too long
+
+            # time could only be aggregated if it exist
+            if hasattr(self.xrDataMeta.clon_bnds, "time"):
+                aggregateDimensions.append("time")
+
+            if self.slAggregateFunction is None:
+                self.slAggregateFunction = bokeh.models.Select(
+                    title="Aggregate Function", options=aggregateFunctions, value="None"
+                )
+                self.slAggregateFunction.on_change("value", self.aggFnUpdate)
+            if self.slAggregateDimension is None:
+                self.slAggregateDimension = bokeh.models.Select(
+                    title="Aggregate Dimension",
+                    options=aggregateDimensions,
+                    value="None",
+                )
+                self.slAggregateDimension.on_change("value", self.aggDimUpdate)
+            if self.cbCoastlineOverlay is None:
+                self.cbCoastlineOverlay = bokeh.models.CheckboxGroup(
+                    labels=["Show coastline"], active=[0]
+                )
+                self.cbCoastlineOverlay.on_click(self.coastlineUpdate)
+            if self.cbColoring is None:
+                self.cbColoring = bokeh.models.CheckboxGroup(
+                    labels=[
+                        "Use fixed coloring",
+                        "symmetric coloring",
+                        "logz coloring",
+                    ],
+                    active=[],
+                )
+                self.cbColoring.on_click(self.coloringUpdate)
+
+            if self.cbAxis is None:
+                self.cbAxis = bokeh.models.CheckboxGroup(labels=["logX", "logY"], active=[])
                 self.cbAxis.on_click(self.coloringUpdate)
 
-            variable = self.parameter["variable"]
-            cm = self.parameter["colorMap"]
-            aggDim = self.parameter["aggregateDim"]
-            aggFn = self.parameter["aggregateFun"]
-            showCoastline = self.parameter["showCoastline"]
-            useFixColoring = self.parameter["fixColoring"]
-            cSymmetric = self.parameter["symColoring"]
-            cLogZ = self.parameter["logzColoring"]
+            btShow = bokeh.models.Button(label="Get New Plot")
+            btShow.on_click(self.btClick)
+            #====================================================================
 
+
+            variable = slVar.value
+            title = self.txTitle.value
+            cm = self.slCMap.value
+            aggDim = self.slAggregateDimension.value
+            aggFn = self.slAggregateFunction.value
+            showCoastline = 0 in self.cbCoastlineOverlay.active
+            useFixColoring = 0 in self.cbColoring.active
+            cSymmetric = 1 in self.cbColoring.active
+            cLogZ = 2 in self.cbColoring.active
             logX = 0 in self.cbAxis.active
             logY = 1 in self.cbAxis.active
 
             try:
-                cLevels = int(self.parameter["colorLevels"])
+                cLevels = int(self.txCLevels.value)
             except Exception as e:
                 print(e)
                 cLevels = 0
@@ -175,14 +315,42 @@ class PlotGenerator:
                     dataUpdate=dataUpdate,
                 )
 
+            
+
+            # implement in layout
             lArray = []
+
+            lArray.append([column(urlinput)])
+            lArray.append([column(slMesh)])
+
+            lArray.append([row(self.txTitle, slVar)])
+
+            # Hide colormap option if CurvePlot is used
+            if aggDim != "lat" or aggFn == "None":
+                lArray.append([column(self.cbCoastlineOverlay)])
+                lArray.append([column(self.slCMap)])
+                lArray.append([column(self.cbColoring)])
+                lArray.append([column(self.txCLevels)])
+            if useFixColoring:
+                lArray.append([row(self.txFixColoringMin, self.txFixColoringMax)])
+
+            if aggDim == "lat" or aggFn != "None":
+                lArray.append([row(self.cbAxis)])
+
+            lArray.append([row(self.slAggregateDimension, self.slAggregateFunction)])
+            lArray.append([column(btShow)])
+
+
             lArray.append([plot.state])
             l = layout(lArray)
 
+            curdoc().add_root(l)
             end = time.time()
             self.logger.info("MainDialog took %d" % (end - start))
 
-            return json.dumps(json_item(l, "myplot"))
+            # script, div = components(plot)
+            # return json.dumps(json_item(l, "myplot"))
+            # return json.dumps(json_item(l))
         except Exception as e:
             print(e)
 
@@ -233,7 +401,7 @@ class PlotGenerator:
             # print(e)
             self.logger.error("getAggDim(): Please call MainDialog() first.")
 
-        self.logger.error("Retrieve aggregate dimensions")
+        self.logger.info("Retrieve aggregate dimensions")
 
         return json.dumps(aggregateDimensions)
 
@@ -297,3 +465,7 @@ class PlotGenerator:
         link = "./data/" + self.parameter["dataPath"]
 
         return link
+
+
+plot1 = PlotGenerator()
+plot1.mainDialog(True)

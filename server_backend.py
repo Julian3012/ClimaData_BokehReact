@@ -2,15 +2,17 @@ import math
 import logging
 import time
 
-from main_backend import PlotGenerator
+# from main_backend import PlotGenerator
 
 import json
-from bokeh.embed import json_item
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_cors import CORS
 from gevent.pywsgi import WSGIServer
 from werkzeug.serving import run_with_reloader
 from werkzeug.debug import DebuggedApplication
+
+from bokeh.client import pull_session, show_session, push_session
+from bokeh.embed import server_session
 
 app = Flask(__name__)
 # CORS enabled so react frontend can pull data from python backend
@@ -21,7 +23,7 @@ PARAMS = {
     "mesh": "DOM1",
     "variable": "TR_stn",
     "showCoastline": True,
-    "colorMap": "Blues",
+    "colorMap": "Inferno",
     "fixColoring": False,
     "symColoring": False,
     "logzColoring": False,
@@ -30,42 +32,77 @@ PARAMS = {
     "aggregateFun": "None",
 }
 
-plot1 = PlotGenerator()
-logger = plot1.logger
+script = ""
 
-@app.route("/postParams", methods=["POST"])
-def postParams():
-    global PARAMS
+# new_plot = PlotGenerator()
+# new_plot.setParams(PARAMS)
+# genNewPlot = new_plot.mainDialog(True)
 
-    if request.method == "POST":
-        PARAMS = request.get_json()["state"]
-        plot1.setParams(PARAMS)
-        plot1.mainDialog(True)
-        logger.info(plot1.parameter)
+app_url = "http://localhost:5010/main_local"
 
-    return ""
+@app.route('/', methods=['GET'])
+def bkapp_page():
+    global script
+    
+    with pull_session(url=app_url) as session:
 
-@app.route("/pushParams")
-def pushParams():
+        # Path to all widgets
+        first_widgets = session.document.roots[0].children
 
-    return json.dumps(plot1.parameter)
+        # each widget alone
+        fileText = first_widgets[0].children[0].children[0]
+        variableSelect = first_widgets[1].children[0].children[0]
+        meshSelect = first_widgets[2].children[0].children[0]
+        show_btn = first_widgets[3].children[0].children[0]
 
-@app.route("/pushVariables")
-def pushVariables():
+        print("File: ",fileText.value)
+        print("Variable: ",variableSelect.value)
+        print("Mesh: ",meshSelect.value)
+        print("Show Button: ",show_btn)
 
-    return plot1.getVariables()
+        # generate a script to load the customized session
+        script = server_session(session_id=session.id, url=app_url)
+
+        return render_template("embed.html",script=script,Template="Flask")
+
+        # use the script in the rendered page
+
+# plot1 = PlotGenerator()
+# logger = plot1.logger
+# plot = plot1.mainDialog(True)
+
+# @app.route("/postParams", methods=["POST"])
+# def postParams():
+#     global PARAMS, plot
+
+#     if request.method == "POST":
+#         PARAMS = request.get_json()["state"]
+#         plot1.setParams(PARAMS)
+#         plot = plot1.mainDialog(True)
+#         logger.info(plot1.parameter)
+
+#     return ""
+
+# @app.route("/pushParams")
+# def pushParams():
+
+#     return json.dumps(plot1.parameter)
+
+# @app.route("/pushVariables")
+# def pushVariables():
+
+#     return plot1.getVariables()
 
 
-@app.route("/pushAggDim")
-def pushAggDim():
+# @app.route("/pushAggDim")
+# def pushAggDim():
 
-    return plot1.getAggDim()
+#     return plot1.getAggDim()
 
-
-@app.route("/plot1")
-def startPlot1():
-
-    return plot1.mainDialog(True)
+# @app.route("/plot1")
+# def startPlot1():
+#     global plot 
+#     return plot
 
 
 # @app.route("/plot2")

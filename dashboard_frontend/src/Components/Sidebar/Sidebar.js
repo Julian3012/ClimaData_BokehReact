@@ -28,8 +28,8 @@ class Sidebar extends Component {
     componentDidMount() {
         this.getAggDim();
         this.getVariables();
-        this.getParameter();
-        this.getPlot1();
+        // this.getParameter();
+        // this.getPlot1();
 
     }
 
@@ -51,7 +51,8 @@ class Sidebar extends Component {
 
     getAggDim = () => {
         Axios.get("http://localhost:5000/pushAggDim").then((response) => {
-            this.setState({ aggDimSelect: response.data })
+            this.setState({ aggDimSelect: response.data });
+            console.log(this.state.aggDimSelect)
         });
     };
 
@@ -132,9 +133,9 @@ class Sidebar extends Component {
         return height;
     }
 
-    getPlot1 = () => {
-        Axios.get("http://localhost:5000/plot1").then(resp => window.Bokeh.embed.embed_item(resp.data, 'plot1'))
-    }
+    // getPlot1 = () => {
+    //     Axios.get("http://localhost:5000/plot1").then(resp => window.Bokeh.embed.embed_item(resp.data, 'plot1'))
+    // }
 
     render() {
         const meshSelect = constants.meshSelect;
@@ -143,7 +144,7 @@ class Sidebar extends Component {
 
         return (
             <Aux>
-                <p>
+                <div>
                     <TextField
                         id="standard-basic"
                         value={this.state.dataPath}
@@ -164,8 +165,8 @@ class Sidebar extends Component {
                             </MenuItem>
                         ))}
                     </TextField>
-                </p>
-                <p>
+                </div>
+                <div>
                     <FormControlLabel
                         control={
                             <Checkbox
@@ -203,9 +204,9 @@ class Sidebar extends Component {
                             />}
                         label={"Logz coloring"}
                     />
-                </p>
+                </div>
 
-                <p>
+                <div>
                     <TextField
                         // id="standard-select-currency"
                         select
@@ -268,20 +269,19 @@ class Sidebar extends Component {
                             </MenuItem>
                         ))}
                     </TextField>
-                </p>
+                </div>
 
-                <p>
+                <div>
                     <TextField id="standard-basic" label="Colorlevels (0:inf):" onChange={this.setColorLevels} value={this.state.colorLevels} />
 
-                </p>
+                </div>
 
-                <p>
+                <div>
                     <Button variant="contained" onClick={this.postData}>Apply</Button>
-                </p>
-                <div id='plot1' className="bk-root" ></div>
+                </div>
+                {/* <div id='plot1' className="bk-root" ></div> */}
 
-                {/* <Plot
-                /> */}
+                <Plot/>
             </Aux>
         );
     }

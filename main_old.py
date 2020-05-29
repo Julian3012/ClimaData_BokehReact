@@ -1,6 +1,6 @@
 from bokeh.server.server import Server
-from bokeh.layouts import layout, column, row
-from bokeh.models import ColumnDataSource, Div, CustomJS
+from bokeh.layouts import layout, widgetbox, row
+from bokeh.models import ColumnDataSource, Div
 from bokeh.models.widgets import TextInput
 from bokeh.io import curdoc
 import geoviews as gv
@@ -11,8 +11,6 @@ import pandas as pd
 import xarray as xr
 import holoviews as hv
 import numpy as np
-
-import panel as pn
 
 from cartopy import crs
 
@@ -106,7 +104,6 @@ class Aggregates:
 def getFile():
     """
     Function to capsulate the url input.
-
     Returns:
         str: The entered data url
     """
@@ -114,42 +111,105 @@ def getFile():
 
     return link
 
+def preDialog():
+    global slVar, slMesh, xrDataMeta
+    start = time.time()
+    logger.info("Started preDialog()")
 
-def initMainDialog():
-    global xrDataMeta, urlinput, slVar, slMesh
+    divLoading = Div(text="Loading metadata...")
+    curdoc().clear()
+    l = layout([[widgetbox(divLoading)]])
+    curdoc().add_root(l)
+
     link = getFile()
     xrDataMeta = xr.open_dataset(link)
 
     variables = [x for x in xrDataMeta.variables.keys()]
+    # TODO implement DOM02, DOM03
     meshOptions = ["DOM1", "DOM2"]
+    # meshOptions = ["reg","calculate", "DOM1", "DOM2"]
+
     default_dom = "DOM1" if "DOM01" in urlinput.value else "DOM2"
-
-    btShow = bokeh.models.Button(label="show")
-    btShow.on_click(btClick)
-
     slVar = bokeh.models.Select(title="Variable", options=variables, value="TR_stn")
     slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value=default_dom)
-    
-    slVar.on_change("value", variableUpdate)
+    txPre = bokeh.models.PreText(text=str(xrDataMeta), width=800)
+    btShow = bokeh.models.Button(label="show")
+    btShow.on_click(btClick)
 
     if len(variables) == 0:
         logger.error("No variables found!")
         divError = Div(text="No variables found!")
         curdoc().clear()
-        l = layout([[column(divError)]])
+        l = layout([[widgetbox(divError)]])
         curdoc().add_root(l)
         return
-    logger.info("Init main")
-    print("Init main")
+
+    curdoc().clear()
     l = layout(
         [
-            [column(urlinput)],
-            [column(slVar)],
-            [column(slMesh)],
-            [column(btShow)],
+            [widgetbox(slVar)],
+            [widgetbox(slMesh)],
+            [widgetbox(txPre)],
+            [widgetbox(btShow)],
         ]
     )
     curdoc().add_root(l)
+    end = time.time()
+    logger.info("preDialog took %d" % (end - start))
+
+
+def variableUpdate(attr, old, new):
+    """
+    This function is only a wrapper round the main function for building the buildDynamicMap.
+    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
+    to be rebuild.
+    """
+    variable = new
+    mainDialog(True)
+
+
+def cmapUpdate(attr, old, new):
+    """
+    This function is only a wrapper round the main function for building the buildDynamicMap.
+    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
+    to be rebuild.
+    """
+    mainDialog(False)
+
+
+def aggDimUpdate(attr, old, new):
+    global slAggregateFunction
+    if slAggregateFunction.value != "None":
+        mainDialog(True)
+    else:
+        mainDialog(False)
+
+
+def aggFnUpdate(attr, old, new):
+    global slAggregateDimension
+    if slAggregateDimension.value != "None":
+        mainDialog(True)
+    else:
+        mainDialog(False)
+
+
+def coastlineUpdate(new):
+    logger.info("coastlineUpdate")
+    mainDialog(False)
+
+
+def ColoringUpdate(new):
+    logger.info("ColoringUpdate")
+    mainDialog(False)
+
+
+def btApplyClick():
+    mainDialog(False)
+
+
+def btClick():
+    mainDialog(True)
+
 
 def mainDialog(dataUpdate=True):
     """
@@ -160,26 +220,12 @@ def mainDialog(dataUpdate=True):
     global tmPlot, cuPlot, hpPlot
     global xrData, xrDataMeta
     global txFixColoringMin, txFixColoringMax, txCLevels
-
     try:
         start = time.time()
         logger.info("Started mainDialog()")
 
         btApply = bokeh.models.Button(label="apply")
         btApply.on_click(btApplyClick)
-        
-        btShow = bokeh.models.Button(label="Get New Plot")
-        btShow.on_click(btClick)
-
-        meshOptions = ["DOM1", "DOM2"]
-        default_dom = "DOM1" if "DOM01" in urlinput.value else "DOM2"
-
-        slMesh = bokeh.models.Select(title="Mesh", options=meshOptions, value=default_dom)
-
-        link = getFile()
-        xrDataMeta = xr.open_dataset(link)
-
-        logger.info("File: " + link)
 
         slVar.on_change("value", variableUpdate)
 
@@ -288,7 +334,7 @@ def mainDialog(dataUpdate=True):
         # Showing a Loading Infotext
         divLoading = Div(text="loading buildDynamicMap...")
         curdoc().clear()
-        l = layout([[column(divLoading)]])
+        l = layout([[widgetbox(divLoading)]])
         curdoc().add_root(l)
 
         # Choose if a Curve or TriMesh is to be used
@@ -342,7 +388,7 @@ def mainDialog(dataUpdate=True):
             if tmPlot is None:
                 logger.info("Build TriMeshPlot")
                 tmPlot = TriMeshPlot(logger, renderer, xrDataMeta)
-                print("Build Trimeshplot")
+
             plot = tmPlot.getPlotObject(
                 variable=variable,
                 title=title,
@@ -360,26 +406,14 @@ def mainDialog(dataUpdate=True):
             )
 
         curdoc().clear()
-
-        l = layout(
-            [
-                [column(urlinput,)],
-                [column(slMesh)],
-                [column(btShow)],
-            ]
-        )
-        
-        curdoc().add_root(l)
-
         lArray = []
         lArray.append([row(txTitle, slVar)])
-
         # Hide colormap option if CurvePlot is used
         if aggDim != "lat" or aggFn == "None":
-            lArray.append([column(cbCoastlineOverlay)])
-            lArray.append([column(slCMap)])
-            lArray.append([column(cbColoring)])
-            lArray.append([column(txCLevels)])
+            lArray.append([widgetbox(cbCoastlineOverlay)])
+            lArray.append([widgetbox(slCMap)])
+            lArray.append([widgetbox(cbColoring)])
+            lArray.append([widgetbox(txCLevels)])
         if useFixColoring:
             lArray.append([row(txFixColoringMin, txFixColoringMax)])
 
@@ -387,31 +421,9 @@ def mainDialog(dataUpdate=True):
             lArray.append([row(cbAxis)])
 
         lArray.append([row(slAggregateDimension, slAggregateFunction)])
-        lArray.append([column(btApply)])
-
-
-        # We write JavaScript to link toggle with visible property of box and line
-        # code = '''\
-        # d1.visible = false
-        # style.visibility = hidden
-        # '''
-        # callback1 = CustomJS(code=code, args={})
-        # d1 = bokeh.models.Button(label="Test Visibility")#,callback=callback1)
-        # d1.callback(args={},code = '''\
-        # d1.visible = false
-        # ''')
-        # lArray.append([d1])
-
+        lArray.append([widgetbox(btApply)])
         lArray.append([plot.state])
-
-        # print("Get state") 
-        # print("Atributes: ", plot.__dict__.keys())
-        # print("Layout: ", plot)
-        # print("root: ",plot.get_root.__dict__.keys())
-        # bokeh_model = plot.get_root()
-        # lArray.append([bokeh_model])
-
-        lArray.append([column(txPre)])
+        lArray.append([widgetbox(txPre)])
 
         l = layout(lArray)
 
@@ -420,63 +432,6 @@ def mainDialog(dataUpdate=True):
         logger.info("MainDialog took %d" % (end - start))
     except Exception as e:
         print(e)
-
-
-def variableUpdate(attr, old, new):
-    """
-    This function is only a wrapper round the main function for building the buildDynamicMap.
-    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
-    to be rebuild.
-    """
-    variable = new
-    mainDialog(True)
-
-
-def cmapUpdate(attr, old, new):
-    """
-    This function is only a wrapper round the main function for building the buildDynamicMap.
-    It is called if at property like the cmap is changed and the whole buildDynamicMap needs
-    to be rebuild.
-    """
-    mainDialog(False)
-
-
-def aggDimUpdate(attr, old, new):
-    global slAggregateFunction
-    if slAggregateFunction.value != "None":
-        mainDialog(True)
-    else:
-        mainDialog(False)
-
-
-def aggFnUpdate(attr, old, new):
-    global slAggregateDimension
-    if slAggregateDimension.value != "None":
-        mainDialog(True)
-    else:
-        mainDialog(False)
-
-
-def coastlineUpdate(new):
-    logger.info("coastlineUpdate")
-    mainDialog(False)
-
-
-def ColoringUpdate(new):
-    logger.info("ColoringUpdate")
-    mainDialog(False)
-
-
-def btApplyClick():
-    mainDialog(False)
-
-
-def btClick():
-    global tmPlot, cuPlot, hpPlot 
-    
-    tmPlot = cuPlot = hpPlot = None
-    mainDialog(True)
-
 
 
 # This function is showing the landingpage. Here one could enter the url for the datasource.
@@ -490,18 +445,8 @@ def entry(doc):
         txPre = bokeh.models.PreText(text=tx, width=800)
 
         doc.clear()
-        l = layout([[column(txPre)], [column(urlinput)], [column(btLoad)]])
+        l = layout([[widgetbox(txPre)], [widgetbox(urlinput)], [widgetbox(btLoad)]])
         doc.add_root(l)
-    except Exception as e:
-        print(e)
-
-
-# This function is showing the landingpage. Here one could enter the url for the datasource.
-# Entering the url is the first step in the dialog
-def entryNew(doc):
-    try:
-        initMainDialog()
-
     except Exception as e:
         print(e)
 
@@ -514,4 +459,4 @@ def entryNew(doc):
 #    server.io_loop.add_callback(server.show, "/")
 #    server.io_loop.start()
 
-entryNew(curdoc())
+entry(curdoc())

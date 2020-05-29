@@ -40,12 +40,14 @@ class Plot:
         """
         ranges = {}
         for d in self.freeDims:
+            
             # WORKAROUND because Holoview is not working with a kdim with name "height"
             # See issue https://github.com/pyviz/holoviews/issues/3448
             if d != "hi":
                 ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),d))-1)
             else:
                 ranges[d] = (0,len(getattr(getattr(self.xrData,self.variable),"height"))-1)
+
         return ranges
 
     def buildSelectors(self, args):
