@@ -107,6 +107,7 @@ class TriMeshPlot(Plot):
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(
                 **ranges
             )
+
         else:
             # This is needed as DynamicMap is not working with an empty kdims array.
             self.logger.info("Show without DynamicMap")
@@ -157,7 +158,6 @@ class TriMeshPlot(Plot):
                 )
             else:
                 self.logger.info("Use no fixed coloring")
-                print("hier ")
                 preGraph = (
                     rasterize(dm)
                     .opts(**rasterizedgraphopts)
@@ -220,8 +220,10 @@ class TriMeshPlot(Plot):
             # Apply unit
             factor = 1
             self.tris["var"] = self.tris["var"] * factor
-
+        self.logger.info("Apply unit")
         res = hv.TriMesh((self.tris, self.verts), label=(self.title))
+        
+        self.logger.info(res)
 
         return res
 
@@ -284,10 +286,7 @@ class TriMeshPlot(Plot):
         tris["v0"] = tris["v0"].astype(np.int32)
         tris["v1"] = tris["v1"].astype(np.int32)
         tris["v2"] = tris["v2"].astype(np.int32)
-
-        self.logger.info(tris.head())
-        self.logger.info(verts.head())
-
+        
         self.tris = tris
         self.verts = verts
 

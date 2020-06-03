@@ -50,15 +50,16 @@ class Sidebar extends Component {
     };
 
     getAggDim = () => {
-        Axios.get("http://localhost:5000/pushAggDim").then((response) => {
-            this.setState({ aggDimSelect: response.data });
-            console.log(this.state.aggDimSelect)
+        Axios.get("http://localhost:5000/script").then((response) => {
+            this.setState({ aggDimSelect: response.data.aggDim });
+            // console.log(this.state.aggDimSelect)
         });
     };
 
     getVariables = () => {
-        Axios.get("http://localhost:5000/pushVariables").then((response) => {
-            this.setState({ variables: response.data })
+        Axios.get("http://localhost:5000/script").then((response) => {
+            this.setState({ variables: response.data.variables });
+            // console.log(this.state.variables)
         });
     };
 

@@ -5,24 +5,35 @@ import Axios from 'axios';
 // https://github.com/bokeh/bokeh/issues/8197
 
 class Plot extends Component {
-
-  getPlot1 = () => {
-    Axios.get("http://localhost:5000/plot1").then(resp => window.Bokeh.embed.embed_item(resp.data, 'plot1'))
+  state = {
+    script: "",
+    src: "",
+    id: ""
   }
 
-
-  componentDidMount () {
+  getScript = () => {
+    Axios.get("http://localhost:5000/script").then((response) => {
+      return { src: response.data.src, id: response.data.id}
+      // this.setState({ src: response.data.src, id: response.data.id});
+      // console.log("Src: " + this.state.src)
+      // console.log("Id: " + this.state.id)
+  }).then((data) => {
+    this.setState({ src: data.src, id: data.id});
     const script = document.createElement("script");
-    script.src = "http://localhost:5010/main_local/autoload.js?bokeh-autoload-element=1060&bokeh-app-path=/main_local&bokeh-absolute-url=http://localhost:5010/main_local&bokeh-session-id=vth0mw5Mdy8t8J76XaTXhM0pNZ65UBfFBCZKLkREpaaG";
+    script.src = this.state.src;
     script.async = true;
-
     document.body.appendChild(script);
-}
+  })
+  }
+
+  componentDidMount() {
+    this.getScript();
+  }
 
   render() {
     return (
       <div className="Plot" style={{ margin: 20 }}>
-        <div id="1060"/>
+        <div id={this.state.id} />
       </div>
     );
   }
