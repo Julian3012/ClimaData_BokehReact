@@ -20,14 +20,11 @@ app = Flask(__name__)
 # CORS enabled so react frontend can pull data from python backend
 CORS(app)
 
-script = ""
-
 app_url = "http://localhost:5010/main_backend"
 
 
 @app.route("/script", methods=["GET"])
 def bkapp_page():
-    global script
 
     with pull_session(url=app_url) as session:
 
@@ -38,6 +35,7 @@ def bkapp_page():
 
         print("Id of widget: ",widget_list[3].children[0].children[0].children[0].id)
         widget_list[13].children[0].children[1].children[1].title = "Slider title"
+        widget_list[3].children[0].children[0].children[0].title = "Slider title"
 
         # generate a script to load the customized session
         script = server_session(session_id=session.id, url=app_url)

@@ -169,10 +169,12 @@ class PlotGenerator:
             lArray.append([column(self.slAggregateFunction)])
             lArray.append([column(self.btShow)])
 
-            self.logger.info("first")
-            lArray.append([plot.get_root()])
-            self.logger.info("get root")
+            # Activate for new versions of bokeh/holoviews
+            # lArray.append([plot.get_root(curdoc())])
 
+            # Activate for old versions of bokeh/holoviews
+            lArray.append([plot.state])
+           
             l = layout(lArray)
             # self.logger.info("layout: ",dir(layout))
 
