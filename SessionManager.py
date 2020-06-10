@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup as bs
 
 class SessionManager:
     def __init__(self, app_url, session):
+        # TODO: Implement logger
         # FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
         # logging.basicConfig(format=FORMAT,level=logging.DEBUG)
         # self.logger = logging.getLogger("Session Manager")
@@ -18,9 +19,10 @@ class SessionManager:
         self.app_url = app_url
         self.session = session
         self.scriptSrc = ""
-        self.idTag = ""
+        self.scriptId = ""
         self.sessionIds = {}
         self.sessionValues = {}
+        self.scriptTag = ""
         self.optVars = {}
         self.optAggDim = {}
 
@@ -29,13 +31,17 @@ class SessionManager:
 
     def initScript(self):
 
+        # self.session.document.roots[0].children[5].children[0].children[0].children[0].value = "Magma"
+
         # generate a script to load the customized session
-        script = server_session(session_id=self.session.id, url=self.app_url)
+        print("Bokeh Session Id: ",self.session.id)
+        script = server_session(session_id=self.session.id, url=self.app_url,)
 
         # Get source, id tag and session
         soup = bs(script, features="lxml")
-        self.idTag = soup.script["id"]
+        self.scriptId = soup.script["id"]
         self.scriptSrc = soup.script["src"]
+        self.scriptTag = script
 
         print("Script tag generated")
         # self.logger.info("Session pulled")
@@ -78,6 +84,7 @@ class SessionManager:
             except Exception as e:
                 print(e)
 
+        # TODO: try more generic approach for this part
         self.optVars = self.genJson(
             widget_list[3].children[0].children[0].children[0].options
         )
@@ -86,11 +93,9 @@ class SessionManager:
         )
         self.sessionIds = valueDict["ids"]
         self.sessionValues = valueDict["values"]
-        # self.logger.info("Ids and values loaded")
 
     def modifiySession(self, parameter):
 
-        # with pull_session(url=self.app_url) as session:
         try:
             self.changeValues(parameter)
             print(self.session.document)
@@ -173,8 +178,11 @@ class SessionManager:
     def getAppUrl(self):
         return self.app_url
 
-    def getIdTag(self):
-        return self.idTag
+    def getScriptTag(self):
+        return self.scriptTag
+
+    def getScriptId(self):
+        return self.scriptId
 
     def getScriptSrc(self):
         return self.scriptSrc
