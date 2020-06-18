@@ -1,6 +1,7 @@
 .ipynb_checkpoints
 datashader-examples
 2016033000-ART-passive*
+templates/
 
 __pycache__/**
 .idea/**
