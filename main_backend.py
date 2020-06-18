@@ -30,6 +30,15 @@ import json
 class PlotGenerator:
     def __init__(self):
 
+        hv.extension("bokeh")
+        self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
+
+        FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
+        logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+        self.logger = logging.getLogger("ncview2")
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.info({i.__name__: i.__version__ for i in [hv, np, pd]})
+
         # Constant
         self.COLORMAPS = [
             "Blues",
@@ -66,6 +75,7 @@ class PlotGenerator:
         ]
 
         # Widget Input
+        # self.dataPath = "2016032700-ART-chemtracer_grid_pmn_DOM01_ML_0001.nc"
         self.dataPath = "2016032700-ART-chemtracer_grid_DOM01_PL_0007.nc"
         self.urlinput = None
         self.slCMap = None
@@ -85,12 +95,30 @@ class PlotGenerator:
         self.slVar = None
 
         # Plot related
-        self.variables = None
         self.tmPlot = None
         self.cuPlot = None
         self.hpPlot = None
         self.xrData = None
         self.xrDataMeta = None
+
+        # Variable Values
+        self.optVariables = [None]
+        self.optAggDim = [None]
+        self.optAggFun = ["None", "mean", "sum"]
+        self.meshOptions = ["DOM1", "DOM2"]
+
+        self.val_dict = {
+            "variable": None,
+            "cm" : self.COLORMAPS[0],
+            "aggDim" : self.optAggDim[0],
+            "aggFn" : self.optAggFun[0],
+            "showCoastline" : [0],
+            "fcol" : [],
+            "scol" : [],
+            "lcol" : [],
+            "cbAxis" : [],
+            "cl" : "0"
+        }
 
         # Variable Values
         self.variable = None
@@ -105,18 +133,6 @@ class PlotGenerator:
         self.logX = None
         self.logY = None
 
-        self.widgetsInitialized = False
-
-        hv.extension("bokeh")
-        self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
-
-        FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
-        logging.basicConfig(format=FORMAT,level=logging.DEBUG)
-        self.logger = logging.getLogger("ncview2")
-        self.logger.setLevel(logging.DEBUG)
-        print(self.logger)
-        self.logger.info({i.__name__: i.__version__ for i in [hv, np, pd]})
-
     def mainDialog(self, dataUpdate=True):
         """
         This function build up and manages the Main-Graph Dialog
@@ -128,18 +144,21 @@ class PlotGenerator:
 
             # Clear doc when update occurs
             curdoc().clear()
-
+            
             # Get data
             link = "./data/" + self.dataPath
             self.xrDataMeta = xr.open_dataset(link)
             self.logger.info("File: " + link)
-            self.variables = [x for x in self.xrDataMeta.variables.keys()]
+
+            self.optVariables = [x for x in self.xrDataMeta.variables.keys()]
+
+            if self.val_dict["variable"] == None:
+                self.val_dict["variable"] = self.optVariables[0]
 
             # Init widgets
-            if self.widgetsInitialized == False:
+            if self.variable == None:
                 self.logger.info("Initialize widgets")
                 self.generateWidgets()
-                self.widgetsInitialized = True
 
             # Generate plot type
             plot = self.genPlot(dataUpdate)
@@ -147,7 +166,7 @@ class PlotGenerator:
             # Apply to layout
             lArray = []
             lArray.append([column(self.urlinput)])
-            lArray.append([column(self.slMesh)])
+            lArray.append([self.slMesh])
             lArray.append([column(self.txTitle)])
             lArray.append([column(self.slVar)])
 
@@ -170,14 +189,14 @@ class PlotGenerator:
             lArray.append([column(self.btShow)])
 
             # Activate for new versions of bokeh/holoviews
-            # lArray.append([plot.get_root(curdoc())])
+            # lArray.append([plot.get_root()])
 
             # Activate for old versions of bokeh/holoviews
             lArray.append([plot.state])
            
             l = layout(lArray)
             # self.logger.info("layout: ",dir(layout))
-
+            l._id = "1000"
             curdoc().add_root(l)
 
             end = time.time()
@@ -212,7 +231,6 @@ class PlotGenerator:
         Generate plot object depending on the data
         """
         self.variable = self.slVar.value
-        self.title = self.txTitle.value
         self.cm = self.slCMap.value
         self.aggDim = self.slAggregateDimension.value
         self.aggFn = self.slAggregateFunction.value
@@ -223,6 +241,7 @@ class PlotGenerator:
         self.logX = 0 in self.cbAxis.active
         self.logY = 1 in self.cbAxis.active
 
+        self.logger.info(self.variable)
         cLevels, fixColorMin, fixColorMax = self.checkInputs()
 
         if self.aggDim == "lat" and self.aggFn != "None":
@@ -239,7 +258,7 @@ class PlotGenerator:
                 self.cuPlot = CurvePlot(self.logger, self.renderer, self.xrData)
             plot = self.cuPlot.getPlotObject(
                 variable=self.variable,
-                title=self.title,
+                title="",
                 aggDim=self.aggDim,
                 aggFn=self.aggFn,
                 logX=self.logX,
@@ -261,7 +280,7 @@ class PlotGenerator:
                 self.hpPlot = HeightProfilePlot(self.logger, self.renderer, self.xrData)
             plot = self.hpPlot.getPlotObject(
                 variable=self.variable,
-                title=self.title,
+                title="",
                 aggDim=self.aggDim,
                 aggFn=self.aggFn,
                 cm=self.cm,
@@ -276,7 +295,7 @@ class PlotGenerator:
                 self.tmPlot = TriMeshPlot(self.logger, self.renderer, self.xrDataMeta)
             plot = self.tmPlot.getPlotObject(
                 variable=self.variable,
-                title=self.title,
+                title="",
                 cm=self.cm,
                 aggDim=self.aggDim,
                 aggFn=self.aggFn,
@@ -289,69 +308,62 @@ class PlotGenerator:
                 cLevels=cLevels,
                 dataUpdate=dataUpdate,
             )
+
         return plot
 
     def generateWidgets(self):
 
-        # callback = CustomJS(code="console.log('Hide this')")
-
         self.urlinput = TextInput(
-            value=self.dataPath, title="netCDF file -OR- OPeNDAP URL:"
+            value=self.dataPath, title="File" #"netCDF file -OR- OPeNDAP URL:"
         )
-        # self.urlinput.js_on_change("hide",callback)
+        self.urlinput.on_change("value", self.fileUpdate)
 
-        self.slVar = Select(title="Variable", options=self.variables, value="TR_stn")
+        self.logger.info(self.val_dict["variable"])
+        self.slVar = Select(title="Variable", options=self.optVariables, value=self.val_dict["variable"])
         self.slVar.on_change("value", self.variableUpdate)
 
-        meshOptions = ["DOM1", "DOM2"]
         default_dom = "DOM1" if "DOM01" in self.urlinput.value else "DOM2"
+        self.slMesh = Select(title="Mesh", options=self.meshOptions, value=default_dom )
 
-        self.slMesh = Select(title="Mesh", options=meshOptions, value=default_dom)
-        self.slCMap = Select(
-            title="Colormap", options=self.COLORMAPS, value=self.COLORMAPS[0]
-        )
+        self.slCMap = Select(title="Colormap", options=self.COLORMAPS, value=self.val_dict["cm"])
         self.slCMap.on_change("value", self.cmapUpdate)
-        self.txTitle = TextInput(value="title", title="Title:")
-        self.txFixColoringMin = TextInput(value="", title="Fix color minimum:")
-        self.txFixColoringMax = TextInput(value="", title="Fix color maxmum:")
-        self.txCLevels = TextInput(value="0", title="Colorlevels (0:inf):")
 
-        aggregateFunctions = ["None", "mean", "sum"]
-        aggregateDimensions = self.getAggDim()
+        self.txTitle = TextInput(value="title", title="Title" )
+
+        self.txFixColoringMin = TextInput(value="", title="Fix color minimum:" )
+        self.txFixColoringMax = TextInput(value="", title="Fix color maxmum:" )
+
+        self.txCLevels = TextInput(value=self.val_dict["cl"], title="Colorlevels" )
+
+        self.optAggDim = self.getAggDim()
 
         self.slAggregateFunction = Select(
-            title="Aggregate Function", options=aggregateFunctions, value="None"
+            title="Aggregate Function", options=self.optAggFun, value=self.val_dict["aggFn"]
         )
         self.slAggregateFunction.on_change("value", self.aggFnUpdate)
 
         self.slAggregateDimension = Select(
-            title="Aggregate Dimension", options=aggregateDimensions, value="None",
+            title="Aggregate Dimension", options=self.optAggDim, value=self.val_dict["aggDim"]
         )
         self.slAggregateDimension.on_change("value", self.aggDimUpdate)
 
-        self.cbCoastlineOverlay = CheckboxGroup(labels=["Show coastline"], active=[0])
+        self.cbCoastlineOverlay = CheckboxGroup(labels=["Show coastline"], active=[0] )
         self.cbCoastlineOverlay.on_click(self.coastlineUpdate)
 
 
-        self.cbFixCol = CheckboxGroup(labels=["Use fixed coloring"], active=[])
+        self.cbFixCol = CheckboxGroup(labels=["Use fixed coloring"], active=self.val_dict["fcol"] )
         self.cbFixCol.on_click(self.coloringUpdate)
 
-        self.cbSymCol = CheckboxGroup(labels=["symmetric coloring"], active=[])
+        self.cbSymCol = CheckboxGroup(labels=["symmetric coloring"], active=self.val_dict["scol"] )
         self.cbSymCol.on_click(self.coloringUpdate)
 
-        self.cbLogzCol = CheckboxGroup(labels=["logz coloring"], active=[])
+        self.cbLogzCol = CheckboxGroup(labels=["logz coloring"], active=self.val_dict["lcol"] )
         self.cbLogzCol.on_click(self.coloringUpdate)
 
-        # self.cbColoring = CheckboxGroup(
-        #     labels=["Use fixed coloring", "symmetric coloring", "logz coloring",],
-        #     active=[],
-        # )
-        # self.cbColoring.on_click(self.coloringUpdate)
-
-        self.cbAxis = CheckboxGroup(labels=["logX", "logY"], active=[])
+        self.cbAxis = CheckboxGroup(labels=["logX", "logY"], active=self.val_dict["cbAxis"] )
         self.cbAxis.on_click(self.coloringUpdate)
 
-        self.btShow = Button(label="Get New Plot")
+        self.btShow = Button(label="Get New Plot" )
         self.btShow.on_click(self.btClick)
 
     def getAggDim(self):
@@ -384,7 +396,14 @@ class PlotGenerator:
         It is called if at property like the cmap is changed and the whole buildDynamicMap needs
         to be rebuild.
         """
-        self.variables = new
+        self.val_dict["variable"] = new
+        self.mainDialog(True)
+
+    def fileUpdate(self, attr, old, new):
+        """
+        
+        """
+        self.dataPath = new
         self.mainDialog(True)
 
     def cmapUpdate(self, attr, old, new):
@@ -393,16 +412,19 @@ class PlotGenerator:
         It is called if at property like the cmap is changed and the whole buildDynamicMap needs
         to be rebuild.
         """
+        self.val_dict["cm"] = self.slCMap.value
         self.mainDialog(False)
 
     def aggDimUpdate(self, attr, old, new):
-        if self.slAggregateFunction.value != "None":
+        self.val_dict["aggDim"] = self.slAggregateDimension.value
+        if self.slAggregateDimension.value != "None":
             self.mainDialog(True)
         else:
             self.mainDialog(False)
 
     def aggFnUpdate(self, attr, old, new):
-        if self.slAggregateDimension.value != "None":
+        self.val_dict["aggFn"] = self.slAggregateFunction.value
+        if self.slAggregateFunction.value != "None":
             self.mainDialog(True)
         else:
             self.mainDialog(False)
