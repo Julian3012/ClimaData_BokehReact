@@ -103,7 +103,7 @@ class PlotGenerator:
 
         # Variable Values
         self.optVariables = [None]
-        self.optAggDim = [None]
+        self.optAggDim = ["None"]
         self.optAggFun = ["None", "mean", "sum"]
         self.meshOptions = ["DOM1", "DOM2"]
 
@@ -124,7 +124,7 @@ class PlotGenerator:
         self.variable = None
         self.title = None
         self.cm = None
-        self.aggDim = None
+        self.aggDim = "None"
         self.aggFn = None
         self.showCoastline = None
         self.useFixColoring = None
@@ -144,7 +144,9 @@ class PlotGenerator:
 
             # Clear doc when update occurs
             curdoc().clear()
-            
+
+            self.logger.info("New values: {}".format(self.val_dict))
+
             # Get data
             link = "./data/" + self.dataPath
             self.xrDataMeta = xr.open_dataset(link)
@@ -396,7 +398,7 @@ class PlotGenerator:
         It is called if at property like the cmap is changed and the whole buildDynamicMap needs
         to be rebuild.
         """
-        self.val_dict["variable"] = new
+        self.val_dict["variable"] = self.slVar.value
         self.mainDialog(True)
 
     def fileUpdate(self, attr, old, new):
@@ -417,14 +419,15 @@ class PlotGenerator:
 
     def aggDimUpdate(self, attr, old, new):
         self.val_dict["aggDim"] = self.slAggregateDimension.value
-        if self.slAggregateDimension.value != "None":
+        if self.slAggregateFunction.value != "None":
             self.mainDialog(True)
         else:
             self.mainDialog(False)
 
     def aggFnUpdate(self, attr, old, new):
         self.val_dict["aggFn"] = self.slAggregateFunction.value
-        if self.slAggregateFunction.value != "None":
+        self.logger.info("Aggregate Function Update: {}".format(self.val_dict["aggFn"]))
+        if self.slAggregateDimension.value != "None":
             self.mainDialog(True)
         else:
             self.mainDialog(False)
