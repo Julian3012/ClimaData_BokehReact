@@ -89,7 +89,8 @@ class PlotGenerator:
         self.cbFixCol = None
         self.cbSymCol = None
         self.cbLogzCol = None
-        self.cbAxis = None
+        self.cbLogX = None
+        self.cbLogY = None
         self.cbCoastlineOverlay = None
         self.cbCoastlineOverlay = None
         self.slVar = None
@@ -116,7 +117,8 @@ class PlotGenerator:
             "fcol" : [],
             "scol" : [],
             "lcol" : [],
-            "cbAxis" : [],
+            "logX" : [],
+            "logY" : [],
             "cl" : "0"
         }
 
@@ -164,6 +166,9 @@ class PlotGenerator:
 
             # Generate plot type
             plot = self.genPlot(dataUpdate)
+            
+            # Disable widgets for specific inputs
+            self.disableWidgets()
 
             # Apply to layout
             lArray = []
@@ -171,21 +176,16 @@ class PlotGenerator:
             lArray.append([self.slMesh])
             lArray.append([column(self.txTitle)])
             lArray.append([column(self.slVar)])
-
-            # Hide colormap option if CurvePlot is used
-            if self.aggDim != "lat" or self.aggFn == "None":
-                lArray.append([column(self.cbCoastlineOverlay)])
-                lArray.append([column(self.slCMap)])
-                lArray.append([column(self.cbFixCol)])
-                lArray.append([column(self.cbSymCol)])
-                lArray.append([column(self.cbLogzCol)])
-                lArray.append([column(self.txCLevels)])
-            if self.useFixColoring:
-                lArray.append([column(self.txFixColoringMin)])
-                lArray.append([column(self.txFixColoringMax)])
-            if self.aggDim == "lat" or self.aggFn != "None":
-                lArray.append([column(self.cbAxis)])
-
+            lArray.append([column(self.cbCoastlineOverlay)])
+            lArray.append([column(self.slCMap)])
+            lArray.append([column(self.cbFixCol)])
+            lArray.append([column(self.cbSymCol)])
+            lArray.append([column(self.cbLogzCol)])
+            lArray.append([column(self.txCLevels)])
+            lArray.append([column(self.txFixColoringMin)])
+            lArray.append([column(self.txFixColoringMax)])
+            lArray.append([column(self.cbLogX)])
+            lArray.append([column(self.cbLogY)])
             lArray.append([column(self.slAggregateDimension)])
             lArray.append([column(self.slAggregateFunction)])
             lArray.append([column(self.btShow)])
@@ -205,6 +205,38 @@ class PlotGenerator:
             self.logger.info("MainDialog took %d" % (end - start))
         except Exception as e:
             print(e)
+
+    def disableWidgets(self):
+        # Hide colormap option if CurvePlot is used
+        if self.aggDim != "lat" or self.aggFn == "None":
+            self.cbCoastlineOverlay.disabled = False
+            self.slCMap.disabled = False
+            self.cbFixCol.disabled = False
+            self.cbSymCol.disabled = False
+            self.cbLogzCol.disabled = False
+            self.txCLevels.disabled = False
+        else: 
+            self.cbCoastlineOverlay.disabled = True
+            self.slCMap.disabled = True
+            self.cbFixCol.disabled = True
+            self.cbSymCol.disabled = True
+            self.cbLogzCol.disabled = True
+            self.txCLevels.disabled = True
+
+        if self.useFixColoring:
+            self.txFixColoringMin.disabled = False
+            self.txFixColoringMax.disabled = False
+        else: 
+            self.txFixColoringMin.disabled = True
+            self.txFixColoringMax.disabled = True
+
+        if self.aggDim == "lat" or self.aggFn != "None":
+            self.cbLogX.disabled = False
+            self.cbLogY.disabled = False
+        else:
+            self.cbLogX.disabled = True
+            self.cbLogY.disabled = True
+
 
     def checkInputs(self):
         """
@@ -240,8 +272,8 @@ class PlotGenerator:
         self.useFixColoring = 0 in self.cbFixCol.active
         self.cSymmetric = 0 in self.cbSymCol.active
         self.cLogZ = 0 in self.cbLogzCol.active
-        self.logX = 0 in self.cbAxis.active
-        self.logY = 1 in self.cbAxis.active
+        self.logX = 0 in self.cbLogX.active
+        self.logY = 0 in self.cbLogY.active
 
         self.logger.info(self.variable)
         cLevels, fixColorMin, fixColorMax = self.checkInputs()
@@ -352,7 +384,6 @@ class PlotGenerator:
         self.cbCoastlineOverlay = CheckboxGroup(labels=["Show coastline"], active=[0] )
         self.cbCoastlineOverlay.on_click(self.coastlineUpdate)
 
-
         self.cbFixCol = CheckboxGroup(labels=["Use fixed coloring"], active=self.val_dict["fcol"] )
         self.cbFixCol.on_click(self.coloringUpdate)
 
@@ -362,8 +393,11 @@ class PlotGenerator:
         self.cbLogzCol = CheckboxGroup(labels=["logz coloring"], active=self.val_dict["lcol"] )
         self.cbLogzCol.on_click(self.coloringUpdate)
 
-        self.cbAxis = CheckboxGroup(labels=["logX", "logY"], active=self.val_dict["cbAxis"] )
-        self.cbAxis.on_click(self.coloringUpdate)
+        self.cbLogX = CheckboxGroup(labels=["logX"], active=self.val_dict["logX"] )
+        self.cbLogX.on_click(self.coloringUpdate)
+
+        self.cbLogY = CheckboxGroup(labels=["logY"], active=self.val_dict["logY"] )
+        self.cbLogY.on_click(self.coloringUpdate)
 
         self.btShow = Button(label="Get New Plot" )
         self.btShow.on_click(self.btClick)
