@@ -45,7 +45,7 @@ class Sidebar extends Component {
         //   })(Slider);
 
         function valuetext(value) {
-            return `${value}°C`;
+            return `${value}`;
         }
 
         const marks = [
@@ -208,15 +208,15 @@ class Sidebar extends Component {
 
                 <div>
                     <Slider
-                        defaultValue={1}
+                        defaultValue={0}
                         getAriaValueText={valuetext}
-                        aria-labelledby="discrete-slider-always"
+                        // aria-labelledby="discrete-slider-always"
                         step={1}
-                        marks
-                        start={this.props.startMarks}
-                        end={this.props.endMarks}
+                        min={this.props.start}
+                        max={this.props.end}
                         valueLabelDisplay="on"
                         disabled={this.props.isActiveSlider}
+                        onChange={this.props.slChLev}
                     />
                 </div>
             </Aux>

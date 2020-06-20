@@ -16,59 +16,70 @@ class App extends Component {
 
     this.state = {
       file: "2016032700-ART-chemtracer_grid_DOM01_PL_0007.nc",
-      mesh: "DOM1", 
-      variable: "clon", 
-      showCoastline: true,  
-      colorMap: "Blues", 
-      fixColoring: false, 
-      symColoring: false, 
-      logzColoring: false, 
-      colorLevels: 0, 
-      aggregateDim: "None", 
-      aggregateFun: "None", 
-      filePos: 0,
-      meshPos: 1, 
-      variablePos: 3, 
-      showCoastlinePos: 4,  
-      colorMapPos: 5, 
-      fixColoringPos: 6, 
-      symColoringPos: 7, 
-      logzColoringPos: 8, 
-      colorLevelsPos: 9, 
-      aggregateDimPos: 10, 
-      aggregateFunPos: 11, 
+      mesh: "DOM1",
+      variable: "clon",
+      showCoastline: true,
+      colorMap: "Blues",
+      fixColoring: false,
+      symColoring: false,
+      logzColoring: false,
+      colorLevels: 0,
+      aggregateDim: "None",
+      aggregateFun: "None",
+      positions: {
+        file: 0,
+        mesh: 1,
+        title: 2,
+        variable: 3,
+        showCoastline: 4,
+        colorMap: 5,
+        fixColoring: 6,
+        symColoring: 7,
+        logzColoring: 8,
+        colorLevels: 9,
+        fixColMin: 10,
+        fixColMax: 11,
+        logx: 12,
+        logy: 13,
+        aggregateDim: 14,
+        aggregateFun: 15,
+        uselessBtn: 16,
+        slider: 17
+      },
       aggDimSelect: [{
         value: "None",
         label: "None",
-      }], 
+      }],
       variables: [{
         value: "TR_stn",
         label: "TR_stn",
-      }], 
+      }],
       sessionIds: {},
       id: "",
       src: "",
       model: "",
       sliderDisabled: false,
-      startMarks: 10,
-      endMarks: 100
+      sliderStart: 0,
+      sliderEnd: 20
     };
   }
 
-
   componentDidMount() {
     this.appendScript().then(setTimeout(this.initState, 2000));
-    // setTimeout(this.getBokehInfo, 3000);
+  }
+
+  getWidget = (model, position) => {
+    if (position <= 16) {
+      return model.attributes.children[position].attributes.children[0].attributes.children[0].attributes.children[0]
+    } else if (position === 17) {
+      return model.attributes.children[position].attributes.children[0].attributes.children[1].attributes.children[1]
+    } else {
+      console.log("Position value does not exist")
+    }
   }
 
   getBokehInfo = () => {
     console.log(this.state)
-  }
-
-  getMesh = () => {
-    if (this.state.file.includes("DOM1")) {
-      this.setState({})
-    }
   }
 
   appendScript = () => {
@@ -85,8 +96,8 @@ class App extends Component {
 
   initState = (event) => {
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    let optsVar = this.mkOptions(model.attributes.children[3].attributes.children[0].attributes.children[0].attributes.children[0].options);
-    let optsAd = this.mkOptions(model.attributes.children[10].attributes.children[0].attributes.children[0].attributes.children[0].options);
+    let optsVar = this.mkOptions(this.getWidget(model,this.state.positions.variable).options);
+    let optsAd = this.mkOptions(this.getWidget(model,this.state.positions.aggregateDim).options);
     this.setState({ variables: optsVar });
     this.setState({ aggDimSelect: optsAd });
 
@@ -94,36 +105,35 @@ class App extends Component {
 
     console.log(this.state)
 
-    this.setState({ file: model.attributes.children[0].attributes.children[0].attributes.children[0].attributes.children[0].value });
+    this.setState({ file: this.getWidget(model,this.state.positions.file).value });
 
-    this.setState({ variable: model.attributes.children[3].attributes.children[0].attributes.children[0].attributes.children[0].value });
+    this.setState({ variable: this.getWidget(model,this.state.positions.variable).value });
 
-    const hasCoastline = this.getActiveEvent(model.attributes.children[4].attributes.children[0].attributes.children[0].attributes.children[0].active);
-    this.setState({ showCoastline: hasCoastline});
+    const hasCoastline = this.getActiveEvent(this.getWidget(model,this.state.positions.showCoastline).active);
+    this.setState({ showCoastline: hasCoastline });
 
-    this.setState({ colorMap: model.attributes.children[5].attributes.children[0].attributes.children[0].attributes.children[0].value });
+    this.setState({ colorMap: this.getWidget(model,this.state.positions.colorMap).value });
 
-    const hasFixedColoring = this.getActiveEvent(model.attributes.children[6].attributes.children[0].attributes.children[0].attributes.children[0].active);
-    this.setState({ fixColoring: hasFixedColoring});
+    const hasFixedColoring = this.getActiveEvent(this.getWidget(model,this.state.positions.fixColoring).active);
+    this.setState({ fixColoring: hasFixedColoring });
 
-    const hasSymColoring = this.getActiveEvent(model.attributes.children[7].attributes.children[0].attributes.children[0].attributes.children[0].active);
-    this.setState({ symColoring: hasSymColoring});
+    const hasSymColoring = this.getActiveEvent(this.getWidget(model,this.state.positions.symColoring).active);
+    this.setState({ symColoring: hasSymColoring });
 
-    const hasLogzColoring = this.getActiveEvent(model.attributes.children[8].attributes.children[0].attributes.children[0].attributes.children[0].active);
-    this.setState({ logzColoring: hasLogzColoring});
+    const hasLogzColoring = this.getActiveEvent(this.getWidget(model,this.state.positions.logzColoring).active);
+    this.setState({ logzColoring: hasLogzColoring });
 
-    this.setState({ colorLevels: model.attributes.children[9].attributes.children[0].attributes.children[0].attributes.children[0].value });
+    this.setState({ colorLevels: this.getWidget(model,this.state.positions.colorLevels).value });
 
-    let aggregateDim = model.attributes.children[10].attributes.children[0].attributes.children[0].attributes.children[0].value;
-    if(aggregateDim === null){
+    let aggregateDim = this.getWidget(model,this.state.positions.aggregateDim).value;
+    if (aggregateDim === null) {
       aggregateDim = "None";
     }
-
     this.setState({ aggregateDim: aggregateDim });
 
-    this.setState({ aggregateFun: model.attributes.children[11].attributes.children[0].attributes.children[0].attributes.children[0].value });
+    this.setState({ aggregateFun: this.getWidget(model,this.state.positions.aggregateFun).value });
 
-    this.isActiveSlider();
+    this.initSlider();
 
     console.log("model loaded")
   }
@@ -139,7 +149,7 @@ class App extends Component {
   setColorMap = (event) => {
     this.setState({ colorMap: event.target.value })
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[5].attributes.children[0].attributes.children[0].attributes.children[0].value = event.target.value
+    this.getWidget(model,this.state.positions.colorMap).value = event.target.value
 
     console.log("Changed colormap")
   };
@@ -165,7 +175,7 @@ class App extends Component {
     this.setState({ showCoastline: !doesShow })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[4].attributes.children[0].attributes.children[0].attributes.children[0].active = this.setActiveEvent(doesShow);
+    this.getWidget(model,this.state.positions.showCoastline).active = this.setActiveEvent(doesShow);
 
     console.log("State showCoastline changed")
   };
@@ -175,7 +185,7 @@ class App extends Component {
     this.setState({ fixColoring: !doesShow })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[6].attributes.children[0].attributes.children[0].attributes.children[0].active = this.setActiveEvent(doesShow);
+    this.getWidget(model,this.state.positions.fixColoring).active = this.setActiveEvent(doesShow);
 
     console.log("State fixColoring changed")
   };
@@ -185,7 +195,7 @@ class App extends Component {
     this.setState({ symColoring: !doesShow })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[7].attributes.children[0].attributes.children[0].attributes.children[0].active = this.setActiveEvent(doesShow);
+    this.getWidget(model,this.state.positions.symColoring).active = this.setActiveEvent(doesShow);
 
     console.log("State symColoring changed")
   };
@@ -195,7 +205,7 @@ class App extends Component {
     this.setState({ logzColoring: !doesShow })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[8].attributes.children[0].attributes.children[0].attributes.children[0].active = this.setActiveEvent(doesShow);
+    this.getWidget(model,this.state.positions.logzColoring).active = this.setActiveEvent(doesShow);
 
     console.log("State logzColoring changed")
   };
@@ -204,7 +214,7 @@ class App extends Component {
     this.setState({ mesh: event.target.value })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[1].attributes.children[0].attributes.children[0].attributes.children[0].value = event.target.value;
+    this.getWidget(model,this.state.positions.mesh).value = event.target.value;
 
     console.log("State mesh changed")
   };
@@ -213,7 +223,7 @@ class App extends Component {
     this.setState({ aggregateFun: event.target.value })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[11].attributes.children[0].attributes.children[0].attributes.children[0].value = event.target.value;
+    this.getWidget(model,this.state.positions.aggregateFun).value = event.target.value;
 
     console.log("State aggregateFun changed")
   };
@@ -222,7 +232,7 @@ class App extends Component {
     this.setState({ aggregateDim: event.target.value })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[10].attributes.children[0].attributes.children[0].attributes.children[0].value = event.target.value;
+    this.getWidget(model,this.state.positions.aggregateDim).value = event.target.value;
 
     console.log("State aggregateDim changed")
   };
@@ -231,7 +241,7 @@ class App extends Component {
     this.setState({ colorLevels: event.target.value })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[9].attributes.children[0].attributes.children[0].attributes.children[0].value = event.target.value;
+    this.getWidget(model,this.state.positions.colorLevels).value = event.target.value;
 
     console.log("State colorLevels changed")
   };
@@ -240,9 +250,9 @@ class App extends Component {
     this.setState({ variable: event.target.value })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[3].attributes.children[0].attributes.children[0].attributes.children[0].value = event.target.value;
+    this.getWidget(model,this.state.positions.variable).value = event.target.value;
 
-    this.isActiveSlider();
+    setTimeout(this.initSlider, 1500);
     console.log("State variable changed")
   };
 
@@ -250,7 +260,7 @@ class App extends Component {
     this.setState({ file: event.target.value })
 
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    model.attributes.children[0].attributes.children[0].attributes.children[0].attributes.children[0].value = event.target.value;
+    this.getWidget(model,this.state.positions.file).value = event.target.value;
 
     console.log("State file changed")
   };
@@ -267,58 +277,29 @@ class App extends Component {
     return height;
   }
 
-  isActiveSlider = () => {
+  handleSlider = (event, newValue) => {
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    let hasSlider = model.children[13].attributes.children[0].attributes.hasOwnProperty("children");
+    let slider = this.getWidget(model,this.state.positions.slider);
+
+    if (newValue <= this.state.sliderEnd) {
+      slider.value = newValue;
+    }
+  }
+
+  initSlider = () => {
+    let model = window.Bokeh.documents[0].get_model_by_id("1000");
+    let hasSlider = model.children[this.state.positions.slider].attributes.children[0].attributes.hasOwnProperty("children");
     console.log("Slider active: " + hasSlider);
 
     if (hasSlider) {
-      let slider = model.attributes.children[13].attributes.children[0].attributes.children[1].attributes.children[1];
+      let slider = this.getWidget(model,this.state.positions.slider);
+      console.log("Init Slider: " + slider.end)
 
-      this.setState({ endMarks: slider.end });
-      this.setState({ startMarks: slider.start });
-
-      return this.setState({ sliderDisabled: false });;
+      this.setState({ sliderEnd: slider.end });
+      this.setState({ sliderStart: slider.start });
+      this.setState({ sliderDisabled: false });;
     } else {
-      return this.setState({ sliderDisabled: true });
-    }
-  }
-
-  sliderMarks = () => {
-    console.log("Slider active: " + this.isActiveSlider)
-    if (this.isActiveSlider) {
-      let model = window.Bokeh.documents[0].get_model_by_id("1000");
-      let slider = model.attributes.children[13].attributes.children[0].attributes.children[1].attributes.children[1]
-      let marks = [{
-        value: slider.start,
-        label: toString(slider.start)
-      },
-      {
-        value: slider.end,
-        label: toString(slider.end)
-      }]
-      return marks;
-    } else {
-      return [{
-        value: -1,
-        label: "undef"
-      }]
-    }
-  }
-
-  startMarks = () => {
-    if (this.state.isActiveSlider) {
-      let model = window.Bokeh.documents[0].get_model_by_id("1000");
-      let slider = model.attributes.children[13].attributes.children[0].attributes.children[1].attributes.children[1]
-      return this.setState({ startMarks: slider.start })
-    }
-  }
-
-  endMarks = () => {
-    if (this.state.isActiveSlider) {
-      let model = window.Bokeh.documents[0].get_model_by_id("1000");
-      let slider = model.attributes.children[13].attributes.children[0].attributes.children[1].attributes.children[1]
-      return this.setState({ endMarks: slider.end })
+      this.setState({ sliderDisabled: true });
     }
   }
 
@@ -379,9 +360,10 @@ class App extends Component {
           txChCol={this.setColorLevels}
           txValCol={this.state.colorLevels}
 
-          marksStart={this.state.startMarks}
-          marksEnd={this.state.endMarks}
-          isActiveSlider={this.state.sliderActive}
+          start={this.state.sliderStart}
+          end={this.state.sliderEnd}
+          isActiveSlider={this.state.sliderDisabled}
+          slChLev={this.handleSlider}
 
           btClick={this.getBokehInfo}
         />
