@@ -3,6 +3,7 @@ import Sidebar from "../Components/Sidebar/Sidebar"
 import Plot from "../Components/Plot/Plot"
 import * as constants from "../Components/constants"
 import './App.css';
+import Grid from '@material-ui/core/Grid';
 
 
 // ran into this issue (hence no npm import of bokehjs):
@@ -295,7 +296,7 @@ class App extends Component {
   handleSubmit = (event) => {
     if (event.keyCode === 13) {
       this.getWidget(this.state.positions.file).value = this.state.file;
-      window.location.reload(true); 
+      window.location.reload(true);
     }
   };
 
@@ -347,80 +348,86 @@ class App extends Component {
 
     return (
       <div className="App" style={{ margin: 20 }}>
-        <Sidebar
-          txLabFile="Filepath"
-          txValFile={this.state.file}
-          txChFile={this.handleDataPath}
-          txSbFile={this.handleSubmit}
+        <Grid container spacing={3}>
+          <Grid item xs={4}>
+            <Sidebar
+              txLabFile="Filepath"
+              txValFile={this.state.file}
+              txChFile={this.handleDataPath}
+              txSbFile={this.handleSubmit}
 
-          selLabVar="Variable"
-          selValVar={this.state.variable}
-          selChVar={this.handleVariable}
-          selMapVar={this.state.variables}
+              selLabVar="Variable"
+              selValVar={this.state.variable}
+              selChVar={this.handleVariable}
+              selMapVar={this.state.variables}
 
-          cbLabCl="Show Coastline"
-          cbStCl={this.state.showCoastline}
-          cbChCl={this.handleShowCoastline}
+              cbLabCl="Show Coastline"
+              cbStCl={this.state.showCoastline}
+              cbChCl={this.handleShowCoastline}
 
-          cbLabFc="Fix Coloring"
-          cbStFc={this.state.fixColoring}
-          cbChFc={this.handleFixColoring}
+              cbLabFc="Fix Coloring"
+              cbStFc={this.state.fixColoring}
+              cbChFc={this.handleFixColoring}
 
-          cbLabSc="Symmetric Coloring"
-          cbStSc={this.state.symColoring}
-          cbChSc={this.handleSymColoring}
+              cbLabSc="Symmetric Coloring"
+              cbStSc={this.state.symColoring}
+              cbChSc={this.handleSymColoring}
 
-          cbLabLc="Log z Coloring"
-          cbStLc={this.state.logzColoring}
-          cbChLc={this.handleLogzColoring}
+              cbLabLc="Log z Coloring"
+              cbStLc={this.state.logzColoring}
+              cbChLc={this.handleLogzColoring}
 
-          selLabCm="Colormap"
-          selValCm={this.state.colorMap}
-          selChCm={this.handleColorMap}
-          selMapCm={cmSelect}
+              selLabCm="Colormap"
+              selValCm={this.state.colorMap}
+              selChCm={this.handleColorMap}
+              selMapCm={cmSelect}
 
-          selLabAd="Aggregate Dimension"
-          selValAd={this.state.aggregateDim}
-          selChAd={this.handleAggregateDim}
-          selMapAd={this.state.aggDimSelect}
+              selLabAd="Dimension"
+              selValAd={this.state.aggregateDim}
+              selChAd={this.handleAggregateDim}
+              selMapAd={this.state.aggDimSelect}
 
-          selLabAf="Aggregate Function"
-          selValAf={this.state.aggregateFun}
-          selChAf={this.handleAggregateFun}
-          selMapAf={funcSelect}
+              selLabAf="Function"
+              selValAf={this.state.aggregateFun}
+              selChAf={this.handleAggregateFun}
+              selMapAf={funcSelect}
 
-          txLabCol="Color Levels"
-          txChCol={this.handleColorLevels}
-          txValCol={this.state.colorLevels}
+              txLabCol="Color Levels"
+              txChCol={this.handleColorLevels}
+              txValCol={this.state.colorLevels}
 
-          txLabFmi="Fix color minimum"
-          txValFmi={this.state.fixColMin}
-          txChFmi={this.handleFixColMi}
+              txLabFmi="Fix color minimum"
+              txValFmi={this.state.fixColMin}
+              txChFmi={this.handleFixColMi}
 
-          txLabFma="Fix color maximum"
-          txValFma={this.state.fixColMax}
-          txChFma={this.handleFixColMa}
+              txLabFma="Fix color maximum"
+              txValFma={this.state.fixColMax}
+              txChFma={this.handleFixColMa}
 
-          cbLabLx="logX"
-          cbChLx={this.handleLogx}
-          cbStLx={this.state.logy}
+              cbLabLx="logX"
+              cbChLx={this.handleLogx}
+              cbStLx={this.state.logx}
 
-          cbLabLy="logY"
-          cbChLy={this.handleLogy}
-          cbStLy={this.state.logx}
+              cbLabLy="logY"
+              cbChLy={this.handleLogy}
+              cbStLy={this.state.logy}
 
-          txActFm={this.state.disabled_FixCol}
-          cbActLxy={this.state.disabled_Logxy}
-          disableDefault={this.state.disabled_default}
+              txActFm={this.state.disabled_FixCol}
+              cbActLxy={this.state.disabled_Logxy}
+              disableDefault={this.state.disabled_default}
 
-          start={this.state.sliderStart}
-          end={this.state.sliderEnd}
-          isActiveSlider={this.state.diabled_Slider}
-          slChLev={this.handleSlider}
+              start={this.state.sliderStart}
+              end={this.state.sliderEnd}
+              isActiveSlider={this.state.diabled_Slider}
+              slChLev={this.handleSlider}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <Plot id={5023}></Plot>
+          </Grid>
+        </Grid>
 
-          btClick={this.getBokehInfo}
-        />
-        <Plot id={5023}></Plot>
+
       </div>
     );
   }

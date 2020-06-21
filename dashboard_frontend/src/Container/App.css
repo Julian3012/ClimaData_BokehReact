@@ -1,12 +1,7 @@
-.bk-grid.bk-grid-row.bk-layout-fixed{
-  width: 0 !important; 
+.bk-grid.bk-grid-row.bk-layout-fixed {
+	width: 0 !important; 
   height: 0 !important;
 }
-.bk-grid.bk-grid-column.bk-layout-fixed{
-  width: 0 !important;
-  height: 0 !important;
-}
-.bk-widget-box.bk-layout-fixed{
-  display: none !important;
-  width: 0 !important;
+.bk-widget-box.bk-layout-fixed {
+	display: none !important;
 }
