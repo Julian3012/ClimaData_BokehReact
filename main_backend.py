@@ -28,7 +28,7 @@ from src.plots.HeightProfilePlot import HeightProfilePlot
 import json
 
 class PlotGenerator:
-    def __init__(self):
+    def __init__(self, dataPath):
 
         hv.extension("bokeh")
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
@@ -75,8 +75,7 @@ class PlotGenerator:
         ]
 
         # Widget Input
-        # self.dataPath = "2016032700-ART-chemtracer_grid_pmn_DOM01_ML_0001.nc"
-        self.dataPath = "2016032700-ART-chemtracer_grid_DOM01_PL_0007.nc"
+        self.dataPath = dataPath
         self.urlinput = None
         self.slCMap = None
         self.txTitle = None
@@ -439,8 +438,10 @@ class PlotGenerator:
         """
         
         """
+        curdoc().clear()
         self.dataPath = new
-        self.mainDialog(True)
+        plot = PlotGenerator(self.dataPath)
+        plot.mainDialog(True)
 
     def cmapUpdate(self, attr, old, new):
         """
@@ -498,7 +499,8 @@ class PlotGenerator:
 # Define the main method here
 def entry():
     try:
-        plot1 = PlotGenerator()
+        dataPath = "2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc"
+        plot1 = PlotGenerator(dataPath)
         plot1.mainDialog(True)
     except Exception as e:
         print(e)
