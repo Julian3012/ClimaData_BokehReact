@@ -73,7 +73,9 @@ class Sidebar extends Component {
                     <TextField
                         value={this.props.txValFile}
                         label={this.props.txLabFile}
-                        onChange={this.props.txChFile} />
+                        onChange={this.props.txChFile} 
+                        onKeyDown={this.props.txSbFile}
+                        />
                     <TextField
                         style={{ marginLeft: 20 }}
                         select
@@ -97,6 +99,7 @@ class Sidebar extends Component {
                                 checked={this.props.cbStCl}
                                 onChange={this.props.cbChCl}
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
+                                disabled={this.props.disableDefault} 
                             />}
                         label={this.props.cbLabCl}
                     />
@@ -106,6 +109,7 @@ class Sidebar extends Component {
                                 checked={this.props.cbStFc}
                                 onChange={this.props.cbChFc}
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
+                                disabled={this.props.disableDefault}
                             />}
                         label={this.props.cbLabFc}
                     />
@@ -115,6 +119,7 @@ class Sidebar extends Component {
                                 checked={this.props.cbStSc}
                                 onChange={this.props.cbChSc}
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
+                                disabled={this.props.disableDefault} 
                             />}
                         label={this.props.cbLabSc}
                     />
@@ -125,27 +130,14 @@ class Sidebar extends Component {
                                 checked={this.props.cbStLc}
                                 onChange={this.props.cbChLc}
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
+                                disabled={this.props.disableDefault} 
                             />}
                         label={this.props.cbLabLc}
                     />
                 </div>
 
                 <div>
-                    <TextField
-                        // id="standard-select-currency"
-                        select
-                        label={this.props.selLabMesh}
-                        value={this.props.selValMesh}
-                        onChange={this.props.selChMesh}
-                        helperText="Please select mesh for file"
-                    >
-                        {this.props.selMapMesh.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-
+             
                     <TextField
                         style={{ marginLeft: 20 }}
                         // id="standard-select-currency"
@@ -154,6 +146,7 @@ class Sidebar extends Component {
                         value={this.props.selValCm}
                         onChange={this.props.selChCm}
                         helperText="Please select color map for file"
+                        disabled={this.props.disableDefault} 
                     >
                         {this.props.selMapCm.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
@@ -180,7 +173,6 @@ class Sidebar extends Component {
 
                     <TextField
                         style={{ marginLeft: 20 }}
-                        // id="standard-select-currency"
                         select
                         label={this.props.selLabAf}
                         value={this.props.selValAf}
@@ -199,11 +191,50 @@ class Sidebar extends Component {
                     <TextField
                         label={this.props.txLabCol}
                         onChange={this.props.txChCol}
-                        value={this.props.txValCol} />
+                        value={this.props.txValCol}
+                        disabled={this.props.disableDefault} 
+                        onKeyDown={this.props.txSbFile}
+                        />
                 </div>
 
                 <div>
                     <Button variant="contained" onClick={this.props.btClick}>Apply</Button>
+                </div>
+
+                <div>
+                    <TextField
+                        label={this.props.txLabFmi}
+                        onChange={this.props.txChFmi}
+                        value={this.props.txValFmi} 
+                        disabled={this.props.txActFm}/>
+                        
+                    <TextField
+                        label={this.props.txLabFma}
+                        onChange={this.props.txChFma}
+                        value={this.props.txValFma} 
+                        disabled={this.props.txActFm}/>
+
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={this.props.cbStLx}
+                                onChange={this.props.cbChLx}
+                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                disabled={this.props.cbActLxy}
+                            />}
+                        label={this.props.cbLabLx}
+                    />
+
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={this.props.cbStLy}
+                                onChange={this.props.cbChLy}
+                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                disabled={this.props.cbActLxy}
+                            />}
+                        label={this.props.cbLabLy}
+                    />
                 </div>
 
                 <div>
