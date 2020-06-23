@@ -1,7 +1,44 @@
+.bk-grid.bk-grid-column.bk-layout-fixed {
+	width: initial !important;
+	height: initial !important;
+}
 .bk-grid.bk-grid-row.bk-layout-fixed {
-	width: 0 !important; 
-  height: 0 !important;
+	width: initial !important;
+	height: initial !important;
 }
 .bk-widget-box.bk-layout-fixed {
 	display: none !important;
 }
+
+/* Decides height of parent component */
+/* .bk-plot-layout.bk-layout-fixed {
+	width: initial !important;
+	height: initial !important;
+} */
+
+/* Plot */
+/* .bk-plot-wrapper{
+	width: initial !important;
+	height: initial !important;
+} */
+
+/* .bk-canvas-wrapper {
+	width: initial !important;
+	height: initial !important;
+	cursor: default !important; 
+} */
+/* canvas.bk-canvas {
+	width: initial !important;
+	height: initial !important;
+} */
+
+/* Bk Events */
+/* [id="934F2FC3B0284FE5BFF97BBE40F87237"] {
+	position: absolute !important;
+	left: initial !important;
+	right: 80px !important;
+	top: 30px !important;
+	width: initial !important;
+	height: initial !important;
+	overflow: hidden;
+} */
