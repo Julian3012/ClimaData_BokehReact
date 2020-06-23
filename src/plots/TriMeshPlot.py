@@ -99,7 +99,7 @@ class TriMeshPlot(Plot):
         coastln = gf.coastline.opts(projection=crs.PlateCarree(), line_width=2)
         rasterizedgraphopts = {"cmap": self.cm, "colorbar": True}
         # TODO do not hardcode the sizes
-        totalgraphopts = {"height": 150, "width": 300}
+        totalgraphopts = {"height": 149, "width": 300}
 
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")
@@ -289,16 +289,3 @@ class TriMeshPlot(Plot):
         
         self.tris = tris
         self.verts = verts
-
-    def sortAndIndex(self, higherThan, lowerThan, attr1, attr2, data1, data2):
-        data1_sorted = data1[
-            (data1[attr1] > higherThan)
-            & (data1[attr1] < lowerThan)
-            & (data1[attr2] > higherThan)
-            & (data1[attr2] < lowerThan)
-        ]
-
-        data2_newIndex = data2.reindex(data1_sorted.index).reset_index()
-        data_sorted = data1_sorted.reset_index()
-
-        return data_sorted, data2_newIndex
