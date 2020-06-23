@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import Sidebar from "../Components/Sidebar/Sidebar"
-import Plot from "../Components/Plot/Plot"
+import Panel from "../Components/Panel"
 import * as constants from "../Components/constants"
 import './App.css';
-import Grid from '@material-ui/core/Grid';
 
 
 // ran into this issue (hence no npm import of bokehjs):
@@ -13,12 +11,12 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    console.log('[Sidebars.js] constructor');
+    console.log('[App.js] constructor');
 
     this.state = {
-      file: "2016032700-ART-chemtracer_grid_DOM01_PL_0007.nc",
+      file: "",
       mesh: "DOM1",
-      variable: "clon",
+      variable: "",
       showCoastline: true,
       colorMap: "Blues",
       fixColoring: false,
@@ -185,7 +183,7 @@ class App extends Component {
   }
 
   getActiveEvent = (val) => {
-    if (val[0] == 0) {
+    if (val[0] === 0) {
       return true;
     } else {
       return false;
@@ -347,10 +345,8 @@ class App extends Component {
     const funcSelect = constants.funcSelect;
 
     return (
-      <div className="App" style={{ margin: 20 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={4}>
-            <Sidebar
+      <div className="App">
+            <Panel
               txLabFile="Filepath"
               txValFile={this.state.file}
               txChFile={this.handleDataPath}
@@ -421,13 +417,6 @@ class App extends Component {
               isActiveSlider={this.state.diabled_Slider}
               slChLev={this.handleSlider}
             />
-          </Grid>
-          <Grid item xs={6}>
-            <Plot id={5023}></Plot>
-          </Grid>
-        </Grid>
-
-
       </div>
     );
   }
