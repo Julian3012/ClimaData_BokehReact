@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { Checkbox, FormControlLabel } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-import Slider from '@material-ui/core/Slider';
-import styled from 'styled-components';
+import { StyledTextField, StyledSlider } from './StyledComponents'
+import Tooltip from '@material-ui/core/Tooltip';
+import PropTypes from 'prop-types';
 
 import Grid from '@material-ui/core/Grid';
 
@@ -13,10 +14,6 @@ class Parameter extends Component {
         function valuetext(value) {
             return `${value}`;
         }
-
-        const StyledTextField = styled(TextField)`
-                width: 90%;
-            `;
 
         const TxFile = () => {
             return (
@@ -257,13 +254,29 @@ class Parameter extends Component {
             );
         }
 
+        function ValueLabelComponent(props) {
+            const { children, open, value } = props;
+
+            return (
+                <Tooltip open={open} enterTouchDelay={0} placement="top" title={value}>
+                    {children}
+                </Tooltip>
+            );
+        }
+
+        ValueLabelComponent.propTypes = {
+            children: PropTypes.element.isRequired,
+            open: PropTypes.bool.isRequired,
+            value: PropTypes.number.isRequired,
+        };
+
         const SliderLev = () => {
             return (
-                <Slider
+                <StyledSlider
+                    ValueLabelComponent={ValueLabelComponent}
                     defaultValue={0}
-                    orientation="vertical"
+                    orientation="horizontal"
                     aria-labelledby="vertical-slider"
-
                     getAriaValueText={valuetext}
                     step={1}
                     min={this.props.start}
@@ -288,20 +301,24 @@ class Parameter extends Component {
                             <SelCm />
                         </Grid>
 
-                        <Grid item xs={12}>
+                        <Grid item md={12} xs={6}>
                             <CbCoastline />
                             <CbFixColoring />
                         </Grid>
 
-                        <Grid item xs={12} style={{ marginBottom: 20 }}>
+                        <Grid item md={12} xs={6} style={{ marginBottom: 20 }}>
                             <CbSymColoring />
                             <CbLogColoring />
                         </Grid>
 
-                        <Grid item xs={12} style={{ marginBottom: 20 }}>
+                        <Grid item md={12} xs={4} style={{ marginBottom: 20 }}>
                             <SelAggDimension />
                             <SelAggFunction />
                             <TxColorlvl />
+                        </Grid>
+
+                        <Grid item xs={12} style={{ marginTop: 10, marginBottom: 10 }}>
+                            <SliderLev />
                         </Grid>
 
                         <Grid item xs={12} style={{ marginBottom: 20 }}>
@@ -314,12 +331,6 @@ class Parameter extends Component {
                             <CbLogY />
                         </Grid>
 
-                    </Grid>
-
-                    <Grid container xs={1}>
-                        <Grid item style={{ marginTop: 10 }}>
-                            <SliderLev />
-                        </Grid>
                     </Grid>
 
                 </Grid>
