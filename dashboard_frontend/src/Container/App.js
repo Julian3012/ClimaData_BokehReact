@@ -325,7 +325,13 @@ class App extends Component {
 
   initSlider = () => {
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    let hasSlider = model.children[this.state.positions.slider].attributes.children[0].attributes.hasOwnProperty("children");
+    let hasSlider = false;
+    if (model.children.length === 18) {
+      hasSlider = model.children[this.state.positions.slider].attributes.children[0].attributes.hasOwnProperty("children");
+    } else {
+      hasSlider = false;
+    }
+
     console.log("Slider active: " + hasSlider);
 
     if (hasSlider) {
@@ -346,77 +352,77 @@ class App extends Component {
 
     return (
       <div className="App">
-            <Panel
-              txLabFile="Filepath"
-              txValFile={this.state.file}
-              txChFile={this.handleDataPath}
-              txSbFile={this.handleSubmit}
+        <Panel
+          txLabFile="Filepath"
+          txValFile={this.state.file}
+          txChFile={this.handleDataPath}
+          txSbFile={this.handleSubmit}
 
-              selLabVar="Variable"
-              selValVar={this.state.variable}
-              selChVar={this.handleVariable}
-              selMapVar={this.state.variables}
+          selLabVar="Variable"
+          selValVar={this.state.variable}
+          selChVar={this.handleVariable}
+          selMapVar={this.state.variables}
 
-              cbLabCl="Show Coastline"
-              cbStCl={this.state.showCoastline}
-              cbChCl={this.handleShowCoastline}
+          cbLabCl="Show Coastline"
+          cbStCl={this.state.showCoastline}
+          cbChCl={this.handleShowCoastline}
 
-              cbLabFc="Fix Coloring"
-              cbStFc={this.state.fixColoring}
-              cbChFc={this.handleFixColoring}
+          cbLabFc="Fix Coloring"
+          cbStFc={this.state.fixColoring}
+          cbChFc={this.handleFixColoring}
 
-              cbLabSc="Symmetric Coloring"
-              cbStSc={this.state.symColoring}
-              cbChSc={this.handleSymColoring}
+          cbLabSc="Symmetric Coloring"
+          cbStSc={this.state.symColoring}
+          cbChSc={this.handleSymColoring}
 
-              cbLabLc="Log z Coloring"
-              cbStLc={this.state.logzColoring}
-              cbChLc={this.handleLogzColoring}
+          cbLabLc="Log z Coloring"
+          cbStLc={this.state.logzColoring}
+          cbChLc={this.handleLogzColoring}
 
-              selLabCm="Colormap"
-              selValCm={this.state.colorMap}
-              selChCm={this.handleColorMap}
-              selMapCm={cmSelect}
+          selLabCm="Colormap"
+          selValCm={this.state.colorMap}
+          selChCm={this.handleColorMap}
+          selMapCm={cmSelect}
 
-              selLabAd="Dimension"
-              selValAd={this.state.aggregateDim}
-              selChAd={this.handleAggregateDim}
-              selMapAd={this.state.aggDimSelect}
+          selLabAd="Dimension"
+          selValAd={this.state.aggregateDim}
+          selChAd={this.handleAggregateDim}
+          selMapAd={this.state.aggDimSelect}
 
-              selLabAf="Function"
-              selValAf={this.state.aggregateFun}
-              selChAf={this.handleAggregateFun}
-              selMapAf={funcSelect}
+          selLabAf="Function"
+          selValAf={this.state.aggregateFun}
+          selChAf={this.handleAggregateFun}
+          selMapAf={funcSelect}
 
-              txLabCol="Color Levels"
-              txChCol={this.handleColorLevels}
-              txValCol={this.state.colorLevels}
+          txLabCol="Color Levels"
+          txChCol={this.handleColorLevels}
+          txValCol={this.state.colorLevels}
 
-              txLabFmi="Fix color minimum"
-              txValFmi={this.state.fixColMin}
-              txChFmi={this.handleFixColMi}
+          txLabFmi="Fix color minimum"
+          txValFmi={this.state.fixColMin}
+          txChFmi={this.handleFixColMi}
 
-              txLabFma="Fix color maximum"
-              txValFma={this.state.fixColMax}
-              txChFma={this.handleFixColMa}
+          txLabFma="Fix color maximum"
+          txValFma={this.state.fixColMax}
+          txChFma={this.handleFixColMa}
 
-              cbLabLx="logX"
-              cbChLx={this.handleLogx}
-              cbStLx={this.state.logx}
+          cbLabLx="logX"
+          cbChLx={this.handleLogx}
+          cbStLx={this.state.logx}
 
-              cbLabLy="logY"
-              cbChLy={this.handleLogy}
-              cbStLy={this.state.logy}
+          cbLabLy="logY"
+          cbChLy={this.handleLogy}
+          cbStLy={this.state.logy}
 
-              txActFm={this.state.disabled_FixCol}
-              cbActLxy={this.state.disabled_Logxy}
-              disableDefault={this.state.disabled_default}
+          txActFm={this.state.disabled_FixCol}
+          cbActLxy={this.state.disabled_Logxy}
+          disableDefault={this.state.disabled_default}
 
-              start={this.state.sliderStart}
-              end={this.state.sliderEnd}
-              isActiveSlider={this.state.diabled_Slider}
-              slChLev={this.handleSlider}
-            />
+          start={this.state.sliderStart}
+          end={this.state.sliderEnd}
+          isActiveSlider={this.state.diabled_Slider}
+          slChLev={this.handleSlider}
+        />
       </div>
     );
   }
