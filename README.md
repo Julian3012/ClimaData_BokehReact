@@ -23,8 +23,6 @@ conda activate ncview2
 bash run_local.sh
 ```
 
-For the new versions comment line 176 and uncomment line 173 in main_backend.py before running the command above
-
 ## run React app
 
 ```
