@@ -10,3 +10,9 @@ data/**
 
 **/*.pyc
 todo*
+
+# Issue2
+.vscode/
+node_modules/
+.DS_Store
+package-lock.json
