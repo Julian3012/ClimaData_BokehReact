@@ -105,7 +105,7 @@ class App extends Component {
 
     this.setState({ file: this.getWidget(this.state.positions.file).value });
 
-    this.setState({ variable: this.getWidget(this.state.positions.variable).value });
+    this.setState((this.getWidget(this.state.positions.variable).value != null) ? { variable: this.getWidget(this.state.positions.variable).value } : {variable: ""});
 
     const hasCoastline = this.getActiveEvent(this.getWidget(this.state.positions.showCoastline).active);
     this.setState({ showCoastline: hasCoastline });
