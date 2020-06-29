@@ -1,15 +1,3 @@
-.bk-grid.bk-grid-column.bk-layout-fixed {
-	width: initial !important;
-	height: initial !important;
-}
-.bk-grid.bk-grid-row.bk-layout-fixed {
-	width: initial !important;
-	height: initial !important;
-}
-.bk-widget-box.bk-layout-fixed {
-	display: none !important;
-}
-
 /* Decides height of parent component */
 /* .bk-plot-layout.bk-layout-fixed {
 	width: initial !important;

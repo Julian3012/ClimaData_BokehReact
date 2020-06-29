@@ -73,7 +73,7 @@ class App extends Component {
   getWidget = (position) => {
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
     if (position <= 16) {
-      return model.attributes.children[position].attributes.children[0].attributes.children[0].attributes.children[0]
+      return model.attributes.children[position].attributes.children[0].attributes.children[0]
     } else if (position === 17) {
       return model.attributes.children[position].attributes.children[0].attributes.children[1].attributes.children[1]
     } else {

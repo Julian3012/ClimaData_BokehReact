@@ -200,7 +200,7 @@ class PlotGenerator:
             # Apply to layout
             lArray = []
             lArray.append([column(self.urlinput)])
-            lArray.append([self.slMesh])
+            lArray.append([column(self.slMesh)])
             lArray.append([column(self.txTitle)])
             lArray.append([column(self.slVar)])
             lArray.append([column(self.cbCoastlineOverlay)])
@@ -217,15 +217,21 @@ class PlotGenerator:
             lArray.append([column(self.slAggregateFunction)])
             lArray.append([column(self.btShow)])
 
-            # Activate for new versions of bokeh/holoviews
-            # lArray.append([plot.get_root()])
-
-            # Activate for old versions of bokeh/holoviews
             if self.dataPath != "":
                 lArray.append([plot.state])
 
             l = layout(lArray)
-            # self.logger.info("layout: ",dir(layout))
+
+            # Hide widgets
+            for widget in l.children:
+                try:
+                    if widget.children[0].children[0].__class__.__name__ != "Figure": 
+                        widget.children[0].children[0].visible = False
+                    else:
+                        widget.children[0].children[1].visible = False
+                except Exception as e:
+                    pass        
+                
             l._id = "1000"
             curdoc().add_root(l)
 
