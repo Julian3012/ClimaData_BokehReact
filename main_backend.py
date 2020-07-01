@@ -497,7 +497,7 @@ class PlotGenerator:
         """
         curdoc().clear()
         self.logger.info("New File: {}".format(new))
-        self.dataPath = new
+        self.__init__(dataPath = new)
         self.mainDialog(True)
 
     def cmapUpdate(self, attr, old, new):
