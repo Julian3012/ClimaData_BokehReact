@@ -3,11 +3,9 @@ import React, { Component } from 'react';
 class Plot extends Component {
 
   render() {
-    return (
-      <div className="Plot">
-        <div id={this.props.id}></div>
-      </div>
-    );
+      return (
+        <div className="Plot" id={this.props.plotId}></div>
+      )
   }
 }
 

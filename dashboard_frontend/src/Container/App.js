@@ -3,10 +3,6 @@ import Panel from "../Components/Panel"
 import * as constants from "../Components/constants"
 import './App.css';
 
-
-// ran into this issue (hence no npm import of bokehjs):
-// https://github.com/bokeh/bokeh/issues/8197
-
 class App extends Component {
 
   constructor(props) {
@@ -14,21 +10,76 @@ class App extends Component {
     console.log('[App.js] constructor');
 
     this.state = {
-      file: "",
-      mesh: "DOM1",
-      variable: "",
-      showCoastline: true,
-      colorMap: "Blues",
-      fixColoring: false,
-      symColoring: false,
-      logzColoring: false,
-      colorLevels: 0,
-      aggregateDim: "None",
-      aggregateFun: "None",
-      fixColMin: "",
-      fixColMax: "",
-      logx: false,
-      logy: false,
+      bk_session: [
+        {
+          id: "1001",
+          session: "AAABBB",
+          pos: 0,
+          file: "",
+          mesh: "DOM1",
+          variable: "",
+          showCoastline: true,
+          colorMap: "Blues",
+          fixColoring: false,
+          symColoring: false,
+          logzColoring: false,
+          colorLevels: 0,
+          aggregateDim: "None",
+          aggregateFun: "None",
+          fixColMin: "",
+          fixColMax: "",
+          logx: false,
+          logy: false,
+          aggDimSelect: [{
+            value: "None",
+            label: "None",
+          }],
+          variables: [{
+            value: "TR_stn",
+            label: "TR_stn",
+          }],
+          disabled_Logxy: true,
+          disabled_FixCol: true,
+          diabled_Slider: true,
+          disabled_default: false,
+          sliderStart: 0,
+          sliderEnd: 20,
+        },
+        {
+          id: "1002",
+          session: "AAACCC",
+          pos: 1,
+          file: "",
+          mesh: "DOM1",
+          variable: "",
+          showCoastline: true,
+          colorMap: "Blues",
+          fixColoring: false,
+          symColoring: false,
+          logzColoring: false,
+          colorLevels: 0,
+          aggregateDim: "None",
+          aggregateFun: "None",
+          fixColMin: "",
+          fixColMax: "",
+          logx: false,
+          logy: false,
+          aggDimSelect: [{
+            value: "None",
+            label: "None",
+          }],
+          variables: [{
+            value: "TR_stn",
+            label: "TR_stn",
+          }],
+          disabled_Logxy: true,
+          disabled_FixCol: true,
+          diabled_Slider: true,
+          disabled_default: false,
+          sliderStart: 0,
+          sliderEnd: 20,
+        },
+      ],
       positions: {
         file: 0,
         mesh: 1,
@@ -49,114 +100,137 @@ class App extends Component {
         uselessBtn: 16,
         slider: 17
       },
-      aggDimSelect: [{
-        value: "None",
-        label: "None",
-      }],
-      variables: [{
-        value: "TR_stn",
-        label: "TR_stn",
-      }],
-      disabled_Logxy: true,
-      disabled_FixCol: true,
-      diabled_Slider: true,
-      disabled_default: false,
-      sliderStart: 0,
-      sliderEnd: 20
     };
   }
 
   componentDidMount() {
-    this.appendScript().then(setTimeout(this.initState, 2000));
+    this.appendScript().then(setTimeout(this.initState, 5000));
   }
 
-  getWidget = (position) => {
-    let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    if (position <= 16) {
-      return model.attributes.children[position].attributes.children[0].attributes.children[0]
-    } else if (position === 17) {
-      return model.attributes.children[position].attributes.children[0].attributes.children[1].attributes.children[1]
+  getWidget = (posWidg, posPlot) => {
+    let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
+    if (posWidg <= 16) {
+      return model.attributes.children[posWidg].attributes.children[0].attributes.children[0]
+    } else if (posWidg === 17) {
+      return model.attributes.children[posWidg].attributes.children[0].attributes.children[1].attributes.children[1]
     } else {
       console.log("Position value does not exist")
     }
   }
 
-  getBokehInfo = () => {
-    console.log(this.state)
-  }
-
   appendScript = () => {
     return new Promise((resolve) => {
 
-      const script = document.createElement("script");
-      script.src = "http://localhost:5010/main_backend/autoload.js?bokeh-autoload-element=5023&bokeh-app-path=/main_backend&bokeh-absolute-url=http://localhost:5010/main_backend&bokeh-session-id=xdGdOjpUPyKW23owmGVIJmWm0zYNjMlWkHvBCOwZWwFE";
-      script.async = true;
-      document.body.appendChild(script);
+      this.state.bk_session.map((sess) => {
+
+        console.log(sess.id)
+
+        const script = document.createElement("script");
+        script.src = this.getScriptSrc(sess.id, sess.session);
+        script.async = true;
+        document.body.appendChild(script);
+
+      })
 
       resolve(true)
     })
   }
 
-  initState = (event) => {
-    let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable).options);
-    let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim).options);
-    this.setState({ variables: optsVar });
-    this.setState({ aggDimSelect: optsAd });
+  getScriptSrc = (id, session) => {
+    const part1 = "http://localhost:5010/main_backend/autoload.js?bokeh-autoload-element=";
+    let strId = id;
+    const part2 = "&bokeh-app-path=/main_backend&bokeh-absolute-url=http://localhost:5010/main_backend&bokeh-session-id=";
+    let strSession = session;
 
-    this.setState({ file: this.getWidget(this.state.positions.file).value });
-
-    this.setState((this.getWidget(this.state.positions.variable).value != null) ? { variable: this.getWidget(this.state.positions.variable).value } : {variable: ""});
-
-    const hasCoastline = this.getActiveEvent(this.getWidget(this.state.positions.showCoastline).active);
-    this.setState({ showCoastline: hasCoastline });
-
-    this.setState({ colorMap: this.getWidget(this.state.positions.colorMap).value });
-
-    const hasFixedColoring = this.getActiveEvent(this.getWidget(this.state.positions.fixColoring).active);
-    this.setState({ fixColoring: hasFixedColoring });
-
-    const hasSymColoring = this.getActiveEvent(this.getWidget(this.state.positions.symColoring).active);
-    this.setState({ symColoring: hasSymColoring });
-
-    const hasLogzColoring = this.getActiveEvent(this.getWidget(this.state.positions.logzColoring).active);
-    this.setState({ logzColoring: hasLogzColoring });
-
-    this.setState({ colorLevels: this.getWidget(this.state.positions.colorLevels).value });
-
-    let aggregateDim = this.getWidget(this.state.positions.aggregateDim).value;
-    if (aggregateDim === null) {
-      aggregateDim = "None";
-    }
-    this.setState({ aggregateDim: aggregateDim });
-
-    this.setState({ aggregateFun: this.getWidget(this.state.positions.aggregateFun).value });
-
-    this.checkActive();
-    this.initSlider();
-
-    console.log("model loaded")
+    console.log(part1 + strId + part2 + strSession)
+    return part1 + strId + part2 + strSession;
   }
 
-  checkActive = () => {
-    if (this.state.aggregateDim !== "lat" || this.state.aggregateFun === "None") {
-      this.setState({ disabled_default: false });
+  setSession = (pos, plot) => {
+    const bk_session = [...this.state.bk_session];
+    bk_session[pos] = plot;
+    this.setState({ bk_session: bk_session });
+  }
+
+  initState = () => {
+    this.state.bk_session.map((sess) => {
+      let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, sess.pos).options);
+      let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, sess.pos).options);
+
+      const plot = {
+        ...this.state.bk_session[sess.pos]
+      };
+
+      plot.variables = optsVar;
+      plot.aggDimSelect = optsAd;
+
+      plot.file = this.getWidget(this.state.positions.file, sess.pos).value;
+      this.setSession(sess.pos, plot);
+
+      plot.variable = (this.getWidget(this.state.positions.variable, sess.pos).value != null) ? this.getWidget(this.state.positions.variable, sess.pos).value : "";
+
+      const hasCoastline = this.getActiveEvent(this.getWidget(this.state.positions.showCoastline, sess.pos).active);
+      plot.showCoastline = hasCoastline;
+
+      plot.colorMap = this.getWidget(this.state.positions.colorMap, sess.pos).value;
+
+      const hasFixedColoring = this.getActiveEvent(this.getWidget(this.state.positions.fixColoring, sess.pos).active);
+      plot.fixColoring = hasFixedColoring;
+
+      const hasSymColoring = this.getActiveEvent(this.getWidget(this.state.positions.symColoring, sess.pos).active);
+      plot.symColoring = hasSymColoring;
+
+      const hasLogzColoring = this.getActiveEvent(this.getWidget(this.state.positions.logzColoring, sess.pos).active);
+      plot.logzColoring = hasLogzColoring;
+
+      plot.colorLevels = this.getWidget(this.state.positions.colorLevels, sess.pos).value;
+
+      let aggregateDim = this.getWidget(this.state.positions.aggregateDim, sess.pos).value;
+      if (aggregateDim === null) {
+        aggregateDim = "None";
+      }
+      plot.aggregateDim = aggregateDim;
+
+      plot.aggregateFun = this.getWidget(this.state.positions.aggregateFun, sess.pos).value;
+
+      this.setSession(sess.pos, plot)
+
+      console.log(plot)
+
+      this.checkActive(sess.pos);
+      this.initSlider(sess.pos);
+
+      console.log("model loaded")
+    })
+  }
+
+
+  checkActive = (posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
+
+    if (this.state.bk_session[posPlot].aggregateDim !== "lat" || this.state.bk_session[posPlot].aggregateFun === "None") {
+      plot.disabled_default = false;
     } else {
-      this.setState({ disabled_default: true });
+      plot.disabled_default = true;
     }
 
-    if (this.state.fixColoring) {
+    if (this.state.bk_session[posPlot].fixColoring) {
       console.log("Enable Fix Coloring")
-      this.setState({ disabled_FixCol: false });
+      plot.disabled_FixCol = false;
     } else {
       console.log("Disable Fix Coloring")
-      this.setState({ disabled_FixCol: true });
+      plot.disabled_FixCol = true;
     }
 
-    if (this.state.aggregateDim === "lat" || this.state.aggregateFun !== "None") {
-      this.setState({ disabled_Logxy: false });
+    if (this.state.bk_session[posPlot].aggregateDim === "lat" || this.state.bk_session[posPlot].aggregateFun !== "None") {
+      plot.disabled_Logxy = false;
     } else {
-      this.setState({ disabled_Logxy: true });
+      plot.disabled_Logxy = true;
     }
+
+    this.setSession(posPlot, plot)
   }
 
   mkOptions = (option) => {
@@ -167,10 +241,15 @@ class App extends Component {
     return arr;
   }
 
-  handleColorMap = (event) => {
-    this.setState({ colorMap: event.target.value })
-    this.getWidget(this.state.positions.colorMap).value = event.target.value
+  handleColorMap = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
 
+    plot.colorMap = event.target.value;
+    this.getWidget(this.state.positions.colorMap, posPlot).value = event.target.value;
+
+    this.setSession(posPlot, plot);
     console.log("Changed colormap")
   };
 
@@ -190,142 +269,200 @@ class App extends Component {
     }
   }
 
-  handleShowCoastline = () => {
-    let doesShow = this.state.showCoastline;
-    this.setState({ showCoastline: !doesShow });
-    this.getWidget(this.state.positions.showCoastline).active = this.setActiveEvent(doesShow);
+  handleShowCoastline = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
 
+    let doesShow = this.state.bk_session[posPlot].showCoastline;
+    plot.showCoastline = !doesShow;
+    this.getWidget(this.state.positions.showCoastline, posPlot).active = this.setActiveEvent(doesShow);
+
+    this.setSession(posPlot, plot);
     console.log("State showCoastline changed")
   };
 
-  handleFixColoring = () => {
-    let doesShow = this.state.fixColoring;
-    this.setState({ fixColoring: !doesShow });
-    this.setState({ disabled_FixCol: doesShow });
-    this.getWidget(this.state.positions.fixColoring).active = this.setActiveEvent(doesShow);
+  handleFixColoring = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
 
+    let doesShow = this.state.bk_session[posPlot].fixColoring;
+    plot.fixColoring = !doesShow;
+    plot.disabled_FixCol = doesShow;
+    this.getWidget(this.state.positions.fixColoring, posPlot).active = this.setActiveEvent(doesShow);
+
+    this.setSession(posPlot, plot);
+
+    console.log("Fix Coloring Position: " + posPlot)
     console.log("State fixColoring changed")
   };
 
-  handleSymColoring = () => {
-    let doesShow = this.state.symColoring;
-    this.setState({ symColoring: !doesShow });
-    this.getWidget(this.state.positions.symColoring).active = this.setActiveEvent(doesShow);
+  handleSymColoring = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
+    let doesShow = this.state.bk_session[posPlot].symColoring;
+    plot.symColoring = !doesShow;
+    this.getWidget(this.state.positions.symColoring, posPlot).active = this.setActiveEvent(doesShow);
 
+    this.setSession(posPlot, plot);
     console.log("State symColoring changed")
   };
 
-  handleLogzColoring = () => {
-    let doesShow = this.state.logzColoring;
-    this.setState({ logzColoring: !doesShow });
-    this.getWidget(this.state.positions.logzColoring).active = this.setActiveEvent(doesShow);
+  handleLogzColoring = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
 
+    let doesShow = this.state.bk_session[posPlot].logzColoring;
+    plot.logzColoring = !doesShow;
+    this.getWidget(this.state.positions.logzColoring, posPlot).active = this.setActiveEvent(doesShow);
+
+    this.setSession(posPlot, plot);
     console.log("State logzColoring changed")
   };
 
-  handleLogx = () => {
-    let doesShow = this.state.logx;
-    this.setState({ logx: !doesShow });
-    this.getWidget(this.state.positions.logx).active = this.setActiveEvent(doesShow);
+  handleLogx = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
 
+    let doesShow = this.state.bk_session[posPlot].logx;
+    plot.logx = !doesShow;
+    this.getWidget(this.state.positions.logx, posPlot).active = this.setActiveEvent(doesShow);
+
+    this.setSession(posPlot, plot);
     console.log("State logx changed")
   };
 
-  handleLogy = () => {
-    let doesShow = this.state.logy;
-    this.setState({ logy: !doesShow });
-    this.getWidget(this.state.positions.logy).active = this.setActiveEvent(doesShow);
+  handleLogy = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
 
+    let doesShow = this.state.bk_session[posPlot].logy;
+    plot.logy = !doesShow;
+    this.getWidget(this.state.positions.logy, posPlot).active = this.setActiveEvent(doesShow);
+
+    this.setSession(posPlot, plot);
     console.log("State logy changed")
   };
 
-  handleAggregateFun = (event) => {
-    this.setState({ aggregateFun: event.target.value });
+  handleAggregateFun = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
+    plot.aggregateFun = event.target.value;
     console.log("Value: " + event.target.value)
 
-    if (this.state.aggregateDim !== "lat" || event.target.value === "None") {
+    if (this.state.bk_session[posPlot].aggregateDim !== "lat" || event.target.value === "None") {
       console.log("Enable default widgets")
-      this.setState({ disabled_default: false });
-      this.setState({ disabled_Logxy: true });
+      plot.disabled_default = false;
+      plot.disabled_Logxy = true;
     } else {
       console.log("Disable default widgets")
-      this.setState({ disabled_default: true });
-      this.setState({ disabled_Logxy: false });
+      plot.disabled_default = true;
+      plot.disabled_Logxy = false;
     }
 
-    this.getWidget(this.state.positions.aggregateFun).value = event.target.value;
+    this.setSession(posPlot, plot);
+
+    this.getWidget(this.state.positions.aggregateFun, posPlot).value = event.target.value;
 
     console.log("State aggregateFun changed")
   };
 
-  handleAggregateDim = (event) => {
-    this.setState({ aggregateDim: event.target.value });
+  handleAggregateDim = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
+    plot.aggregateDim = event.target.value;
 
     if (event.target.value !== "lat" || this.state.aggregateFun === "None") {
       console.log("Enable default widgets")
-      this.setState({ disabled_default: false });
-      this.setState({ disabled_Logxy: true });
+      plot.disabled_default = false;
+      plot.disabled_Logxy = true;
     } else {
       console.log("Disable default widgets")
-      this.setState({ disabled_default: true });
-      this.setState({ disabled_default: false });
+      plot.disabled_default = true;
+      plot.disabled_default = false;
     }
 
-    this.getWidget(this.state.positions.aggregateDim).value = event.target.value;
+    this.setSession(posPlot, plot);
+
+    this.getWidget(this.state.positions.aggregateDim, posPlot).value = event.target.value;
 
     console.log("State aggregateDim changed")
   };
 
-  handleColorLevels = (event) => {
-    this.setState({ colorLevels: event.target.value })
-    this.getWidget(this.state.positions.colorLevels).value = event.target.value;
+  handleColorLevels = (event, posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
 
+    plot.colorLevels = event.target.value;
+    this.getWidget(this.state.positions.colorLevels, posPlot).value = event.target.value;
+
+    this.setSession(posPlot, plot);
     console.log("State colorLevels changed")
   };
 
-  handleVariable = (event) => {
-    this.setState({ variable: event.target.value });
-    this.getWidget(this.state.positions.variable).value = event.target.value;
+  handleVariable = (event, posPlot) => {
 
-    setTimeout(this.initSlider, 1500);
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
+
+    plot.variable = event.target.value;
+    this.getWidget(this.state.positions.variable, posPlot).value = event.target.value;
+
+    this.setSession(posPlot, plot);
+
+    setTimeout(() => {this.initSlider(posPlot)}, 1500);
+
     console.log("State variable changed")
   };
 
-  handleSubmit = (event) => {
+  handleSubmit = (event, posPlot) => {
+
     if (event.keyCode === 13) {
-      this.getWidget(this.state.positions.file).value = this.state.file;
-      window.location.reload(true);
+      this.getWidget(this.state.positions.file, posPlot).value = this.state.bk_session[posPlot].file;
+      console.log(this.state.bk_session)
+      setTimeout(this.initState, 5000);
+      // setTimeout(() => {window.location.reload(true)}, 30000);
     }
   };
 
-  handleDataPath = (event) => {
-    this.setState({ file: event.target.value });
-  }
+  handleDataPath = (event, posPlot) => {
 
-  handleHeight = () => {
-    let height = "";
-    if (this.state.file.includes("ML")) {
-      height = "height"
-    } else if (this.state.file.includes("PL")) {
-      height = "lev"
-    } else {
-      height = "alt"
+    const plot = {
+      ...this.state.bk_session[posPlot]
     };
-    return height;
+    plot.file = event.target.value;
+
+    this.setSession(posPlot, plot);
+    console.log("Plot position: " + posPlot)
   }
 
-  handleSlider = (event, newValue) => {
+  handleSlider = (event, newValue, posPlot) => {
 
-    let slider = this.getWidget(this.state.positions.slider);
+    let slider = this.getWidget(this.state.positions.slider, posPlot);
 
-    if (newValue <= this.state.sliderEnd) {
+    if (newValue <= this.state.bk_session[posPlot].sliderEnd) {
       slider.value = newValue;
+      console.log(slider.value)
     }
   }
 
-  initSlider = () => {
-    let model = window.Bokeh.documents[0].get_model_by_id("1000");
+  initSlider = (posPlot) => {
+    const plot = {
+      ...this.state.bk_session[posPlot]
+    };
+
+    let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
     let hasSlider = false;
+
     if (model.children.length === 18) {
       hasSlider = model.children[this.state.positions.slider].attributes.children[0].attributes.hasOwnProperty("children");
     } else {
@@ -335,96 +472,103 @@ class App extends Component {
     console.log("Slider active: " + hasSlider);
 
     if (hasSlider) {
-      let slider = this.getWidget(this.state.positions.slider);
-      console.log("Init Slider: " + slider.end)
+      let slider = this.getWidget(this.state.positions.slider, posPlot);
+      plot.sliderEnd = slider.end;
+      plot.sliderStart = slider.start;
+      plot.diabled_Slider = false;
 
-      this.setState({ sliderEnd: slider.end });
-      this.setState({ sliderStart: slider.start });
-      this.setState({ diabled_Slider: false });;
+      console.log("Init Slider End: " + slider.end);
     } else {
-      this.setState({ diabled_Slider: true });
+      plot.diabled_Slider = true;
     }
+
+    this.setSession(posPlot, plot)
+
   }
 
   render() {
     const cmSelect = constants.cmSelect;
     const funcSelect = constants.funcSelect;
 
-    return (
-      <div className="App">
-        <Panel
-          txLabFile="Filepath"
-          txValFile={this.state.file}
-          txChFile={this.handleDataPath}
-          txSbFile={this.handleSubmit}
+    return this.state.bk_session.map((sess) => {
+      return (
+        <div className="App">
+          <Panel
+            txLabFile="Filepath"
+            txValFile={sess.file}
+            txChFile={(event) => { this.handleDataPath(event, sess.pos) }}
+            txSbFile={(event) => { this.handleSubmit(event, sess.pos) }}
 
-          selLabVar="Variable"
-          selValVar={this.state.variable}
-          selChVar={this.handleVariable}
-          selMapVar={this.state.variables}
+            selLabVar="Variable"
+            selValVar={sess.variable}
+            selChVar={(event) => { this.handleVariable(event, sess.pos) }}
+            selMapVar={sess.variables}
 
-          cbLabCl="Show Coastline"
-          cbStCl={this.state.showCoastline}
-          cbChCl={this.handleShowCoastline}
+            cbLabCl="Show Coastline"
+            cbStCl={sess.showCoastline}
+            cbChCl={(event) => { this.handleShowCoastline(event, sess.pos) }}
 
-          cbLabFc="Fix Coloring"
-          cbStFc={this.state.fixColoring}
-          cbChFc={this.handleFixColoring}
+            cbLabFc="Fix Coloring"
+            cbStFc={sess.fixColoring}
+            cbChFc={(event) => { this.handleFixColoring(event, sess.pos) }}
 
-          cbLabSc="Symmetric Coloring"
-          cbStSc={this.state.symColoring}
-          cbChSc={this.handleSymColoring}
+            cbLabSc="Symmetric Coloring"
+            cbStSc={sess.symColoring}
+            cbChSc={(event) => { this.handleSymColoring(event, sess.pos) }}
 
-          cbLabLc="Log z Coloring"
-          cbStLc={this.state.logzColoring}
-          cbChLc={this.handleLogzColoring}
+            cbLabLc="Log z Coloring"
+            cbStLc={sess.logzColoring}
+            cbChLc={(event) => { this.handleLogzColoring(event, sess.pos) }}
 
-          selLabCm="Colormap"
-          selValCm={this.state.colorMap}
-          selChCm={this.handleColorMap}
-          selMapCm={cmSelect}
+            selLabCm="Colormap"
+            selValCm={sess.colorMap}
+            selChCm={(event) => { this.handleColorMap(event, sess.pos) }}
+            selMapCm={cmSelect}
 
-          selLabAd="Dimension"
-          selValAd={this.state.aggregateDim}
-          selChAd={this.handleAggregateDim}
-          selMapAd={this.state.aggDimSelect}
+            selLabAd="Dimension"
+            selValAd={sess.aggregateDim}
+            selChAd={(event) => { this.handleAggregateDim(event, sess.pos) }}
+            selMapAd={sess.aggDimSelect}
 
-          selLabAf="Function"
-          selValAf={this.state.aggregateFun}
-          selChAf={this.handleAggregateFun}
-          selMapAf={funcSelect}
+            selLabAf="Function"
+            selValAf={sess.aggregateFun}
+            selChAf={(event) => { this.handleAggregateFun(event, sess.pos) }}
+            selMapAf={funcSelect}
 
-          txLabCol="Color Levels"
-          txChCol={this.handleColorLevels}
-          txValCol={this.state.colorLevels}
+            txLabCol="Color Levels"
+            txChCol={(event) => { this.handleColorLevels(event, sess.pos) }}
+            txValCol={sess.colorLevels}
 
-          txLabFmi="Fix color minimum"
-          txValFmi={this.state.fixColMin}
-          txChFmi={this.handleFixColMi}
+            txLabFmi="Fix color minimum"
+            txValFmi={sess.fixColMin}
+            txChFmi={(event) => { this.handleFixColMi(event, sess.pos) }}
 
-          txLabFma="Fix color maximum"
-          txValFma={this.state.fixColMax}
-          txChFma={this.handleFixColMa}
+            txLabFma="Fix color maximum"
+            txValFma={sess.fixColMax}
+            txChFma={(event) => { this.handleFixColMa(event, sess.pos) }}
 
-          cbLabLx="logX"
-          cbChLx={this.handleLogx}
-          cbStLx={this.state.logx}
+            cbLabLx="logX"
+            cbChLx={(event) => { this.handleLogx(event, sess.pos) }}
+            cbStLx={sess.logx}
 
-          cbLabLy="logY"
-          cbChLy={this.handleLogy}
-          cbStLy={this.state.logy}
+            cbLabLy="logY"
+            cbChLy={(event) => { this.handleLogy(event, sess.pos) }}
+            cbStLy={sess.logy}
 
-          txActFm={this.state.disabled_FixCol}
-          cbActLxy={this.state.disabled_Logxy}
-          disableDefault={this.state.disabled_default}
+            txActFm={sess.disabled_FixCol}
+            cbActLxy={sess.disabled_Logxy}
+            disableDefault={sess.disabled_default}
 
-          start={this.state.sliderStart}
-          end={this.state.sliderEnd}
-          isActiveSlider={this.state.diabled_Slider}
-          slChLev={this.handleSlider}
-        />
-      </div>
-    );
+            start={sess.sliderStart}
+            end={sess.sliderEnd}
+            isActiveSlider={sess.diabled_Slider}
+            slChLev={(event, newValue) => { this.handleSlider(event, newValue, sess.pos) }}
+
+            plotId={sess.id}
+          />
+        </div>
+      )
+    });
   }
 }
 

@@ -4,7 +4,7 @@ import Parameter from "./Parameter/Parameter"
 import Grid from '@material-ui/core/Grid';
 
 class Panel extends Component {
-  
+
   ParameterProps = () => {
     return (
       <Parameter
@@ -100,19 +100,20 @@ class Panel extends Component {
       borderBottom: "solid #DADDE7 1px",
     };
 
-    return (
-      <div className="App">
-        <Grid container spacing={3} style={{ margin: 20 }}>
-          <Grid item sm={4} style={gridLeftStyle}>
-            {this.ParameterProps()}
+      return (
+        <div className="App">
+          <Grid container spacing={3} style={{ margin: 20 }}>
+            <Grid item sm={4} style={gridLeftStyle}>
+              {this.ParameterProps()}
+            </Grid>
+            <Grid item xs={6} style={gridRightStyle}>
+              <Plot plotId={this.props.plotId}></Plot>
+            </Grid>
           </Grid>
-          <Grid item xs={6} style={gridRightStyle}>
-            <Plot id={5023}></Plot>
-          </Grid>
-        </Grid>
-      </div>
-    );
+        </div>
+      )
   }
 }
+
 
 export default Panel;
