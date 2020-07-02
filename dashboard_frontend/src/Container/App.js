@@ -100,11 +100,12 @@ class App extends Component {
         uselessBtn: 16,
         slider: 17
       },
+      didMount: 0,
     };
   }
 
   componentDidMount() {
-    this.appendScript().then(setTimeout(this.initState, 5000));
+    this.appendScript().then(setTimeout(this.initState, 4000));
   }
 
   getWidget = (posWidg, posPlot) => {
@@ -122,14 +123,10 @@ class App extends Component {
     return new Promise((resolve) => {
 
       this.state.bk_session.map((sess) => {
-
-        console.log(sess.id)
-
         const script = document.createElement("script");
         script.src = this.getScriptSrc(sess.id, sess.session);
         script.async = true;
         document.body.appendChild(script);
-
       })
 
       resolve(true)
@@ -142,7 +139,6 @@ class App extends Component {
     const part2 = "&bokeh-app-path=/main_backend&bokeh-absolute-url=http://localhost:5010/main_backend&bokeh-session-id=";
     let strSession = session;
 
-    console.log(part1 + strId + part2 + strSession)
     return part1 + strId + part2 + strSession;
   }
 
@@ -153,55 +149,61 @@ class App extends Component {
   }
 
   initState = () => {
-    this.state.bk_session.map((sess) => {
-      let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, sess.pos).options);
-      let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, sess.pos).options);
+    console.log("Start initializing state")
+    try {
+      this.state.bk_session.map((sess) => {
+        let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, sess.pos).options);
+        let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, sess.pos).options);
 
-      const plot = {
-        ...this.state.bk_session[sess.pos]
-      };
+        const plot = {
+          ...this.state.bk_session[sess.pos]
+        };
 
-      plot.variables = optsVar;
-      plot.aggDimSelect = optsAd;
+        plot.variables = optsVar;
+        plot.aggDimSelect = optsAd;
 
-      plot.file = this.getWidget(this.state.positions.file, sess.pos).value;
-      this.setSession(sess.pos, plot);
+        plot.file = this.getWidget(this.state.positions.file, sess.pos).value;
+        this.setSession(sess.pos, plot);
 
-      plot.variable = (this.getWidget(this.state.positions.variable, sess.pos).value != null) ? this.getWidget(this.state.positions.variable, sess.pos).value : "";
+        plot.variable = (this.getWidget(this.state.positions.variable, sess.pos).value != null) ? this.getWidget(this.state.positions.variable, sess.pos).value : "";
 
-      const hasCoastline = this.getActiveEvent(this.getWidget(this.state.positions.showCoastline, sess.pos).active);
-      plot.showCoastline = hasCoastline;
+        const hasCoastline = this.getActiveEvent(this.getWidget(this.state.positions.showCoastline, sess.pos).active);
+        plot.showCoastline = hasCoastline;
 
-      plot.colorMap = this.getWidget(this.state.positions.colorMap, sess.pos).value;
+        plot.colorMap = this.getWidget(this.state.positions.colorMap, sess.pos).value;
 
-      const hasFixedColoring = this.getActiveEvent(this.getWidget(this.state.positions.fixColoring, sess.pos).active);
-      plot.fixColoring = hasFixedColoring;
+        const hasFixedColoring = this.getActiveEvent(this.getWidget(this.state.positions.fixColoring, sess.pos).active);
+        plot.fixColoring = hasFixedColoring;
 
-      const hasSymColoring = this.getActiveEvent(this.getWidget(this.state.positions.symColoring, sess.pos).active);
-      plot.symColoring = hasSymColoring;
+        const hasSymColoring = this.getActiveEvent(this.getWidget(this.state.positions.symColoring, sess.pos).active);
+        plot.symColoring = hasSymColoring;
 
-      const hasLogzColoring = this.getActiveEvent(this.getWidget(this.state.positions.logzColoring, sess.pos).active);
-      plot.logzColoring = hasLogzColoring;
+        const hasLogzColoring = this.getActiveEvent(this.getWidget(this.state.positions.logzColoring, sess.pos).active);
+        plot.logzColoring = hasLogzColoring;
 
-      plot.colorLevels = this.getWidget(this.state.positions.colorLevels, sess.pos).value;
+        plot.colorLevels = this.getWidget(this.state.positions.colorLevels, sess.pos).value;
 
-      let aggregateDim = this.getWidget(this.state.positions.aggregateDim, sess.pos).value;
-      if (aggregateDim === null) {
-        aggregateDim = "None";
-      }
-      plot.aggregateDim = aggregateDim;
+        let aggregateDim = this.getWidget(this.state.positions.aggregateDim, sess.pos).value;
+        if (aggregateDim === null) {
+          aggregateDim = "None";
+        }
+        plot.aggregateDim = aggregateDim;
 
-      plot.aggregateFun = this.getWidget(this.state.positions.aggregateFun, sess.pos).value;
+        plot.aggregateFun = this.getWidget(this.state.positions.aggregateFun, sess.pos).value;
 
-      this.setSession(sess.pos, plot)
+        this.setSession(sess.pos, plot)
 
-      console.log(plot)
+        console.log(plot)
 
-      this.checkActive(sess.pos);
-      this.initSlider(sess.pos);
+        this.checkActive(sess.pos);
+        this.initSlider(sess.pos);
 
-      console.log("model loaded")
-    })
+        console.log("model loaded")
+      })
+    } catch (e) {
+      this.componentDidMount();
+      console.log(e);
+    }
   }
 
 
@@ -419,7 +421,7 @@ class App extends Component {
 
     this.setSession(posPlot, plot);
 
-    setTimeout(() => {this.initSlider(posPlot)}, 1500);
+    setTimeout(() => { this.initSlider(posPlot) }, 1500);
 
     console.log("State variable changed")
   };
@@ -430,6 +432,7 @@ class App extends Component {
       this.getWidget(this.state.positions.file, posPlot).value = this.state.bk_session[posPlot].file;
       console.log(this.state.bk_session)
       setTimeout(this.initState, 5000);
+      // window.location.reload(true);
       // setTimeout(() => {window.location.reload(true)}, 30000);
     }
   };
@@ -451,7 +454,6 @@ class App extends Component {
 
     if (newValue <= this.state.bk_session[posPlot].sliderEnd) {
       slider.value = newValue;
-      console.log(slider.value)
     }
   }
 
