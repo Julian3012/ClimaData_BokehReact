@@ -350,7 +350,7 @@ class App extends Component {
     this.setSession(posPlot, plot);
     console.log("State logy changed")
   };
-
+  
   handleAggregateFun = (event, posPlot) => {
     const plot = {
       ...this.state.bk_session[posPlot]
@@ -492,85 +492,47 @@ class App extends Component {
     const cmSelect = constants.cmSelect;
     const funcSelect = constants.funcSelect;
 
-    return this.state.bk_session.map((sess) => {
-      return (
-        <div className="App">
-          <Panel
-            txLabFile="Filepath"
-            txValFile={sess.file}
-            txChFile={(event) => { this.handleDataPath(event, sess.pos) }}
-            txSbFile={(event) => { this.handleSubmit(event, sess.pos) }}
+    return (
+      <div className="App">
+        <Panel
+          txChFile={this.handleDataPath}
+          txSbFile={this.handleSubmit}
 
-            selLabVar="Variable"
-            selValVar={sess.variable}
-            selChVar={(event) => { this.handleVariable(event, sess.pos) }}
-            selMapVar={sess.variables}
+          selChVar={this.handleVariable}
 
-            cbLabCl="Show Coastline"
-            cbStCl={sess.showCoastline}
-            cbChCl={(event) => { this.handleShowCoastline(event, sess.pos) }}
+          cbChCl={this.handleShowCoastline}
 
-            cbLabFc="Fix Coloring"
-            cbStFc={sess.fixColoring}
-            cbChFc={(event) => { this.handleFixColoring(event, sess.pos) }}
+          cbChFc={this.handleFixColoring}
 
-            cbLabSc="Symmetric Coloring"
-            cbStSc={sess.symColoring}
-            cbChSc={(event) => { this.handleSymColoring(event, sess.pos) }}
+          cbChSc={this.handleSymColoring}
 
-            cbLabLc="Log z Coloring"
-            cbStLc={sess.logzColoring}
-            cbChLc={(event) => { this.handleLogzColoring(event, sess.pos) }}
+          cbChLc={this.handleLogzColoring}
 
-            selLabCm="Colormap"
-            selValCm={sess.colorMap}
-            selChCm={(event) => { this.handleColorMap(event, sess.pos) }}
-            selMapCm={cmSelect}
+          selChCm={this.handleColorMap}
+          selMapCm={cmSelect}
 
-            selLabAd="Dimension"
-            selValAd={sess.aggregateDim}
-            selChAd={(event) => { this.handleAggregateDim(event, sess.pos) }}
-            selMapAd={sess.aggDimSelect}
+          selChAd={this.handleAggregateDim}
 
-            selLabAf="Function"
-            selValAf={sess.aggregateFun}
-            selChAf={(event) => { this.handleAggregateFun(event, sess.pos) }}
-            selMapAf={funcSelect}
+          selChAf={this.handleAggregateFun}
+          selMapAf={funcSelect}
 
-            txLabCol="Color Levels"
-            txChCol={(event) => { this.handleColorLevels(event, sess.pos) }}
-            txValCol={sess.colorLevels}
+          txChCol={this.handleColorLevels}
 
-            txLabFmi="Fix color minimum"
-            txValFmi={sess.fixColMin}
-            txChFmi={(event) => { this.handleFixColMi(event, sess.pos) }}
+          txChFmi={this.handleFixColMi}
 
-            txLabFma="Fix color maximum"
-            txValFma={sess.fixColMax}
-            txChFma={(event) => { this.handleFixColMa(event, sess.pos) }}
+          txChFma={this.handleFixColMa}
 
-            cbLabLx="logX"
-            cbChLx={(event) => { this.handleLogx(event, sess.pos) }}
-            cbStLx={sess.logx}
+          cbChLx={this.handleLogx}
 
-            cbLabLy="logY"
-            cbChLy={(event) => { this.handleLogy(event, sess.pos) }}
-            cbStLy={sess.logy}
+          cbChLy={this.handleLogy}
 
-            txActFm={sess.disabled_FixCol}
-            cbActLxy={sess.disabled_Logxy}
-            disableDefault={sess.disabled_default}
 
-            start={sess.sliderStart}
-            end={sess.sliderEnd}
-            isActiveSlider={sess.diabled_Slider}
-            slChLev={(event, newValue) => { this.handleSlider(event, newValue, sess.pos) }}
+          slChLev={this.handleSlider}
 
-            plotId={sess.id}
-          />
-        </div>
-      )
-    });
+          bk_session={this.state.bk_session}
+        />
+      </div>
+    )
   }
 }
 

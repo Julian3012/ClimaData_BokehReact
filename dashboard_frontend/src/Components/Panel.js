@@ -5,78 +5,78 @@ import Grid from '@material-ui/core/Grid';
 
 class Panel extends Component {
 
-  ParameterProps = () => {
+  ParameterProps = (sess) => {
     return (
       <Parameter
         txLabFile="Filepath"
-        txValFile={this.props.txValFile}
-        txChFile={this.props.txChFile}
-        txSbFile={this.props.txSbFile}
+        txValFile={sess.file}
+        txChFile={(event) => {this.props.txChFile(event, sess.pos)}}
+        txSbFile={(event) => {this.props.txSbFile(event, sess.pos)}}
 
         selLabVar="Variable"
-        selValVar={this.props.selValVar}
-        selChVar={this.props.selChVar}
-        selMapVar={this.props.selMapVar}
+        selValVar={sess.variable}
+        selChVar={(event) => {this.props.selChVar(event, sess.pos)}}
+        selMapVar={sess.variables}
 
         cbLabCl="Show Coastline"
-        cbStCl={this.props.cbStCl}
-        cbChCl={this.props.cbChCl}
+        cbStCl={sess.showCoastline}
+        cbChCl={(event) => {this.props.cbChCl(event, sess.pos)}}
 
         cbLabFc="Fix Coloring"
-        cbStFc={this.props.cbStFc}
-        cbChFc={this.props.cbChFc}
+        cbStFc={sess.fixColoring}
+        cbChFc={(event) => {this.props.cbChFc(event, sess.pos)}}
 
         cbLabSc="Symmetric Coloring"
-        cbStSc={this.props.cbStSc}
-        cbChSc={this.props.cbChSc}
+        cbStSc={sess.symColoring}
+        cbChSc={(event) => {this.props.cbChSc(event, sess.pos)}}
 
         cbLabLc="Log z Coloring"
-        cbStLc={this.props.cbStLc}
-        cbChLc={this.props.cbChLc}
+        cbStLc={sess.logzColoring}
+        cbChLc={(event) => {this.props.cbChLc(event, sess.pos)}}
 
         selLabCm="Colormap"
-        selValCm={this.props.selValCm}
-        selChCm={this.props.selChCm}
+        selValCm={sess.colorMap}
+        selChCm={(event) => {this.props.selChCm(event, sess.pos)}}
         selMapCm={this.props.selMapCm}
 
         selLabAd="Dimension"
-        selValAd={this.props.selValAd}
-        selChAd={this.props.selChAd}
-        selMapAd={this.props.selMapAd}
+        selValAd={sess.aggregateDim}
+        selChAd={(event) => {this.props.selChAd(event, sess.pos)}}
+        selMapAd={sess.aggDimSelect}
 
         selLabAf="Function"
-        selValAf={this.props.selValAf}
-        selChAf={this.props.selChAf}
+        selValAf={sess.aggregateFun}
+        selChAf={(event) => {this.props.selChAf(event, sess.pos)}}
         selMapAf={this.props.selMapAf}
 
         txLabCol="Color Levels"
-        txChCol={this.props.txChCol}
-        txValCol={this.props.txValCol}
+        txChCol={(event) => {this.props.txChCol(event, sess.pos)}}
+        txValCol={sess.colorLevels}
 
         txLabFmi="Fix color minimum"
-        txValFmi={this.props.txValFmi}
-        txChFmi={this.props.txChFmi}
+        txValFmi={sess.fixColMin}
+        txChFmi={(event) => {this.props.txChFmi(event, sess.pos)}}
 
         txLabFma="Fix color maximum"
-        txValFma={this.props.txValFma}
-        txChFma={this.props.txChFma}
+        txValFma={sess.fixColMax}
+        txChFma={(event) => {this.props.txChFma(event, sess.pos)}}
 
         cbLabLx="logX"
-        cbChLx={this.props.cbChLx}
-        cbStLx={this.props.cbStLx}
+        cbChLx={(event) => {this.props.cbChLx(event, sess.pos)}}
+        cbStLx={sess.logx}
 
         cbLabLy="logY"
-        cbChLy={this.props.cbChLy}
-        cbStLy={this.props.cbStLy}
+        cbChLy={(event) => {this.props.cbChLy(event, sess.pos)}}
+        cbStLy={sess.logy}
 
-        txActFm={this.props.txActFm}
-        cbActLxy={this.props.cbActLxy}
-        disableDefault={this.props.disableDefault}
+        txActFm={sess.disabled_FixCol}
+        cbActLxy={sess.disabled_Logxy}
+        disableDefault={sess.disabled_default}
 
-        start={this.props.start}
-        end={this.props.end}
-        isActiveSlider={this.props.isActiveSlider}
-        slChLev={this.props.slChLev}
+        start={sess.sliderStart}
+        end={sess.sliderEnd}
+        isActiveSlider={sess.diabled_Slider}
+        slChLev={(event, newValue) => {this.props.slChLev(event, newValue, sess.pos)}}
       />
     );
   }
@@ -100,18 +100,22 @@ class Panel extends Component {
       borderBottom: "solid #DADDE7 1px",
     };
 
-      return (
-        <div className="App">
-          <Grid container spacing={3} style={{ margin: 20 }}>
-            <Grid item sm={4} style={gridLeftStyle}>
-              {this.ParameterProps()}
-            </Grid>
-            <Grid item xs={6} style={gridRightStyle}>
-              <Plot plotId={this.props.plotId}></Plot>
-            </Grid>
-          </Grid>
-        </div>
-      )
+    return (
+      <div className="App">
+
+        {this.props.bk_session.map((sess) => {
+          return (
+            <Grid container spacing={3} style={{ margin: 20 }}>
+              <Grid item sm={4} style={gridLeftStyle}>
+                {this.ParameterProps(sess)}
+              </Grid>
+              <Grid item xs={6} style={gridRightStyle}>
+                <Plot plotId={sess.id}></Plot>
+              </Grid>
+            </Grid>)
+        })}
+      </div>
+    )
   }
 }
 

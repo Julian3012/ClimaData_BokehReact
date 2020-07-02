@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import { Checkbox, FormControlLabel } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-import { StyledTextField, StyledSlider, ValueLabelComponent } from './StyledComponents'
-import Tooltip from '@material-ui/core/Tooltip';
-import PropTypes from 'prop-types';
+import { StyledTextField, StyledSlider, ValueLabelComponent } from './Widgets/StyledComponents'
 
 import Grid from '@material-ui/core/Grid';
 
@@ -251,8 +249,8 @@ class Parameter extends Component {
 
     valuetext = (value) => {
         return `${value}`;
-    }  
-    
+    }
+
     SliderLev = () => {
         return (
             <StyledSlider
@@ -272,7 +270,7 @@ class Parameter extends Component {
     }
 
     render() {
-      
+
         return (
             <div>
                 <Grid container={true} spacing={3}>
