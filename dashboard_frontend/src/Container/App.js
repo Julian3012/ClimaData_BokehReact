@@ -201,7 +201,6 @@ class App extends Component {
         console.log("model loaded")
       })
     } catch (e) {
-      this.componentDidMount();
       console.log(e);
     }
   }
