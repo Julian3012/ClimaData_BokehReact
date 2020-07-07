@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
-import { Checkbox, FormControlLabel } from '@material-ui/core';
-import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
-import { StyledTextField, StyledSlider, ValueLabelComponent } from '../Styles/StyledComponents'
-
+import { StyledSlider, ValueLabelComponent } from '../Styles/StyledSlider';
+import FileTextField from "../Styles/FileTextField";
+import {StyledCheckbox, StyledFormControlLabel} from "../Styles/StyledCheckbox";
+import {StyledSelection, StyledMenuItem} from "../Styles/StyledSelection";
 import Grid from '@material-ui/core/Grid';
+
+import TextField from '@material-ui/core/TextField';
 
 class Parameter extends Component {
 
     TxFile = () => {
         return (
-            < StyledTextField
+            < FileTextField
                 variant="outlined"
                 size="small"
                 value={this.props.txValFile}
@@ -23,8 +24,7 @@ class Parameter extends Component {
 
     SelVariable = () => {
         return (
-            <TextField
-                // style={{ marginLeft: 20 }}
+            <StyledSelection
                 variant="outlined"
                 size="small"
                 select={true}
@@ -33,18 +33,18 @@ class Parameter extends Component {
                 onChange={this.props.selChVar}
             >
                 {this.props.selMapVar.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <StyledMenuItem key={option.value} value={option.value}>
                         {option.label}
-                    </MenuItem>
+                    </StyledMenuItem>
                 ))}
-            </TextField>
+            </StyledSelection>
         );
     }
 
     SelAggDimension = () => {
         return (
 
-            <TextField
+            <StyledSelection
                 variant="outlined"
                 size="small"
                 select={true}
@@ -53,18 +53,18 @@ class Parameter extends Component {
                 onChange={this.props.selChAd}
             >
                 {this.props.selMapAd.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <StyledMenuItem key={option.value} value={option.value}>
                         {option.label}
-                    </MenuItem>
+                    </StyledMenuItem>
                 ))}
-            </TextField>
+            </StyledSelection>
 
         );
     }
 
     SelAggFunction = () => {
         return (
-            <TextField
+            <StyledSelection
                 style={{ marginLeft: 20 }}
                 select={true}
                 variant="outlined"
@@ -74,11 +74,11 @@ class Parameter extends Component {
                 onChange={this.props.selChAf}
             >
                 {this.props.selMapAf.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
+                    <StyledMenuItem key={option.value} value={option.value}>
                         {option.label}
-                    </MenuItem>
+                    </StyledMenuItem>
                 ))}
-            </TextField>
+            </StyledSelection>
 
         );
     }
@@ -126,9 +126,9 @@ class Parameter extends Component {
 
     CbLogX = () => {
         return (
-            <FormControlLabel
+            <StyledFormControlLabel
                 control={
-                    <Checkbox
+                    <StyledCheckbox
                         checked={this.props.cbStLx}
                         variant="outlined"
                         size="small"
@@ -143,9 +143,9 @@ class Parameter extends Component {
 
     CbLogY = () => {
         return (
-            <FormControlLabel
+            <StyledFormControlLabel
                 control={
-                    <Checkbox
+                    <StyledCheckbox
                         checked={this.props.cbStLy}
                         variant="outlined"
                         size="small"

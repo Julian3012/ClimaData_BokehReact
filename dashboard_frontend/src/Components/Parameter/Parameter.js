@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Checkbox, FormControlLabel } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-import { StyledTextField, StyledSlider, ValueLabelComponent } from '../Styles/StyledComponents'
+import { StyledSlider, ValueLabelComponent } from '../Styles/StyledSlider'
+import FileTextField from "../Styles/FileTextField";
 
 import Grid from '@material-ui/core/Grid';
 
@@ -10,7 +11,7 @@ class Parameter extends Component {
 
     TxFile = () => {
         return (
-            < StyledTextField
+            < FileTextField
                 variant="outlined"
                 size="small"
                 value={this.props.txValFile}
