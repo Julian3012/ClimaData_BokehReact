@@ -35,29 +35,6 @@ class PlotGenerator:
         hv.extension("bokeh")
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
 
-        # Add theme for plot
-        # bk_theme = Theme(
-        #     json={
-        #         "attrs": {
-        #             "Figure": {
-        #                 "background_fill_color": "white",
-        #                 "border_fill_color": "#e6e6e6",
-        #                 "border_line_color":"#e6e6e6",
-
-        #             },
-        #             "Grid": {"grid_line_dash": [6, 4], "grid_line_alpha": 0.3,},
-        #             "Axis": {
-        #                 "major_label_text_color": "white",
-        #                 "axis_label_text_color": "white",
-        #                 "major_tick_line_color": "white",
-        #                 "minor_tick_line_color": "white",
-        #                 "axis_line_color": "white",
-        #             },
-        #         }
-        #     }
-        # )
-        # self.renderer.theme = bk_theme
-
         FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
         logging.basicConfig(format=FORMAT, level=logging.DEBUG)
         self.logger = logging.getLogger("ncview2")
@@ -133,7 +110,7 @@ class PlotGenerator:
         self.meshOptions = ["DOM1", "DOM2"]
 
         self.val_dict = {
-            "variable": None,
+            "variable": "None",
             "cm": self.COLORMAPS[0],
             "aggDim": self.optAggDim[0],
             "aggFn": self.optAggFun[0],
@@ -143,6 +120,10 @@ class PlotGenerator:
             "lcol": [],
             "logX": [],
             "logY": [],
+            "x_range_start": 0,
+            "x_range_end": 0,
+            "y_range_start": 0,
+            "y_range_end": 0,
             "cl": "0",
         }
 
@@ -158,6 +139,10 @@ class PlotGenerator:
         self.cLogZ = None
         self.logX = None
         self.logY = None
+        self.x_range_start = None
+        self.x_range_end = None
+        self.y_range_start = None
+        self.y_range_end = None
 
     def mainDialog(self, dataUpdate=True):
         """
@@ -170,7 +155,6 @@ class PlotGenerator:
 
             # Clear doc when update occurs
             curdoc().clear()
-            self.logger.info("New values: {}".format(self.val_dict))
 
             # Get data
             if self.dataPath != "":
@@ -179,10 +163,14 @@ class PlotGenerator:
                 self.logger.info("File: " + link)
                 self.optVariables = [x for x in self.xrDataMeta.variables.keys()]
 
-                if self.val_dict["variable"] == None:
+                if self.val_dict["variable"] == "None":
                     self.val_dict["variable"] = self.optVariables[0]
+                # self.logger.info(self.val_dict["variable"])
+                # self.logger.info(self.optVariables)
             else: 
-                self.optVariables = [""]
+                self.optVariables = ["None"]
+
+            self.logger.info("New values: {}".format(self.val_dict))
 
             # Init widgets
             if self.variable == None:
@@ -217,19 +205,37 @@ class PlotGenerator:
             lArray.append([column(self.slAggregateFunction)])
             lArray.append([column(self.btShow)])
 
+            lArray.append([column(self.x_range_start)])
+            lArray.append([column(self.x_range_end)])
+            lArray.append([column(self.y_range_start)])
+            lArray.append([column(self.y_range_end)])
+
             if self.dataPath != "":
+                plot.state.css_classes = ["plot_object"]
                 lArray.append([plot.state])
+
+                try:
+                    plot.state.children[0].x_range.on_change('start', self.x_range_start_callback)
+                    plot.state.children[0].x_range.on_change('end', self.x_range_end_callback)
+                    plot.state.children[0].y_range.on_change('start', self.y_range_start_callback)
+                    plot.state.children[0].y_range.on_change('end', self.y_range_end_callback)
+                except Exception as e:
+                    self.logger.info(e)
+
 
             l = layout(lArray)
 
             # Hide widgets
             for widget in l.children:
                 try:
+                    # if widget.children[0].children[0].css_classes == ["plot_ranges"]:
+                    #     widget.children[0].children[0].visible = True
                     if widget.children[0].children[0].__class__.__name__ != "Figure": 
                         widget.children[0].children[0].visible = False
                     else:
                         widget.children[0].children[1].visible = False
                 except Exception as e:
+                    self.logger.info(e)
                     pass        
                 
             l._id = "1000"
@@ -239,6 +245,19 @@ class PlotGenerator:
             self.logger.info("MainDialog took %d" % (end - start))
         except Exception as e:
             print(e)
+
+    def x_range_start_callback(self, attr, old, new):
+        self.x_range_start.value = str(new)
+    
+    def x_range_end_callback(self, attr, old, new):
+        self.x_range_end.value = str(new)
+
+    def y_range_start_callback(self, attr, old, new):
+        self.y_range_start.value = str(new)
+
+    def y_range_end_callback(self, attr, old, new):
+        self.y_range_end.value = str(new)
+
 
     def disableWidgets(self):
         # Hide colormap option if CurvePlot is used
@@ -381,7 +400,7 @@ class PlotGenerator:
         startWidgets = time.time()
 
         self.urlinput = TextInput(
-            value=self.dataPath, title="File"  # "netCDF file -OR- OPeNDAP URL:"
+            value=self.dataPath, title="File"
         )
         self.urlinput.on_change("value", self.fileUpdate)
 
@@ -448,6 +467,28 @@ class PlotGenerator:
 
         self.btShow = Button(label="Get New Plot")
         self.btShow.on_click(self.btClick)
+
+        self.x_range_start = TextInput(
+            value=str(self.val_dict["x_range_start"]), title="x_range_start", css_classes=["plot_ranges"]
+        )
+        self.x_range_start.disabled = True
+
+        self.x_range_end = TextInput(
+            value=str(self.val_dict["x_range_end"]), title="x_range_end", css_classes=["plot_ranges"]
+        )
+        self.x_range_end.disabled = True
+
+        self.y_range_start = TextInput(
+            value=str(self.val_dict["y_range_start"]), title="y_range_start", css_classes=["plot_ranges"]
+        )
+        self.y_range_start.disabled = True
+
+        self.y_range_end = TextInput(
+            value=str(self.val_dict["y_range_end"]), title="y_range_end", css_classes=["plot_ranges"]
+        )
+        self.y_range_end.disabled = True
+
+
 
         endWidgets = time.time()
         timeWidgets = endWidgets - startWidgets

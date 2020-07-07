@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Checkbox, FormControlLabel } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-import { StyledTextField, StyledSlider, ValueLabelComponent } from './Widgets/StyledComponents'
+import { StyledTextField, StyledSlider, ValueLabelComponent } from '../Styles/StyledComponents'
 
 import Grid from '@material-ui/core/Grid';
 

@@ -10,63 +10,63 @@ class Panel extends Component {
       <Parameter
         txLabFile="Filepath"
         txValFile={sess.file}
-        txChFile={(event) => {this.props.txChFile(event, sess.pos)}}
-        txSbFile={(event) => {this.props.txSbFile(event, sess.pos)}}
+        txChFile={(event) => {this.props.txChFile(event, [sess.pos])}}
+        txSbFile={(event) => {this.props.txSbFile(event, [sess.pos])}}
 
         selLabVar="Variable"
         selValVar={sess.variable}
-        selChVar={(event) => {this.props.selChVar(event, sess.pos)}}
+        selChVar={(event) => {this.props.selChVar(event, [sess.pos])}}
         selMapVar={sess.variables}
 
         cbLabCl="Show Coastline"
         cbStCl={sess.showCoastline}
-        cbChCl={(event) => {this.props.cbChCl(event, sess.pos)}}
+        cbChCl={(event) => {this.props.cbChCl(event, [sess.pos])}}
 
         cbLabFc="Fix Coloring"
         cbStFc={sess.fixColoring}
-        cbChFc={(event) => {this.props.cbChFc(event, sess.pos)}}
+        cbChFc={(event) => {this.props.cbChFc(event, [sess.pos])}}
 
         cbLabSc="Symmetric Coloring"
         cbStSc={sess.symColoring}
-        cbChSc={(event) => {this.props.cbChSc(event, sess.pos)}}
+        cbChSc={(event) => {this.props.cbChSc(event, [sess.pos])}}
 
         cbLabLc="Log z Coloring"
         cbStLc={sess.logzColoring}
-        cbChLc={(event) => {this.props.cbChLc(event, sess.pos)}}
+        cbChLc={(event) => {this.props.cbChLc(event, [sess.pos])}}
 
         selLabCm="Colormap"
         selValCm={sess.colorMap}
-        selChCm={(event) => {this.props.selChCm(event, sess.pos)}}
+        selChCm={(event) => {this.props.selChCm(event, [sess.pos])}}
         selMapCm={this.props.selMapCm}
 
         selLabAd="Dimension"
         selValAd={sess.aggregateDim}
-        selChAd={(event) => {this.props.selChAd(event, sess.pos)}}
+        selChAd={(event) => {this.props.selChAd(event, [sess.pos])}}
         selMapAd={sess.aggDimSelect}
 
         selLabAf="Function"
         selValAf={sess.aggregateFun}
-        selChAf={(event) => {this.props.selChAf(event, sess.pos)}}
+        selChAf={(event) => {this.props.selChAf(event, [sess.pos])}}
         selMapAf={this.props.selMapAf}
 
         txLabCol="Color Levels"
-        txChCol={(event) => {this.props.txChCol(event, sess.pos)}}
+        txChCol={(event) => {this.props.txChCol(event, [sess.pos])}}
         txValCol={sess.colorLevels}
 
         txLabFmi="Fix color minimum"
         txValFmi={sess.fixColMin}
-        txChFmi={(event) => {this.props.txChFmi(event, sess.pos)}}
+        txChFmi={(event) => {this.props.txChFmi(event, [sess.pos])}}
 
         txLabFma="Fix color maximum"
         txValFma={sess.fixColMax}
-        txChFma={(event) => {this.props.txChFma(event, sess.pos)}}
+        txChFma={(event) => {this.props.txChFma(event, [sess.pos])}}
 
         cbLabLx="logX"
-        cbChLx={(event) => {this.props.cbChLx(event, sess.pos)}}
+        cbChLx={(event) => {this.props.cbChLx(event, [sess.pos])}}
         cbStLx={sess.logx}
 
         cbLabLy="logY"
-        cbChLy={(event) => {this.props.cbChLy(event, sess.pos)}}
+        cbChLy={(event) => {this.props.cbChLy(event, [sess.pos])}}
         cbStLy={sess.logy}
 
         txActFm={sess.disabled_FixCol}
@@ -76,7 +76,7 @@ class Panel extends Component {
         start={sess.sliderStart}
         end={sess.sliderEnd}
         isActiveSlider={sess.diabled_Slider}
-        slChLev={(event, newValue) => {this.props.slChLev(event, newValue, sess.pos)}}
+        slChLev={(event, newValue) => {this.props.slChLev(event, newValue, [sess.pos])}}
       />
     );
   }
