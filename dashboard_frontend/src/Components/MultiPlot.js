@@ -32,11 +32,11 @@ class MultiPlot extends Component {
                 txChCol={(event) => { this.props.txChCol(event, [sess.pos]) }}
                 txValCol={sess.colorLevels}
 
-                txLabFmi="Fix color minimum"
+                txLabFmi="Fix color min"
                 txValFmi={sess.fixColMin}
                 txChFmi={(event) => { this.props.txChFmi(event, [sess.pos]) }}
 
-                txLabFma="Fix color maximum"
+                txLabFma="Fix color max"
                 txValFma={sess.fixColMax}
                 txChFma={(event) => { this.props.txChFma(event, [sess.pos]) }}
 
