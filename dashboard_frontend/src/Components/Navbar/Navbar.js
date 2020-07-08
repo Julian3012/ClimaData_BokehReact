@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import {StyledCheckbox, StyledFormControlLabel} from "../Styles/StyledCheckbox";
+import { StyledCheckbox, StyledFormControlLabel } from "../Styles/StyledCheckbox";
 import StyledButton from "../Styles/StyledButton";
 import { StyledSelection, StyledMenuItem } from "../Styles/StyledSelection";
 import Toolbar from '@material-ui/core/Toolbar';
-
+import Grid from '@material-ui/core/Grid';
 
 class Navbar extends Component {
 
@@ -122,20 +122,34 @@ class Navbar extends Component {
     render() {
         const navbarStyle = {
             background: "white",
-            // position: "center",
             paddingLeft: 50,
+            align: "right",
             borderRight: "solid #DADDE7 1px",
             borderTop: "solid #DADDE7 1px",
             borderBottom: "solid #DADDE7 1px",
         };
         return (
             <Toolbar style={navbarStyle}>
-                {this.SelCm()}
-                {this.CbCoastline()}
-                {this.CbFixColoring()}
-                {this.CbLogColoring()}
-                {this.CbSymColoring()}
-                {this.BtnZoom()}
+                <Grid container justify="center" alignItems="center" spacing={3}>
+                    <Grid item>
+                        {this.SelCm()}
+                    </Grid>
+                    <Grid item>
+                        {this.CbCoastline()}
+                    </Grid>
+                    <Grid item>
+                        {this.CbFixColoring()}
+                    </Grid>
+                    <Grid item>
+                        {this.CbLogColoring()}
+                    </Grid>
+                    <Grid item>
+                        {this.CbSymColoring()}
+                    </Grid>
+                    <Grid item>
+                        {this.BtnZoom()}
+                    </Grid>
+                </Grid>
             </Toolbar>
         );
     }
