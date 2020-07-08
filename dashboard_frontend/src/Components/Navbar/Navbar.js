@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { StyledCheckbox, StyledFormControlLabel } from "../Styles/StyledCheckbox";
-import StyledButton from "../Styles/StyledButton";
 import { StyledSelection, StyledMenuItem } from "../Styles/StyledSelection";
 import Toolbar from '@material-ui/core/Toolbar';
 import Grid from '@material-ui/core/Grid';
@@ -10,7 +9,6 @@ class Navbar extends Component {
     SelCm = () => {
         return (
             <StyledSelection
-                style={{ marginLeft: 20 }}
                 select={true}
                 variant="outlined"
                 size="small"
@@ -113,12 +111,6 @@ class Navbar extends Component {
         );
     }
 
-    BtnZoom = () => {
-        return (
-            <StyledButton variant="contained" style={{ margin: 20 }} onClick={this.props.onClick}>Get Zoom</StyledButton>
-        );
-    }
-
     render() {
         const navbarStyle = {
             background: "white",
@@ -146,9 +138,7 @@ class Navbar extends Component {
                     <Grid item>
                         {this.CbSymColoring()}
                     </Grid>
-                    <Grid item>
-                        {this.BtnZoom()}
-                    </Grid>
+                    
                 </Grid>
             </Toolbar>
         );

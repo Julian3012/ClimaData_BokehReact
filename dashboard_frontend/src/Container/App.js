@@ -84,7 +84,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.appendScript().then(setTimeout(this.initState, 4000));
+    this.appendScript().then(setTimeout(this.initState, 2000));
   }
 
   getWidget = (posWidg, posPlot) => {
@@ -539,7 +539,7 @@ class App extends Component {
           cbChLy={this.handleLogy}
           slChLev={this.handleSlider}
           bk_session={this.state.bk_session}
-          onMouseOver={this.onMouseOver}
+          onClick={this.handleZoom}
         />
       )
     } else {
@@ -564,7 +564,7 @@ class App extends Component {
 
           disableDefaultNavbar={this.state.bk_session[0].disabled_default}
 
-          onClick={this.onMouseOver}
+          onClick={this.handleZoom}
 
           // Plots
           txChFile={this.handleDataPath}
@@ -605,15 +605,18 @@ class App extends Component {
     return range_dict;
   }
 
-  onMouseOver = () => {
-    let model1 = window.Bokeh.documents[0].get_model_by_id("1000");
-    let model2 = window.Bokeh.documents[1].get_model_by_id("1000");
+  handleZoom = (posPlot) => {
+    let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
+    const ranges = this.getPlotRange(model);
 
-    const ranges = this.getPlotRange(model1);
-    model2.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end = ranges["model_y_end"];
-    model2.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start = ranges["model_y_start"];
-    model2.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end = ranges["model_x_end"];
-    model2.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start = ranges["model_x_start"];
+    this.state.bk_session.map((sess) => {
+      let model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
+
+      model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end = ranges["model_y_end"];
+      model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start = ranges["model_y_start"];
+      model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end = ranges["model_x_end"];
+      model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start = ranges["model_x_start"];
+    })
 
     console.log("Zoom")
 
@@ -622,7 +625,7 @@ class App extends Component {
   render() {
     return (
       <div className="App" >
-        <Button variant="contained" style={{ margin: 20 }} onClick={this.changeLayout}>Change Layout</Button>
+        {/* <Button variant="contained" style={{ margin: 20 }} onClick={this.changeLayout}>Change Layout</Button> */}
         {this.activeLayout()}
       </div >
     )

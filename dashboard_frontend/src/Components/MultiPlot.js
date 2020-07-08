@@ -56,6 +56,8 @@ class MultiPlot extends Component {
                 end={sess.sliderEnd}
                 isActiveSlider={sess.diabled_Slider}
                 slChLev={(event, newValue) => { this.props.slChLev(event, newValue, [sess.pos]) }}
+
+                onClick={() => {this.props.onClick([sess.pos])}}
             />
         );
     }
@@ -85,8 +87,6 @@ class MultiPlot extends Component {
                 selMapCm={this.props.selMapCm}
 
                 disableDefault={this.props.disableDefaultNavbar}
-
-                onClick={this.props.onClick}
             />
         );
     }

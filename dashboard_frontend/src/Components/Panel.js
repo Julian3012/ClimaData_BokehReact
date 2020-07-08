@@ -77,6 +77,8 @@ class Panel extends Component {
         end={sess.sliderEnd}
         isActiveSlider={sess.diabled_Slider}
         slChLev={(event, newValue) => {this.props.slChLev(event, newValue, [sess.pos])}}
+
+        onClick={() => {this.props.onClick([sess.pos])}}
       />
     );
   }
