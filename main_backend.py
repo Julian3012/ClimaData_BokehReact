@@ -97,6 +97,7 @@ class PlotGenerator:
         self.slVar = None
 
         # Plot related
+        self.plot = None
         self.tmPlot = None
         self.cuPlot = None
         self.hpPlot = None
@@ -165,8 +166,6 @@ class PlotGenerator:
 
                 if self.val_dict["variable"] == "None":
                     self.val_dict["variable"] = self.optVariables[0]
-                # self.logger.info(self.val_dict["variable"])
-                # self.logger.info(self.optVariables)
             else: 
                 self.optVariables = ["None"]
 
@@ -212,6 +211,7 @@ class PlotGenerator:
 
             if self.dataPath != "":
                 plot.state.css_classes = ["plot_object"]
+                plot.state.sizing_mode = "stretch_both"
                 lArray.append([plot.state])
 
                 try:
@@ -585,7 +585,6 @@ class PlotGenerator:
     def getFile(self):
         """
         Function to capsulate the url input.
-
         Returns:
             str: The entered data url
         """
