@@ -6,8 +6,9 @@ import React from 'react';
 
 export const StyledSlider = withStyles({
     root: {
-        marginTop: 8,
-        width: "90%",
+        marginTop: 5,
+        marginLeft: 30,
+        width: "80%",
         color: '#404863',
     },
     active: {},
