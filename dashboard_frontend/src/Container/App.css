@@ -1,23 +1,18 @@
-/* Decides height of parent component */
-/* .bk-plot-layout.bk-layout-fixed {
-	width: initial !important;
-	height: initial !important;
-} */
-
-/* Plot */
-/* .bk-plot-wrapper{
-	width: initial !important;
-	height: initial !important;
-} */
-
-/* .bk-canvas-wrapper {
-	width: initial !important;
-	height: initial !important;
-	cursor: default !important; 
-} */
 /* canvas.bk-canvas {
-	width: initial !important;
-	height: initial !important;
+	width: 600px !important;
+	height: 300px !important;
+}
+
+.bk-canvas-events{
+	width: 600px !important;
+	height: 300px !important;
+}
+.bk-canvas-events > div {
+	left: 600px !important;
+}
+
+.bk-toolbar.bk-toolbar-right{
+
 } */
 
 /* Bk Events */

@@ -11,11 +11,13 @@ class App extends Component {
     super(props);
     console.log('[App.js] constructor');
 
-    let session1 = this.createSession("0000", "1000", 0)
-    let session2 = this.createSession("0001", "1001", 1)
+    let session1 = this.createSession("0000", "1000", 0);
+    let session2 = this.createSession("0001", "1001", 1);
+    let session3 = this.createSession("0002", "1002", 2);
+    let session4 = this.createSession("0003", "1003", 3);
 
     this.state = {
-      bk_session: [session1, session2],
+      bk_session: [session1, session2, session3, session4],
       positions: {
         file: 0,
         mesh: 1,
@@ -38,6 +40,7 @@ class App extends Component {
       },
       didMount: 0,
       changeLayout: false,
+      activeSidebar: false,
     };
   }
 
@@ -465,20 +468,30 @@ class App extends Component {
   }
 
   handleSlider = (event, newValue, posPlot) => {
-    let plot = []
-    posPlot.map((pos) => {
-      return plot.push(this.state.bk_session[pos]);
-    })
+    try {
+      let plot = []
+      posPlot.map((pos) => {
+        return plot.push(this.state.bk_session[pos]);
+      })
 
-    plot.map((sess) => {
-      let slider = this.getWidget(this.state.positions.slider, sess.pos);
+      plot.map((sess) => {
+        let slider = this.getWidget(this.state.positions.slider, sess.pos);
 
-      if (newValue <= this.state.bk_session[sess.pos].sliderEnd) {
-        slider.value = newValue;
-      }
-      return "";
-    })
+        if (newValue <= this.state.bk_session[sess.pos].sliderEnd) {
+          slider.value = newValue;
+        }
+        return "";
+      })
+    }
+    catch (e) {
+      console.log(e);
+    }
   };
+
+  handleExpandClick = () => {
+    let exp = this.state.expanded;
+    this.setState({ expanded: !exp });
+  }
 
   initSlider = (posPlot) => {
     let plot = []
@@ -512,6 +525,11 @@ class App extends Component {
 
       return this.setSession(sess.pos, sess);
     })
+  }
+
+  handleSidebar = () => {
+    let activeSidebar = this.state.activeSidebar;
+    this.setState({ activeSidebar: !activeSidebar });
   }
 
   activeLayout = () => {
@@ -586,6 +604,9 @@ class App extends Component {
 
           slChLev={this.handleSlider}
           bk_session={this.state.bk_session}
+
+          activeSidebar={this.state.activeSidebar}
+          showSidebar={this.handleSidebar}
         />
       )
     }
@@ -606,26 +627,29 @@ class App extends Component {
   }
 
   handleZoom = (posPlot) => {
-    let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
-    const ranges = this.getPlotRange(model);
+    try {
+      let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
+      const ranges = this.getPlotRange(model);
 
-    this.state.bk_session.map((sess) => {
-      let model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
+      this.state.bk_session.map((sess) => {
+        let model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
 
-      model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end = ranges["model_y_end"];
-      model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start = ranges["model_y_start"];
-      model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end = ranges["model_x_end"];
-      model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start = ranges["model_x_start"];
-    })
+        model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end = ranges["model_y_end"];
+        model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start = ranges["model_y_start"];
+        model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end = ranges["model_x_end"];
+        model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start = ranges["model_x_start"];
+      })
 
-    console.log("Zoom")
-
+      console.log("Zoom")
+    }
+    catch (e) {
+      console.log(e);
+    }
   }
 
   render() {
     return (
       <div className="App" >
-        {/* <Button variant="contained" style={{ margin: 20 }} onClick={this.changeLayout}>Change Layout</Button> */}
         {this.activeLayout()}
       </div >
     )

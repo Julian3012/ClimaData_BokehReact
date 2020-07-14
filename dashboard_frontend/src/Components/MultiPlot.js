@@ -3,63 +3,42 @@ import Plot from "./Plot/Plot";
 import Parameter2 from "./Parameter/Parameter2";
 import Navbar from "./Navbar/Navbar";
 import Grid from '@material-ui/core/Grid';
+import Sidebar from "./Sidebar/Sidebar";
+import { StyledSlider, ValueLabelComponent } from './Styles/StyledSlider';
+import StyledButton from "./Styles/StyledButton";
 
 class MultiPlot extends Component {
-    ParameterProps = (sess) => {
-        return (
-            <Parameter2
-                txLabFile="Filepath"
-                txValFile={sess.file}
-                txChFile={(event) => { this.props.txChFile(event, [sess.pos]) }}
-                txSbFile={(event) => { this.props.txSbFile(event, [sess.pos]) }}
+    SidebarProps = () => {
+        if (this.props.activeSidebar) {
+            return (
+                <Sidebar
+                    bk_session={this.props.bk_session}
+                    txChFile={this.props.txChFile}
+                    txSbFile={this.props.txSbFile}
 
-                selLabVar="Variable"
-                selValVar={sess.variable}
-                selChVar={(event) => { this.props.selChVar(event, [sess.pos]) }}
-                selMapVar={sess.variables}
+                    selChVar={this.props.selChVar}
 
-                selLabAd="Dimension"
-                selValAd={sess.aggregateDim}
-                selChAd={(event) => { this.props.selChAd(event, [sess.pos]) }}
-                selMapAd={sess.aggDimSelect}
+                    selChAd={this.props.selChAd}
 
-                selLabAf="Function"
-                selValAf={sess.aggregateFun}
-                selChAf={(event) => { this.props.selChAf(event, [sess.pos]) }}
-                selMapAf={this.props.selMapAf}
+                    selChAf={this.props.selChAf}
+                    selMapAf={this.props.selMapAf}
 
-                txLabCol="Color Levels"
-                txChCol={(event) => { this.props.txChCol(event, [sess.pos]) }}
-                txValCol={sess.colorLevels}
+                    txChCol={this.props.txChCol}
 
-                txLabFmi="Fix color min"
-                txValFmi={sess.fixColMin}
-                txChFmi={(event) => { this.props.txChFmi(event, [sess.pos]) }}
+                    txChFmi={this.props.txChFmi}
 
-                txLabFma="Fix color max"
-                txValFma={sess.fixColMax}
-                txChFma={(event) => { this.props.txChFma(event, [sess.pos]) }}
+                    txChFma={this.props.txChFma}
 
-                cbLabLx="logX"
-                cbChLx={(event) => { this.props.cbChLx(event, [sess.pos]) }}
-                cbStLx={sess.logx}
+                    cbChLx={this.props.cbChLx}
 
-                cbLabLy="logY"
-                cbChLy={(event) => { this.props.cbChLy(event, [sess.pos]) }}
-                cbStLy={sess.logy}
+                    cbChLy={this.props.cbChLy}
 
-                cbActLxy={sess.disabled_Logxy}
-                txActFm={sess.disabled_FixCol}
-                disableDefault={sess.disableDefault}
+                    slChLev={this.props.slChLev}
 
-                start={sess.sliderStart}
-                end={sess.sliderEnd}
-                isActiveSlider={sess.diabled_Slider}
-                slChLev={(event, newValue) => { this.props.slChLev(event, newValue, [sess.pos]) }}
-
-                onClick={() => {this.props.onClick([sess.pos])}}
-            />
-        );
+                    onClick={this.props.onClick}
+                />
+            );
+        }
     }
 
     NavbarProps = () => {
@@ -67,30 +46,64 @@ class MultiPlot extends Component {
             <Navbar
                 cbLabCl="Show Coastline"
                 cbStCl={this.props.cbStCl}
-                cbChCl={(event) => { this.props.cbChCl(event, [0,1]) }}
+                cbChCl={(event) => { this.props.cbChCl(event, [0, 1, 2, 3]) }}
 
                 cbLabFc="Fix Coloring"
                 cbStFc={this.props.cbStFc}
-                cbChFc={(event) => { this.props.cbChFc(event, [0,1]) }}
+                cbChFc={(event) => { this.props.cbChFc(event, [0, 1]) }}
 
                 cbLabSc="Symmetric Coloring"
                 cbStSc={this.props.cbStSc}
-                cbChSc={(event) => { this.props.cbChSc(event, [0,1]) }}
+                cbChSc={(event) => { this.props.cbChSc(event, [0, 1]) }}
 
                 cbLabLc="Log z Coloring"
                 cbStLc={this.props.cbStLc}
-                cbChLc={(event) => { this.props.cbChLc(event, [0,1]) }}
+                cbChLc={(event) => { this.props.cbChLc(event, [0, 1]) }}
 
                 selLabCm="Colormap"
                 selValCm={this.props.selValCm}
-                selChCm={(event) => { this.props.selChCm(event, [0,1]) }}
+                selChCm={(event) => { this.props.selChCm(event, [0, 1, 2, 3]) }}
                 selMapCm={this.props.selMapCm}
 
                 disableDefault={this.props.disableDefaultNavbar}
+
+                showSidebar={this.props.showSidebar}
             />
         );
     }
 
+    isSidebar = (active) => {
+        if (active) {
+            return 10;
+        } else {
+            return 12;
+        }
+    }
+
+    SliderLev = (sess) => {
+        return (
+            <StyledSlider
+                ValueLabelComponent={ValueLabelComponent}
+                defaultValue={0}
+                orientation="horizontal"
+                aria-labelledby="vertical-slider"
+                getAriaValueText={this.valuetext}
+                step={1}
+                min={sess.sliderStart}
+                max={sess.sliderEnd}
+                valueLabelDisplay="on"
+                disabled={sess.diabled_Slider}
+                onChange={(event, newValue) => { this.props.slChLev(event, newValue, [sess.pos]) }}
+                display={"none"}
+            />
+        );
+    }
+
+    BtnZoom = (sess) => {
+        return (
+            <StyledButton variant="contained" onClick={() => { this.props.onClick([sess.pos]) }}>Get Zoom</StyledButton>
+        );
+    }
 
     render() {
         const gridLeftStyle = {
@@ -104,28 +117,49 @@ class MultiPlot extends Component {
         const gridRightStyle = {
             background: "white",
             // height: 450,
-            padding: 0,
+            // padding: 0,
+            margin: 10,
             borderRight: "solid #DADDE7 1px",
+            borderLeft: "solid #DADDE7 1px",
             borderTop: "solid #DADDE7 1px",
             borderBottom: "solid #DADDE7 1px",
         };
 
+        const containerStyle = {
+            margin: 10,
+        }
 
         return (
             <div className="App">
                 {this.NavbarProps()}
-                {this.props.bk_session.map((sess) => {
-                    return (
-                        <Grid container spacing={3} style={{ margin: 20 }}>
-                            <Grid item sm={4} style={gridLeftStyle}>
-                                {this.ParameterProps(sess)}
-                            </Grid>
-                            <Grid item xs={6} style={gridRightStyle}>
-                                <Plot plotId={sess.id}></Plot>
+
+
+                <div style={containerStyle}>
+                    <Grid container>
+                        {this.SidebarProps()}
+                        <Grid item xs={this.isSidebar(this.props.activeSidebar)}>
+                            <Grid container justify="center">
+                                {this.props.bk_session.map((sess) => {
+                                    return (
+                                        <Grid item xs={5} style={gridRightStyle}>
+                                            <Grid container alignItems="flex-start">
+                                                <Grid item xs={12}>
+                                                    <Plot plotId={sess.id}></Plot>
+                                                </Grid>
+                                                <Grid item xs={9}>
+                                                    {this.SliderLev(sess)}
+                                                </Grid>
+                                                <Grid item xs={2}>
+                                                    {this.BtnZoom(sess)}
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    )
+                                })}
                             </Grid>
                         </Grid>
-                    )
-                })}
+                    </Grid>
+                </div>
             </div>
         )
     }

@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { StyledSlider, ValueLabelComponent } from '../Styles/StyledSlider';
+import StyledButton from "../Styles/StyledButton";
 import FileTextField from "../Styles/FileTextField";
-import {StyledCheckbox, StyledFormControlLabel} from "../Styles/StyledCheckbox";
-import {StyledSelection, StyledMenuItem} from "../Styles/StyledSelection";
+import { StyledCheckbox, StyledFormControlLabel } from "../Styles/StyledCheckbox";
+import { StyledSelection, StyledMenuItem } from "../Styles/StyledSelection";
 import Grid from '@material-ui/core/Grid';
-
-import TextField from '@material-ui/core/TextField';
+import StyledTextField from '../Styles/StyledTextField';
+import Hidden from '@material-ui/core/Hidden';
 
 class Parameter extends Component {
 
@@ -43,7 +44,6 @@ class Parameter extends Component {
 
     SelAggDimension = () => {
         return (
-
             <StyledSelection
                 variant="outlined"
                 size="small"
@@ -58,14 +58,12 @@ class Parameter extends Component {
                     </StyledMenuItem>
                 ))}
             </StyledSelection>
-
         );
     }
 
     SelAggFunction = () => {
         return (
             <StyledSelection
-                style={{ marginLeft: 20 }}
                 select={true}
                 variant="outlined"
                 size="small"
@@ -83,10 +81,23 @@ class Parameter extends Component {
         );
     }
 
+    styles = theme => ({
+        textField: {
+            width: '90%',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            paddingBottom: 0,
+            marginTop: 0,
+            fontWeight: 500
+        },
+        input: {
+            color: 'white'
+        }
+    });
+
     TxColorlvl = () => {
         return (
-            <TextField
-                style={{ marginLeft: 20 }}
+            <StyledTextField
                 label={this.props.txLabCol}
                 variant="outlined"
                 size="small"
@@ -100,7 +111,7 @@ class Parameter extends Component {
 
     TxFixColMin = () => {
         return (
-            <TextField
+            <StyledTextField
                 label={this.props.txLabFmi}
                 variant="outlined"
                 size="small"
@@ -113,9 +124,8 @@ class Parameter extends Component {
 
     TxFixColMax = () => {
         return (
-            <TextField
+            <StyledTextField
                 label={this.props.txLabFma}
-                style={{ marginLeft: 20 }}
                 variant="outlined"
                 size="small"
                 onChange={this.props.txChFma}
@@ -176,7 +186,14 @@ class Parameter extends Component {
                 valueLabelDisplay="on"
                 disabled={this.props.isActiveSlider}
                 onChange={this.props.slChLev}
+                display={"none"}
             />
+        );
+    }
+
+    BtnZoom = () => {
+        return (
+            <StyledButton variant="contained" onClick={this.props.onClick}>Get Zoom</StyledButton>
         );
     }
 
@@ -184,33 +201,45 @@ class Parameter extends Component {
 
         return (
             <div>
-                <Grid container={true} spacing={3}>
-                    <Grid item xs={10}>
-                        <Grid item xs={12} style={{ marginBottom: 20 }}>
-                            {this.TxFile()}
-                        </Grid>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} >
+                        {this.TxFile()}
+                    </Grid>
 
-                        <Grid item md={12} xs={4} style={{ marginBottom: 20 }}>
-                            {this.SelVariable()}
-                            {this.SelAggDimension()}
-                            {this.SelAggFunction()}
+                    <Grid item md={12} xs={4} >
+                        {this.SelVariable()}
+                    </Grid>
+
+                    <Grid item md={12} xs={4} >
+                        {this.SelAggDimension()}
+                        {this.SelAggFunction()}
+                        <Hidden xlDown={this.props.disableDefault}>
                             {this.TxColorlvl()}
-                        </Grid>
+                        </Hidden>
+                    </Grid>
 
-                        <Grid item xs={12} style={{ marginTop: 10, marginBottom: 10 }}>
+                    {/* <Grid item>
+                        {this.BtnZoom()}
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Hidden xlDown={this.props.isActiveSlider}>
                             {this.SliderLev()}
-                        </Grid>
+                        </Hidden>
+                    </Grid> */}
 
-                        <Grid item xs={12} style={{ marginBottom: 20 }}>
+                    <Grid item xs={12} >
+                        <Hidden xlDown={this.props.txActFm}>
                             {this.TxFixColMin()}
                             {this.TxFixColMax()}
-                        </Grid>
+                        </Hidden>
+                    </Grid>
 
-                        <Grid item xs={12}>
+                    <Grid item xs={12}>
+                        <Hidden xlDown={this.props.cbActLxy}>
                             {this.CbLogX()}
                             {this.CbLogY()}
-                        </Grid>
-
+                        </Hidden>
                     </Grid>
 
                 </Grid>

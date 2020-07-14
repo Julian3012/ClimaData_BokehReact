@@ -3,6 +3,10 @@ import { StyledCheckbox, StyledFormControlLabel } from "../Styles/StyledCheckbox
 import { StyledSelection, StyledMenuItem } from "../Styles/StyledSelection";
 import Toolbar from '@material-ui/core/Toolbar';
 import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import Typography from '@material-ui/core/Typography';
+import Collapse from '@material-ui/core/Collapse';
 
 class Navbar extends Component {
 
@@ -120,8 +124,15 @@ class Navbar extends Component {
             borderTop: "solid #DADDE7 1px",
             borderBottom: "solid #DADDE7 1px",
         };
+
         return (
             <Toolbar style={navbarStyle}>
+                <IconButton edge="start" color="inherit" aria-label="menu" onClick={this.props.showSidebar}>
+                    <MenuIcon />
+                </IconButton>
+                <Typography variant="h6">
+                    Ncview
+                </Typography>
                 <Grid container justify="center" alignItems="center" spacing={3}>
                     <Grid item>
                         {this.SelCm()}
@@ -138,7 +149,7 @@ class Navbar extends Component {
                     <Grid item>
                         {this.CbSymColoring()}
                     </Grid>
-                    
+
                 </Grid>
             </Toolbar>
         );
