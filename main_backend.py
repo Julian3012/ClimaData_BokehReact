@@ -548,7 +548,7 @@ class PlotGenerator:
         to be rebuild.
         """
         self.val_dict["cm"] = self.slCMap.value
-        self.mainDialog(False)
+        self.mainDialog(True)
 
     def aggDimUpdate(self, attr, old, new):
         self.val_dict["aggDim"] = self.slAggregateDimension.value
@@ -567,14 +567,11 @@ class PlotGenerator:
 
     def coastlineUpdate(self, new):
         self.logger.info("coastlineUpdate")
-        self.mainDialog(False)
+        self.mainDialog(True)
 
     def coloringUpdate(self, new):
         self.logger.info("ColoringUpdate")
-        self.mainDialog(False)
-
-    def btApplyClick(self):
-        self.mainDialog(False)
+        self.mainDialog(True)
 
     def btClick(self):
         link = self.getFile()
