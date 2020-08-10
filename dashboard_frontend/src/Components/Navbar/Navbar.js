@@ -6,13 +6,13 @@ import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Typography from '@material-ui/core/Typography';
-import Collapse from '@material-ui/core/Collapse';
 
 class Navbar extends Component {
 
     SelCm = () => {
         return (
             <StyledSelection
+                style={{marginRight: 20}}
                 select={true}
                 variant="outlined"
                 size="small"
@@ -115,6 +115,22 @@ class Navbar extends Component {
         );
     }
 
+    CbSynchZoom = () => {
+        return (
+            <StyledFormControlLabel
+                control={
+                    <StyledCheckbox
+                        checked={this.props.cbStSyZoom}
+                        variant="outlined"
+                        size="small"
+                        onChange={this.props.cbChSyZoom}
+                        inputProps={{ 'aria-label': 'primary  Checkbox' }}
+                    />}
+                label={this.props.cbLabSyZoom}
+            />
+        )
+    }
+
     render() {
         const navbarStyle = {
             background: "white",
@@ -133,22 +149,14 @@ class Navbar extends Component {
                 <Typography variant="h6">
                     Ncview
                 </Typography>
-                <Grid container justify="center" alignItems="center" spacing={3}>
-                    <Grid item>
-                        {this.SelCm()}
-                    </Grid>
-                    <Grid item>
-                        {this.CbCoastline()}
-                    </Grid>
-                    <Grid item>
-                        {this.CbFixColoring()}
-                    </Grid>
-                    <Grid item>
-                        {this.CbLogColoring()}
-                    </Grid>
-                    <Grid item>
-                        {this.CbSymColoring()}
-                    </Grid>
+                <Grid container justify="center" alignItems="center" spacing={1}>
+
+                    {this.CbSynchZoom()}
+                    {this.SelCm()}
+                    {this.CbCoastline()}
+                    {this.CbFixColoring()}
+                    {this.CbLogColoring()}
+                    {this.CbSymColoring()}
 
                 </Grid>
             </Toolbar>

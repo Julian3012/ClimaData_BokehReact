@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import Plot from "./Plot/Plot";
-import Parameter2 from "./Parameter/Parameter2";
 import Navbar from "./Navbar/Navbar";
 import Grid from '@material-ui/core/Grid';
 import Sidebar from "./Sidebar/Sidebar";
 import { StyledSlider, ValueLabelComponent } from './Styles/StyledSlider';
-import StyledButton from "./Styles/StyledButton";
 
 class MultiPlot extends Component {
     SidebarProps = () => {
@@ -44,21 +42,25 @@ class MultiPlot extends Component {
     NavbarProps = () => {
         return (
             <Navbar
+                cbLabSyZoom="Synchonize Zoom"
+                cbStSyZoom={this.props.cbStSyZoom}
+                cbChSyZoom={this.props.cbChSyZoom}
+
                 cbLabCl="Show Coastline"
                 cbStCl={this.props.cbStCl}
                 cbChCl={(event) => { this.props.cbChCl(event, [0, 1, 2, 3]) }}
 
                 cbLabFc="Fix Coloring"
                 cbStFc={this.props.cbStFc}
-                cbChFc={(event) => { this.props.cbChFc(event, [0, 1]) }}
+                cbChFc={(event) => { this.props.cbChFc(event, [0, 1, 2, 3]) }}
 
                 cbLabSc="Symmetric Coloring"
                 cbStSc={this.props.cbStSc}
-                cbChSc={(event) => { this.props.cbChSc(event, [0, 1]) }}
+                cbChSc={(event) => { this.props.cbChSc(event, [0, 1, 2, 3]) }}
 
                 cbLabLc="Log z Coloring"
                 cbStLc={this.props.cbStLc}
-                cbChLc={(event) => { this.props.cbChLc(event, [0, 1]) }}
+                cbChLc={(event) => { this.props.cbChLc(event, [0, 1, 2, 3]) }}
 
                 selLabCm="Colormap"
                 selValCm={this.props.selValCm}
@@ -99,20 +101,7 @@ class MultiPlot extends Component {
         );
     }
 
-    BtnZoom = (sess) => {
-        return (
-            <StyledButton variant="contained" onClick={() => { this.props.onClick([sess.pos]) }}>Get Zoom</StyledButton>
-        );
-    }
-
     render() {
-        const gridLeftStyle = {
-            background: "white",
-            // height: 450,
-            borderLeft: "solid #DADDE7 1px",
-            borderTop: "solid #DADDE7 1px",
-            borderBottom: "solid #DADDE7 1px",
-        };
 
         const gridRightStyle = {
             background: "white",
@@ -148,9 +137,6 @@ class MultiPlot extends Component {
                                                 </Grid>
                                                 <Grid item xs={9}>
                                                     {this.SliderLev(sess)}
-                                                </Grid>
-                                                <Grid item xs={2}>
-                                                    {this.BtnZoom(sess)}
                                                 </Grid>
                                             </Grid>
                                         </Grid>

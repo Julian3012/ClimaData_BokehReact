@@ -218,16 +218,6 @@ class Parameter extends Component {
                         </Hidden>
                     </Grid>
 
-                    {/* <Grid item>
-                        {this.BtnZoom()}
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        <Hidden xlDown={this.props.isActiveSlider}>
-                            {this.SliderLev()}
-                        </Hidden>
-                    </Grid> */}
-
                     <Grid item xs={12} >
                         <Hidden xlDown={this.props.txActFm}>
                             {this.TxFixColMin()}

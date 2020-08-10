@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
-import Panel from "../Components/Panel"
 import MultiPlot from "../Components/MultiPlot"
 import * as constants from "../Components/constants"
-import Button from '@material-ui/core/Button';
 import './App.css';
+import $ from 'jquery';
+import PlotRange from "./Counter";
 
 class App extends Component {
 
   constructor(props) {
     super(props);
     console.log('[App.js] constructor');
+
+    // this.handleScroll = this.handleScroll.bind(this);
 
     let session1 = this.createSession("0000", "1000", 0);
     let session2 = this.createSession("0001", "1001", 1);
@@ -38,9 +40,10 @@ class App extends Component {
         uselessBtn: 16,
         slider: 21
       },
-      didMount: 0,
       changeLayout: false,
       activeSidebar: false,
+      isSynched: false,
+      observer: [],
     };
   }
 
@@ -78,7 +81,6 @@ class App extends Component {
       disabled_default: false,
       sliderStart: 0,
       sliderEnd: 20,
-      default_ranges: [-89.99999999999957, 89.99999999999955, -179.99999999999997, 179.99999999999997],
       x_range_start: 0,
       x_range_end: 0,
       y_range_start: 0,
@@ -86,8 +88,13 @@ class App extends Component {
     }
   }
 
+  checkCheck = () => {
+    console.log("ok")
+  }
+
   componentDidMount() {
     this.appendScript().then(setTimeout(this.initState, 2000));
+
   }
 
   getWidget = (posWidg, posPlot) => {
@@ -181,10 +188,60 @@ class App extends Component {
         this.checkActive(sess.pos);
         this.initSlider([sess.pos]);
 
+        if (this.state.isSynched) {
+          this.observePlots(sess);
+        }
+
         return console.log("model loaded")
       })
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  handleSyncZoom = () => {
+    let isActive = this.state.isSynched;
+    this.setState({ isSynched: !isActive });
+
+    console.log("Sync zoom: " + !isActive)
+  }
+
+  observePlots = (sess) => {
+    if (!this.state.isSynched) {
+
+      const adjustZoom = () => { this.adjustZoom(sess.pos) };
+      const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
+      let ranges = new PlotRange(0, model);
+
+      var plotObserver = new MutationObserver(function (mutations) {
+        try {
+          const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
+          if (ranges.compare(model)) {
+            if (ranges.counter % 25 === 0 || ranges.isDefault(model)) {
+              adjustZoom();
+              ranges.adjust();
+            }
+            ranges.add();
+          }
+        } catch (e) {
+          console.log(e)
+        }
+      });
+
+      const plotId = "#" + sess.id;
+      var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');
+      plotObserver.observe(myElement[0], {
+        childList: true,
+        subtree: true
+      });
+
+      let observer = this.state.observer;
+      observer.push(plotObserver);
+      this.setState({ observer: observer });
+
+      console.log("Observer added to plot: " + sess.pos)
+    } else {
+      console.log("Observer disconnected")
     }
   }
 
@@ -237,9 +294,10 @@ class App extends Component {
       sess.colorMap = event.target.value;
       this.getWidget(this.state.positions.colorMap, sess.pos).value = event.target.value;
 
-      return this.setSession(sess.pos, sess);
-    })
+      this.setSession(sess.pos, sess);
 
+      return "";
+    })
   };
 
   setActiveEvent = (doesShow) => {
@@ -271,6 +329,7 @@ class App extends Component {
 
       return this.setSession(sess.pos, sess);
     })
+
   };
 
   handleFixColoring = (event, posPlot) => {
@@ -446,9 +505,7 @@ class App extends Component {
         return this.getWidget(this.state.positions.file, pos).value = this.state.bk_session[pos].file;
       })
       console.log(this.state.bk_session)
-      setTimeout(this.initState, 5000);
-      // window.location.reload(true);
-      // setTimeout(() => {window.location.reload(true)}, 30000);
+      setTimeout(this.initState, 2500);
     }
   };
 
@@ -518,7 +575,7 @@ class App extends Component {
         sess.sliderStart = slider.start;
         sess.diabled_Slider = false;
 
-        console.log("Init Slider End: " + slider.end);
+        console.log("Slider initialized");
       } else {
         sess.diabled_Slider = true;
       }
@@ -535,85 +592,55 @@ class App extends Component {
   activeLayout = () => {
     const cmSelect = constants.cmSelect;
     const funcSelect = constants.funcSelect;
-    if (this.state.changeLayout) {
-      return (
-        <Panel
-          txChFile={this.handleDataPath}
-          txSbFile={this.handleSubmit}
-          selChVar={this.handleVariable}
-          cbChCl={this.handleShowCoastline}
-          cbChFc={this.handleFixColoring}
-          cbChSc={this.handleSymColoring}
-          cbChLc={this.handleLogzColoring}
-          selChCm={this.handleColorMap}
-          selMapCm={cmSelect}
-          selChAd={this.handleAggregateDim}
-          selChAf={this.handleAggregateFun}
-          selMapAf={funcSelect}
-          txChCol={this.handleColorLevels}
-          txChFmi={this.handleFixColMi}
-          txChFma={this.handleFixColMa}
-          cbChLx={this.handleLogx}
-          cbChLy={this.handleLogy}
-          slChLev={this.handleSlider}
-          bk_session={this.state.bk_session}
-          onClick={this.handleZoom}
-        />
-      )
-    } else {
-      return (
-        <MultiPlot
-          // Navbar
-          cbStCl={this.state.bk_session[0].showCoastline}
-          cbChCl={this.handleShowCoastline}
+    return (
+      <MultiPlot
+        // Navbar
+        cbStCl={this.state.bk_session[0].showCoastline}
+        cbChCl={this.handleShowCoastline}
 
-          cbStFc={this.state.bk_session[0].fixColoring}
-          cbChFc={this.handleFixColoring}
+        cbStFc={this.state.bk_session[0].fixColoring}
+        cbChFc={this.handleFixColoring}
 
-          cbStSc={this.state.bk_session[0].symColoring}
-          cbChSc={this.handleSymColoring}
+        cbStSc={this.state.bk_session[0].symColoring}
+        cbChSc={this.handleSymColoring}
 
-          cbStLc={this.state.bk_session[0].logzColoring}
-          cbChLc={this.handleLogzColoring}
+        cbStLc={this.state.bk_session[0].logzColoring}
+        cbChLc={this.handleLogzColoring}
 
-          selValCm={this.state.bk_session[0].colorMap}
-          selChCm={this.handleColorMap}
-          selMapCm={cmSelect}
+        selValCm={this.state.bk_session[0].colorMap}
+        selChCm={this.handleColorMap}
+        selMapCm={cmSelect}
 
-          disableDefaultNavbar={this.state.bk_session[0].disabled_default}
+        disableDefaultNavbar={this.state.bk_session[0].disabled_default}
 
-          onClick={this.handleZoom}
+        // Plots
+        txChFile={this.handleDataPath}
+        txSbFile={this.handleSubmit}
 
-          // Plots
-          txChFile={this.handleDataPath}
-          txSbFile={this.handleSubmit}
+        selChVar={this.handleVariable}
 
-          selChVar={this.handleVariable}
+        selChAd={this.handleAggregateDim}
+        selChAf={this.handleAggregateFun}
+        selMapAf={funcSelect}
 
-          selChAd={this.handleAggregateDim}
-          selChAf={this.handleAggregateFun}
-          selMapAf={funcSelect}
+        txChCol={this.handleColorLevels}
 
-          txChCol={this.handleColorLevels}
+        txChFmi={this.handleFixColMi}
+        txChFma={this.handleFixColMa}
 
-          txChFmi={this.handleFixColMi}
-          txChFma={this.handleFixColMa}
+        cbChLx={this.handleLogx}
+        cbChLy={this.handleLogy}
 
-          cbChLx={this.handleLogx}
-          cbChLy={this.handleLogy}
+        slChLev={this.handleSlider}
+        bk_session={this.state.bk_session}
 
-          slChLev={this.handleSlider}
-          bk_session={this.state.bk_session}
+        activeSidebar={this.state.activeSidebar}
+        showSidebar={this.handleSidebar}
 
-          activeSidebar={this.state.activeSidebar}
-          showSidebar={this.handleSidebar}
-        />
-      )
-    }
-  }
-
-  changeLayout = () => {
-    this.setState({ changeLayout: !this.state.changeLayout })
+        cbStSyZoom={this.state.isSynched}
+        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.observePlots(sess) }); return "" }}
+      />
+    )
   }
 
   getPlotRange = (model) => {
@@ -626,7 +653,7 @@ class App extends Component {
     return range_dict;
   }
 
-  handleZoom = (posPlot) => {
+  adjustZoom = (posPlot) => {
     try {
       let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
       const ranges = this.getPlotRange(model);
