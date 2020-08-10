@@ -1,5 +1,5 @@
 
-(function(root) {
+export const plotLoader = (root, plotId, sessionId) => {
   function now() {
     return new Date();
   }
@@ -11,10 +11,10 @@
     root._bokeh_is_loading = undefined;
   }
 
-  
+
   function run_callbacks() {
     try {
-      root._bokeh_onload_callbacks.forEach(function(callback) {
+      root._bokeh_onload_callbacks.forEach(function (callback) {
         if (callback != null)
           callback();
       });
@@ -74,9 +74,9 @@
       console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
       document.head.appendChild(element);
     }
-  };var element = document.getElementById("12");
+  }; var element = document.getElementById(plotId);
   if (element == null) {
-    console.error("Bokeh: ERROR: autoload.js configured with elementid '12' but no matching script tag was found. ")
+    console.error("Bokeh: ERROR: autoload.js configured with elementid " + plotId + " but no matching script tag was found. ")
     return false;
   }
 
@@ -90,31 +90,31 @@
   var css_urls = ["http://localhost:5010/static/css/bokeh.min.css?v=8fd4497fa606336ecf7914789df0ce04", "http://localhost:5010/static/css/bokeh-widgets.min.css?v=39c9e5a33345954077df1da16f43957a", "http://localhost:5010/static/css/bokeh-tables.min.css?v=69a9e725f277a6c569c9261b8ffe50eb"];
 
   var inline_js = [
-    function(Bokeh) {
+    function (Bokeh) {
       Bokeh.set_log_level("info");
     },
-    
-    function(Bokeh) {
-      
+
+    function (Bokeh) {
+
     },
-    
-    function(Bokeh) {
-      (function() {
-        var fn = function() {
-          Bokeh.safely(function() {
-            (function(root) {
+
+    function (Bokeh) {
+      (function () {
+        var fn = function () {
+          Bokeh.safely(function () {
+            (function (root) {
               function embed_document(root) {
-                
-              var docs_json = 'null';
-              var render_items = [{"elementid":"12","sessionid":"123","use_for_title":false}];
-              root.Bokeh.embed.embed_items(docs_json, render_items, "/main_backend", "http://localhost:5010/main_backend");
-            
+
+                var docs_json = 'null';
+                var render_items = [{ "elementid": plotId, "sessionid": sessionId, "use_for_title": false }];
+                root.Bokeh.embed.embed_items(docs_json, render_items, "/main_backend", "http://localhost:5010/main_backend");
+
               }
               if (root.Bokeh !== undefined) {
                 embed_document(root);
               } else {
                 var attempts = 0;
-                var timer = setInterval(function(root) {
+                var timer = setInterval(function (root) {
                   if (root.Bokeh !== undefined) {
                     embed_document(root);
                     clearInterval(timer);
@@ -133,24 +133,26 @@
         else document.addEventListener("DOMContentLoaded", fn);
       })();
     },
-    function(Bokeh) {} // ensure no trailing comma for IE
+    function (Bokeh) { } // ensure no trailing comma for IE
   ];
 
   function run_inline_js() {
-    
+
     for (var i = 0; i < inline_js.length; i++) {
       inline_js[i].call(root, root.Bokeh);
     }
-    
+
   }
 
   if (root._bokeh_is_loading === 0) {
     console.debug("Bokeh: BokehJS loaded, going straight to plotting");
     run_inline_js();
   } else {
-    load_libs(css_urls, js_urls, function() {
+    load_libs(css_urls, js_urls, function () {
       console.debug("Bokeh: BokehJS plotting callback run at", now());
       run_inline_js();
     });
   }
-}(window));
+}
+
+export default plotLoader;

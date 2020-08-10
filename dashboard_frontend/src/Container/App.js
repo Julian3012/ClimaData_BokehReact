@@ -4,14 +4,13 @@ import * as constants from "../Components/constants"
 import './App.css';
 import $ from 'jquery';
 import PlotRange from "./Counter";
+import plotLoader from "../autoload";
 
 class App extends Component {
 
   constructor(props) {
     super(props);
     console.log('[App.js] constructor');
-
-    // this.handleScroll = this.handleScroll.bind(this);
 
     let session1 = this.createSession("0000", "1000", 0);
     let session2 = this.createSession("0001", "1001", 1);
@@ -112,11 +111,7 @@ class App extends Component {
     return new Promise((resolve) => {
 
       this.state.bk_session.map((sess) => {
-        const script = document.createElement("script");
-        script.src = this.getScriptSrc(sess.id, sess.session);
-        script.async = true;
-
-        return document.body.appendChild(script);
+        plotLoader(window, sess.id, sess.session)
       })
 
       resolve(true)
@@ -675,6 +670,8 @@ class App extends Component {
   }
 
   render() {
+    console.log('[App.js] render method');
+
     return (
       <div className="App" >
         {this.activeLayout()}
