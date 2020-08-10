@@ -4,6 +4,7 @@ import Navbar from "./Navbar/Navbar";
 import Grid from '@material-ui/core/Grid';
 import Sidebar from "./Sidebar/Sidebar";
 import { StyledSlider, ValueLabelComponent } from './Styles/StyledSlider';
+import Hidden from '@material-ui/core/Hidden';
 
 class MultiPlot extends Component {
     SidebarProps = () => {
@@ -96,7 +97,7 @@ class MultiPlot extends Component {
                 valueLabelDisplay="on"
                 disabled={sess.diabled_Slider}
                 onChange={(event, newValue) => { this.props.slChLev(event, newValue, [sess.pos]) }}
-                display={"none"}
+                display="none"
             />
         );
     }
@@ -136,7 +137,9 @@ class MultiPlot extends Component {
                                                     <Plot plotId={sess.id}></Plot>
                                                 </Grid>
                                                 <Grid item xs={9}>
-                                                    {this.SliderLev(sess)}
+                                                    <Hidden xlDown={sess.diabled_Slider}>
+                                                        {this.SliderLev(sess)}
+                                                    </Hidden>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
