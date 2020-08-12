@@ -30,8 +30,8 @@ import json
 
 
 class PlotGenerator:
-    def __init__(self, dataPath = ""):
-        
+    def __init__(self, dataPath=""):
+
         hv.extension("bokeh")
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
 
@@ -80,7 +80,6 @@ class PlotGenerator:
         self.dataPath = dataPath
         self.urlinput = None
         self.slCMap = None
-        self.txTitle = None
         self.txFixColoringMin = None
         self.txFixColoringMax = None
         self.txCLevels = None
@@ -108,7 +107,6 @@ class PlotGenerator:
         self.optVariables = [None]
         self.optAggDim = ["None"]
         self.optAggFun = ["None", "mean", "sum"]
-        self.meshOptions = ["DOM1", "DOM2"]
 
         self.val_dict = {
             "variable": "None",
@@ -121,16 +119,11 @@ class PlotGenerator:
             "lcol": [],
             "logX": [],
             "logY": [],
-            "x_range_start": 0,
-            "x_range_end": 0,
-            "y_range_start": 0,
-            "y_range_end": 0,
             "cl": "0",
         }
 
         # Variable Values
         self.variable = None
-        self.title = None
         self.cm = None
         self.aggDim = "None"
         self.aggFn = None
@@ -140,10 +133,6 @@ class PlotGenerator:
         self.cLogZ = None
         self.logX = None
         self.logY = None
-        self.x_range_start = None
-        self.x_range_end = None
-        self.y_range_start = None
-        self.y_range_end = None
 
     def mainDialog(self, dataUpdate=True):
         """
@@ -166,7 +155,7 @@ class PlotGenerator:
 
                 if self.val_dict["variable"] == "None":
                     self.val_dict["variable"] = self.optVariables[0]
-            else: 
+            else:
                 self.optVariables = ["None"]
 
             self.logger.info("New values: {}".format(self.val_dict))
@@ -185,59 +174,43 @@ class PlotGenerator:
                 self.disableWidgets()
 
             # Apply to layout
+            # lArray.append([column(self.slVar)])
+            # lArray.append([column(self.cbCoastlineOverlay)])
+            # lArray.append([column(self.slCMap)])
+            # lArray.append([column(self.cbSymCol)])
+            # lArray.append([column(self.cbLogzCol)])
+            # lArray.append([column(self.txCLevels)])
+            # lArray.append([column(self.txFixColoringMax)])
+            # lArray.append([column(self.cbLogX)])
+            # lArray.append([column(self.cbLogY)])
+            # lArray.append([column(self.slAggregateFunction)])
+            # lArray.append([column(self.btShow)])
             lArray = []
-            lArray.append([column(self.urlinput)])
-            lArray.append([column(self.slMesh)])
-            lArray.append([column(self.txTitle)])
-            lArray.append([column(self.slVar)])
-            lArray.append([column(self.cbCoastlineOverlay)])
-            lArray.append([column(self.slCMap)])
-            lArray.append([column(self.cbFixCol)])
-            lArray.append([column(self.cbSymCol)])
-            lArray.append([column(self.cbLogzCol)])
-            lArray.append([column(self.txCLevels)])
-            lArray.append([column(self.txFixColoringMin)])
-            lArray.append([column(self.txFixColoringMax)])
-            lArray.append([column(self.cbLogX)])
-            lArray.append([column(self.cbLogY)])
-            lArray.append([column(self.slAggregateDimension)])
-            lArray.append([column(self.slAggregateFunction)])
-            lArray.append([column(self.btShow)])
-
-            lArray.append([column(self.x_range_start)])
-            lArray.append([column(self.x_range_end)])
-            lArray.append([column(self.y_range_start)])
-            lArray.append([column(self.y_range_end)])
+            lArray.append([row(self.urlinput, self.slVar, self.cbCoastlineOverlay, self.slCMap)])
+            lArray.append([row(self.cbFixCol, self.cbSymCol, self.cbLogzCol, self.txCLevels)])
+            lArray.append([row(self.txFixColoringMin, self.txFixColoringMax, self.cbLogX, self.cbLogY)])
+            lArray.append([row(self.slAggregateDimension, self.slAggregateFunction, self.btShow)])
 
             if self.dataPath != "":
                 plot.state.css_classes = ["plot_object"]
                 plot.state.sizing_mode = "stretch_both"
                 lArray.append([plot.state])
 
-                try:
-                    plot.state.children[0].x_range.on_change('start', self.x_range_start_callback)
-                    plot.state.children[0].x_range.on_change('end', self.x_range_end_callback)
-                    plot.state.children[0].y_range.on_change('start', self.y_range_start_callback)
-                    plot.state.children[0].y_range.on_change('end', self.y_range_end_callback)
-                except Exception as e:
-                    self.logger.info(e)
-
-
             l = layout(lArray)
 
             # Hide widgets
-            for widget in l.children:
-                try:
-                    # if widget.children[0].children[0].css_classes == ["plot_ranges"]:
-                    #     widget.children[0].children[0].visible = True
-                    if widget.children[0].children[0].__class__.__name__ != "Figure": 
-                        widget.children[0].children[0].visible = False
-                    else:
-                        widget.children[0].children[1].visible = False
-                except Exception as e:
-                    self.logger.info(e)
-                    pass        
-                
+            # for widget in l.children:
+            #     try:
+            #         # if widget.children[0].children[0].css_classes == ["plot_ranges"]:
+            #         #     widget.children[0].children[0].visible = True
+            #         if widget.children[0].children[0].__class__.__name__ != "Figure":
+            #             widget.children[0].children[0].visible = False
+            #         else:
+            #             widget.children[0].children[1].visible = False
+            #     except Exception as e:
+            #         self.logger.info(e)
+            #         pass
+
             l._id = "1000"
             curdoc().add_root(l)
 
@@ -245,19 +218,6 @@ class PlotGenerator:
             self.logger.info("MainDialog took %d" % (end - start))
         except Exception as e:
             print(e)
-
-    def x_range_start_callback(self, attr, old, new):
-        self.x_range_start.value = str(new)
-    
-    def x_range_end_callback(self, attr, old, new):
-        self.x_range_end.value = str(new)
-
-    def y_range_start_callback(self, attr, old, new):
-        self.y_range_start.value = str(new)
-
-    def y_range_end_callback(self, attr, old, new):
-        self.y_range_end.value = str(new)
-
 
     def disableWidgets(self):
         # Hide colormap option if CurvePlot is used
@@ -399,9 +359,7 @@ class PlotGenerator:
     def generateWidgets(self):
         startWidgets = time.time()
 
-        self.urlinput = TextInput(
-            value=self.dataPath, title="File"
-        )
+        self.urlinput = TextInput(value=self.dataPath, title="File")
         self.urlinput.on_change("value", self.fileUpdate)
 
         self.logger.info(self.val_dict["variable"])
@@ -410,15 +368,10 @@ class PlotGenerator:
         )
         self.slVar.on_change("value", self.variableUpdate)
 
-        default_dom = "DOM1" if "DOM01" in self.urlinput.value else "DOM2"
-        self.slMesh = Select(title="Mesh", options=self.meshOptions, value=default_dom)
-
         self.slCMap = Select(
             title="Colormap", options=self.COLORMAPS, value=self.val_dict["cm"]
         )
         self.slCMap.on_change("value", self.cmapUpdate)
-
-        self.txTitle = TextInput(value="title", title="Title")
 
         self.txFixColoringMin = TextInput(value="", title="Fix color minimum:")
         self.txFixColoringMax = TextInput(value="", title="Fix color maxmum:")
@@ -468,33 +421,10 @@ class PlotGenerator:
         self.btShow = Button(label="Get New Plot")
         self.btShow.on_click(self.btClick)
 
-        self.x_range_start = TextInput(
-            value=str(self.val_dict["x_range_start"]), title="x_range_start", css_classes=["plot_ranges"]
-        )
-        self.x_range_start.disabled = True
-
-        self.x_range_end = TextInput(
-            value=str(self.val_dict["x_range_end"]), title="x_range_end", css_classes=["plot_ranges"]
-        )
-        self.x_range_end.disabled = True
-
-        self.y_range_start = TextInput(
-            value=str(self.val_dict["y_range_start"]), title="y_range_start", css_classes=["plot_ranges"]
-        )
-        self.y_range_start.disabled = True
-
-        self.y_range_end = TextInput(
-            value=str(self.val_dict["y_range_end"]), title="y_range_end", css_classes=["plot_ranges"]
-        )
-        self.y_range_end.disabled = True
-
-
-
         endWidgets = time.time()
         timeWidgets = endWidgets - startWidgets
 
         self.logger.info("genWidgets took %d" % (timeWidgets))
-
 
     def getAggDim(self):
         """
@@ -515,7 +445,7 @@ class PlotGenerator:
         ]
 
         # time can only be aggregated if it exist
-        try: 
+        try:
             if hasattr(self.xrDataMeta.clon_bnds, "time"):
                 aggregateDimensions.append("time")
         except Exception as e:
@@ -538,7 +468,7 @@ class PlotGenerator:
         """
         curdoc().clear()
         self.logger.info("New File: {}".format(new))
-        self.__init__(dataPath = new)
+        self.__init__(dataPath=new)
         self.mainDialog(True)
 
     def cmapUpdate(self, attr, old, new):
