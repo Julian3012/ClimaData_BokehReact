@@ -35,6 +35,8 @@ class MultiPlot extends Component {
                     slChLev={this.props.slChLev}
 
                     onClick={this.props.onClick}
+
+                    addPlot={this.props.addPlot}
                 />
             );
         }
@@ -129,22 +131,26 @@ class MultiPlot extends Component {
                         {this.SidebarProps()}
                         <Grid item xs={this.isSidebar(this.props.activeSidebar)}>
                             <Grid container justify="center">
-                                {this.props.bk_session.map((sess) => {
-                                    return (
-                                        <Grid item xs={5} style={gridRightStyle}>
-                                            <Grid container alignItems="flex-start">
-                                                <Grid item xs={12}>
-                                                    <Plot plotId={sess.id}></Plot>
+                                {
+                                    this.props.bk_session.map((sess) => {
+                                        if (sess.pos !== -1) {
+                                            return (
+                                                <Grid item xs={5} style={gridRightStyle}>
+                                                    <Grid container alignItems="flex-start">
+                                                        <Grid item xs={12}>
+                                                            <Plot plotId={sess.id}></Plot>
+                                                        </Grid>
+                                                        <Grid item xs={9}>
+                                                            <Hidden xlDown={sess.diabled_Slider}>
+                                                                {this.SliderLev(sess)}
+                                                            </Hidden>
+                                                        </Grid>
+                                                    </Grid>
                                                 </Grid>
-                                                <Grid item xs={9}>
-                                                    <Hidden xlDown={sess.diabled_Slider}>
-                                                        {this.SliderLev(sess)}
-                                                    </Hidden>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    )
-                                })}
+                                            )
+                                        }
+                                    })
+                                }
                             </Grid>
                         </Grid>
                     </Grid>

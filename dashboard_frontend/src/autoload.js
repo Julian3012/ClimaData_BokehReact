@@ -1,5 +1,5 @@
-
 export const plotLoader = (root, plotId, sessionId) => {
+  console.log("Autoload start for model: " + sessionId)
   function now() {
     return new Date();
   }
@@ -80,11 +80,11 @@ export const plotLoader = (root, plotId, sessionId) => {
     return false;
   }
 
-  function inject_raw_css(css) {
-    const element = document.createElement("style");
-    element.appendChild(document.createTextNode(css));
-    document.body.appendChild(element);
-  }
+  // function inject_raw_css(css) {
+  //   const element = document.createElement("style");
+  //   element.appendChild(document.createTextNode(css));
+  //   document.body.appendChild(element);
+  // }
 
   var js_urls = ["http://localhost:5010/static/js/bokeh.min.js?v=c6e430dae3b21eac93896aa0b6b43d3a", "http://localhost:5010/static/js/bokeh-widgets.min.js?v=6e6c2eb007d471426aeb6be7db849713", "http://localhost:5010/static/js/bokeh-tables.min.js?v=54b8dffc263336641f6399ab27ff5957", "http://localhost:5010/static/js/bokeh-gl.min.js?v=281a5558eb2e30de81d7f33d4aa5e1dc"];
   var css_urls = ["http://localhost:5010/static/css/bokeh.min.css?v=8fd4497fa606336ecf7914789df0ce04", "http://localhost:5010/static/css/bokeh-widgets.min.css?v=39c9e5a33345954077df1da16f43957a", "http://localhost:5010/static/css/bokeh-tables.min.css?v=69a9e725f277a6c569c9261b8ffe50eb"];

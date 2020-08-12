@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { StyledSlider, ValueLabelComponent } from '../Styles/StyledSlider';
-import StyledButton from "../Styles/StyledButton";
 import FileTextField from "../Styles/FileTextField";
 import { StyledCheckbox, StyledFormControlLabel } from "../Styles/StyledCheckbox";
 import { StyledSelection, StyledMenuItem } from "../Styles/StyledSelection";
@@ -188,12 +187,6 @@ class Parameter extends Component {
                 onChange={this.props.slChLev}
                 display={"none"}
             />
-        );
-    }
-
-    BtnZoom = () => {
-        return (
-            <StyledButton variant="contained" onClick={this.props.onClick}>Get Zoom</StyledButton>
         );
     }
 

@@ -5,6 +5,8 @@ import './App.css';
 import $ from 'jquery';
 import PlotRange from "./Counter";
 import plotLoader from "../autoload";
+import { connect } from "react-redux";
+import Button from '@material-ui/core/Button';
 
 class App extends Component {
 
@@ -12,119 +14,81 @@ class App extends Component {
     super(props);
     console.log('[App.js] constructor');
 
-    let session1 = this.createSession("0000", "1000", 0);
-    let session2 = this.createSession("0001", "1001", 1);
-    let session3 = this.createSession("0002", "1002", 2);
-    let session4 = this.createSession("0003", "1003", 3);
-
-    this.state = {
-      bk_session: [session1, session2, session3, session4],
-      positions: {
-        file: 0,
-        mesh: 1,
-        title: 2,
-        variable: 3,
-        showCoastline: 4,
-        colorMap: 5,
-        fixColoring: 6,
-        symColoring: 7,
-        logzColoring: 8,
-        colorLevels: 9,
-        fixColMin: 10,
-        fixColMax: 11,
-        logx: 12,
-        logy: 13,
-        aggregateDim: 14,
-        aggregateFun: 15,
-        uselessBtn: 16,
-        slider: 21
-      },
-      changeLayout: false,
-      activeSidebar: false,
-      isSynched: false,
-      observer: [],
-    };
-  }
-
-  createSession = (sessId, plotId, pos) => {
-    return {
-      id: plotId,
-      session: sessId,
-      pos: pos,
-      file: "",
-      mesh: "DOM1",
-      variable: "None",
-      showCoastline: true,
-      colorMap: "Blues",
-      fixColoring: false,
-      symColoring: false,
-      logzColoring: false,
-      colorLevels: 0,
-      aggregateDim: "None",
-      aggregateFun: "None",
-      fixColMin: "",
-      fixColMax: "",
-      logx: false,
-      logy: false,
-      aggDimSelect: [{
-        value: "None",
-        label: "None",
-      }],
-      variables: [{
-        value: "None",
-        label: "None",
-      }],
-      disabled_Logxy: true,
-      disabled_FixCol: true,
-      diabled_Slider: true,
-      disabled_default: false,
-      sliderStart: 0,
-      sliderEnd: 20,
-      x_range_start: 0,
-      x_range_end: 0,
-      y_range_start: 0,
-      y_range_end: 0,
+    if (this.props.list.length === 0 || this.props.list[0] === null) {
+      this.state = JSON.parse(JSON.stringify(constants.session));
+    } else {
+      this.state = JSON.parse(JSON.stringify(this.props.list[0]));
     }
+
+    this.handleStateRedux = this.handleStateRedux.bind(this);
   }
 
-  checkCheck = () => {
-    console.log("ok")
+  handleStateRedux = () => {
+
+    return this.props.add(this.state)
   }
 
   componentDidMount() {
-    this.appendScript().then(setTimeout(this.initState, 2000));
+    this.setState(this.props.list[0])
 
+    if (this.state.bk_session[0].pos !== -1) {
+      this.state.bk_session.map((sess) => {
+        plotLoader(window, sess.id, sess.session);
+      })
+      setTimeout(this.initState, 3000);
+    }
+  }
+
+  makeId = (length) => {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
+  createSession = () => {
+    const pos = this.state.bk_session[0];
+
+    let position = (pos === -1) ? (0) : (this.state.bk_session[this.state.bk_session.length - 1]["pos"] + 1)
+    const plotId = this.makeId(8);
+    const sessId = this.makeId(8);
+
+    let session = JSON.parse(JSON.stringify(constants.session.bk_session[0]));
+    session.id = plotId;
+    session.session = sessId;
+    session.pos = position;
+
+    console.log("New session created: \n", session);
+    this.setSession(session["pos"], session);
+
+    return session;
   }
 
   getWidget = (posWidg, posPlot) => {
+
     let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
     if (posWidg <= 16) {
-      return model.attributes.children[posWidg].attributes.children[0].attributes.children[0]
+      return model.attributes.children[posWidg].attributes.children[0].attributes.children[0];
     } else if (posWidg === this.state.positions.slider) {
-      return model.attributes.children[posWidg].attributes.children[0].attributes.children[1].attributes.children[1]
+      return model.attributes.children[posWidg].attributes.children[0].attributes.children[1].attributes.children[1];
     } else {
       console.log("Position value does not exist")
     }
   }
 
-  appendScript = () => {
-    return new Promise((resolve) => {
-
-      this.state.bk_session.map((sess) => {
-        plotLoader(window, sess.id, sess.session)
-      })
-
-      resolve(true)
+  addPlot = () => {
+    let promise = new Promise((resolve) => {
+      resolve(this.createSession());
     })
-  }
+    promise.then(() => { this.props.add(this.state) })
 
-  getScriptSrc = (id, session) => {
-    const part1 = "http://localhost:5010/main_backend/autoload.js?bokeh-autoload-element=";
-    let strId = id;
-    const part2 = "&bokeh-app-path=/main_backend&bokeh-absolute-url=http://localhost:5010/main_backend&bokeh-session-id=";
-    let strSession = session;
-
-    return part1 + strId + part2 + strSession;
+    this.state.bk_session.map((sess) => {
+      return plotLoader(window, sess.id, sess.session);
+    })
+    window.location.reload()
   }
 
   setSession = (pos, plot) => {
@@ -134,9 +98,9 @@ class App extends Component {
   }
 
   initState = () => {
-    console.log("Start initializing state")
-    try {
-      this.state.bk_session.map((sess) => {
+    this.state.bk_session.map((sess) => {
+      console.log("Start initializing state of " + sess.session)
+      try {
         let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, sess.pos).options);
         let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, sess.pos).options);
 
@@ -178,8 +142,6 @@ class App extends Component {
 
         this.setSession(sess.pos, plot)
 
-        console.log(plot)
-
         this.checkActive(sess.pos);
         this.initSlider([sess.pos]);
 
@@ -187,11 +149,13 @@ class App extends Component {
           this.observePlots(sess);
         }
 
-        return console.log("model loaded")
-      })
-    } catch (e) {
-      console.log(e);
-    }
+        console.log("State of model " + sess.session + " initialized")
+      } catch (e) {
+        console.log("Model " + sess.session + " failed to initialize")
+        console.log(e);
+      }
+      return ""
+    })
   }
 
   handleSyncZoom = () => {
@@ -496,6 +460,7 @@ class App extends Component {
   handleSubmit = (event, posPlot) => {
 
     if (event.keyCode === 13) {
+      // window.location.reload(true)
       posPlot.map((pos) => {
         return this.getWidget(this.state.positions.file, pos).value = this.state.bk_session[pos].file;
       })
@@ -555,11 +520,14 @@ class App extends Component {
 
       let model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
       let hasSlider = false;
-
-      if (model.children.length === 22) {
-        hasSlider = model.children[this.state.positions.slider].attributes.children[0].attributes.hasOwnProperty("children");
-      } else {
-        hasSlider = false;
+      try {
+        if (model.children.length === 22) {
+          hasSlider = model.children[this.state.positions.slider].attributes.children[0].attributes.hasOwnProperty("children");
+        } else {
+          hasSlider = false;
+        }
+      } catch (e){
+        console.log(e);
       }
 
       console.log("Slider active: " + hasSlider);
@@ -582,6 +550,40 @@ class App extends Component {
   handleSidebar = () => {
     let activeSidebar = this.state.activeSidebar;
     this.setState({ activeSidebar: !activeSidebar });
+  }
+
+
+  getPlotRange = (model) => {
+    let range_dict = {
+      "model_y_end": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end,
+      "model_y_start": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start,
+      "model_x_end": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end,
+      "model_x_start": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start,
+    }
+    return range_dict;
+  }
+
+  adjustZoom = (posPlot) => {
+    try {
+      let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
+      const ranges = this.getPlotRange(model);
+
+      this.state.bk_session.map((sess) => {
+        let model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
+
+        model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end = ranges["model_y_end"];
+        model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start = ranges["model_y_start"];
+        model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end = ranges["model_x_end"];
+        model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start = ranges["model_x_start"];
+
+        return ""
+      })
+
+      console.log("Zoom")
+    }
+    catch (e) {
+      console.log(e);
+    }
   }
 
   activeLayout = () => {
@@ -634,50 +636,47 @@ class App extends Component {
 
         cbStSyZoom={this.state.isSynched}
         cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.observePlots(sess) }); return "" }}
+
+        addPlot={this.addPlot}
       />
     )
   }
 
-  getPlotRange = (model) => {
-    let range_dict = {
-      "model_y_end": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end,
-      "model_y_start": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start,
-      "model_x_end": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end,
-      "model_x_start": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start,
-    }
-    return range_dict;
-  }
-
-  adjustZoom = (posPlot) => {
-    try {
-      let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
-      const ranges = this.getPlotRange(model);
-
-      this.state.bk_session.map((sess) => {
-        let model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
-
-        model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end = ranges["model_y_end"];
-        model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start = ranges["model_y_start"];
-        model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end = ranges["model_x_end"];
-        model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start = ranges["model_x_start"];
-      })
-
-      console.log("Zoom")
-    }
-    catch (e) {
-      console.log(e);
-    }
-  }
-
   render() {
-    console.log('[App.js] render method');
-
+    // console.log('[App.js] render method=========================================================');
+    // this.props.add(this.state)
     return (
       <div className="App" >
+        <Button variant="contained" onClick={this.handleStateRedux}> add state </Button>
+        <Button variant="contained" onClick={() => { this.props.remove() }}> delete state </Button>
+        <Button variant="contained" onClick={() => { this.initState() }}> init state </Button>
+        <Button variant="contained" onClick={() => {
+          this.state.bk_session.map((sess) => {
+            return plotLoader(window, sess.id, sess.session);
+          })
+        }}> load plots </Button>
         {this.activeLayout()}
       </div >
     )
   }
 }
 
-export default App;
+const mapStateToProps = (state, ownProps) => {
+  return {
+    list: state.list,
+  }
+}
+
+const mapDispachToProps = (dispatch) => {
+  return {
+    add: (value) => {
+      dispatch({ type: "ADD", payload: value })
+    },
+    remove: (value) => {
+      dispatch({ type: "REMOVE", payload: value })
+    }
+  }
+}
+
+// export default App;
+export default connect(mapStateToProps, mapDispachToProps)(App);

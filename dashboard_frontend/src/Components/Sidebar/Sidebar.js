@@ -5,6 +5,7 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import StyledButton from "../Styles/StyledButton";
 
 class Sidebar extends Component {
     ParameterProps = (sess) => {
@@ -54,25 +55,25 @@ class Sidebar extends Component {
                 txActFm={sess.disabled_FixCol}
                 disableDefault={sess.disableDefault}
 
-                // start={sess.sliderStart}
-                // end={sess.sliderEnd}
-                // isActiveSlider={sess.diabled_Slider}
-                // slChLev={(event, newValue) => { this.props.slChLev(event, newValue, [sess.pos]) }}
+            // start={sess.sliderStart}
+            // end={sess.sliderEnd}
+            // isActiveSlider={sess.diabled_Slider}
+            // slChLev={(event, newValue) => { this.props.slChLev(event, newValue, [sess.pos]) }}
 
-                // onClick={() => { this.props.onClick([sess.pos]) }}
+            // onClick={() => { this.props.onClick([sess.pos]) }}
             />
         );
     }
 
     render() {
-        const gridLeftStyle = {
-            background: "white",
-            // height: 450,
-            borderRight: "solid #DADDE7 1px",
-            borderLeft: "solid #DADDE7 1px",
-            borderTop: "solid #DADDE7 1px",
-            borderBottom: "solid #DADDE7 1px",
-        };
+        // const gridLeftStyle = {
+        //     background: "white",
+        //     // height: 450,
+        //     borderRight: "solid #DADDE7 1px",
+        //     borderLeft: "solid #DADDE7 1px",
+        //     borderTop: "solid #DADDE7 1px",
+        //     borderBottom: "solid #DADDE7 1px",
+        // };
 
 
         return (
@@ -81,21 +82,29 @@ class Sidebar extends Component {
                 <Grid container>
 
                     {this.props.bk_session.map((sess) => {
-                        return (
-                            <Accordion>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel1a-content"
-                                    id="panel1a-header"
-                                >
-                                    Plot {sess.pos + 1}
-                                        </AccordionSummary>
-                                <AccordionDetails>
-                                    {this.ParameterProps(sess)}
-                                </AccordionDetails>
-                            </Accordion>
-                        )
+                        if (sess.pos !== -1) {
+                            return (
+                                <Accordion>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1a-content"
+                                        id="panel1a-header"
+                                    >
+                                        Plot {sess.pos + 1}
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        {this.ParameterProps(sess)}
+                                    </AccordionDetails>
+                                </Accordion>
+                            )
+                        }
                     })}
+
+                    <Grid container justify="center">
+                        <StyledButton onClick={this.props.addPlot}>
+                            Add Plot
+                            </StyledButton>
+                    </Grid>
                 </Grid>
             </Grid>
         )
