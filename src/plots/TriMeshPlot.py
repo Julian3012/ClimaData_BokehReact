@@ -83,7 +83,6 @@ class TriMeshPlot(Plot):
 
         # Builds up the free and non-free dimensions array
         self.buildDims()
-        self.logger.info("build dims")
 
         return self.buildDynamicMaps()
 
@@ -196,7 +195,6 @@ class TriMeshPlot(Plot):
             self.logger.info("Selectors: " + str(selectors))
 
             if self.aggDim == "None" or self.aggFn == "None":
-                self.logger.info("No aggregation")
                 self.tris["var"] = getattr(self.xrData, self.variable).isel(selectors)
                 self.logger.info("aggregation end")
             else:
@@ -220,11 +218,9 @@ class TriMeshPlot(Plot):
             # Apply unit
             factor = 1
             self.tris["var"] = self.tris["var"] * factor
-        self.logger.info("Apply unit")
+
         res = hv.TriMesh((self.tris, self.verts), label=(self.title))
         
-        self.logger.info(res)
-
         return res
 
     def loadMesh(self, xrData):
