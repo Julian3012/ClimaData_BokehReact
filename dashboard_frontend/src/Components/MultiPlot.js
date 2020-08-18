@@ -35,6 +35,8 @@ class MultiPlot extends Component {
                     slChLev={this.props.slChLev}
 
                     onClick={this.props.onClick}
+
+                    addPlot={this.props.addPlot}
                 />
             );
         }
@@ -49,23 +51,23 @@ class MultiPlot extends Component {
 
                 cbLabCl="Show Coastline"
                 cbStCl={this.props.cbStCl}
-                cbChCl={(event) => { this.props.cbChCl(event, [0, 1, 2, 3]) }}
+                cbChCl={(event) => { this.props.cbChCl(event, this.props.bk_session) }}
 
                 cbLabFc="Fix Coloring"
                 cbStFc={this.props.cbStFc}
-                cbChFc={(event) => { this.props.cbChFc(event, [0, 1, 2, 3]) }}
+                cbChFc={(event) => { this.props.cbChFc(event, this.props.bk_session) }}
 
                 cbLabSc="Symmetric Coloring"
                 cbStSc={this.props.cbStSc}
-                cbChSc={(event) => { this.props.cbChSc(event, [0, 1, 2, 3]) }}
+                cbChSc={(event) => { this.props.cbChSc(event, this.props.bk_session) }}
 
                 cbLabLc="Log z Coloring"
                 cbStLc={this.props.cbStLc}
-                cbChLc={(event) => { this.props.cbChLc(event, [0, 1, 2, 3]) }}
+                cbChLc={(event) => { this.props.cbChLc(event, this.props.bk_session) }}
 
                 selLabCm="Colormap"
                 selValCm={this.props.selValCm}
-                selChCm={(event) => { this.props.selChCm(event, [0, 1, 2, 3]) }}
+                selChCm={(event) => { this.props.selChCm(event, this.props.bk_session) }}
                 selMapCm={this.props.selMapCm}
 
                 disableDefault={this.props.disableDefaultNavbar}
@@ -129,22 +131,18 @@ class MultiPlot extends Component {
                         {this.SidebarProps()}
                         <Grid item xs={this.isSidebar(this.props.activeSidebar)}>
                             <Grid container justify="center">
-                                {this.props.bk_session.map((sess) => {
-                                    return (
-                                        <Grid item xs={5} style={gridRightStyle}>
-                                            <Grid container alignItems="flex-start">
-                                                <Grid item xs={12}>
-                                                    <Plot plotId={sess.id}></Plot>
-                                                </Grid>
-                                                <Grid item xs={9}>
-                                                    <Hidden xlDown={sess.diabled_Slider}>
-                                                        {this.SliderLev(sess)}
-                                                    </Hidden>
-                                                </Grid>
-                                            </Grid>
+                                <Grid item xs={5} >
+                                    <Grid container alignItems="flex-start">
+                                        <Grid item xs={12}>
+                                            <Plot plotId={this.props.plotId}></Plot>
                                         </Grid>
-                                    )
-                                })}
+                                        {/* <Grid item xs={9}>
+                                            <Hidden xlDown={sess.diabled_Slider}>
+                                                {this.SliderLev(sess)}
+                                            </Hidden>
+                                        </Grid> */}
+                                    </Grid>
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>

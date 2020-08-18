@@ -29,9 +29,9 @@ from src.plots.TriMeshPlot import TriMeshPlot
 class PlotObject():
 
     def __init__(self, logger, dataPath = ""):
-        #2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc
+
         print("Start PlotObject()")
-        # Logger
+        # TODO: Add Styling from themes.Bokeh
         hv.extension("bokeh")
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
         self.logger = logger
@@ -72,12 +72,12 @@ class PlotObject():
         self.logY = None
 
         # Val Dict
-        self.optVariables = [None]
+        self.optVariables = ["clon"]
         self.optAggDim = ["None"]
         self.optAggFun = ["None", "mean", "sum"]
 
         self.val_dict = {
-            "variable": "None",
+            "variable": "clon",
             "cm": self.COLORMAPS[0],
             "aggDim": self.optAggDim[0],
             "aggFn": self.optAggFun[0],
@@ -185,17 +185,17 @@ class PlotObject():
         try:
             cLevels = int(self.txCLevels.value)
         except Exception as e:
-            print(e)
+            self.logger.info(e)
             cLevels = 0
         try:
             fixColorMin = float(self.txFixColoringMin.value)
         except Exception as e:
-            print(e)
+            self.logger.info(e)
             fixColorMin = None
         try:
             fixColorMax = float(self.txFixColoringMax.value)
         except Exception as e:
-            print(e)
+            self.logger.info(e)
             fixColorMax = None
 
         return cLevels, fixColorMin, fixColorMax
@@ -223,7 +223,7 @@ class PlotObject():
             if hasattr(self.xrDataMeta.clon_bnds, "time"):
                 aggregateDimensions.append("time")
         except Exception as e:
-            print(e)
+            pass
 
         return aggregateDimensions
 
@@ -246,7 +246,7 @@ class PlotObject():
             curdoc().clear()
             self.__init__(logger=self.logger, dataPath=new)
         except Exception as e: 
-            print(e)
+            self.logger.info(e)
 
     def genPlot(self, dataUpdate):
         """

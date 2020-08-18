@@ -39,13 +39,15 @@ class PlotGenerator:
         self.logger.info("Get plots")
         self.plotPosition = -1 
 
+        #inp1 = "2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc"
+        inp = ""
         self.plots = [
-            PlotObject(self.logger,dataPath="2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc"),
-            PlotObject(self.logger,dataPath="2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc")
-            # PlotObject(self.logger),
-            # PlotObject(self.logger),
-            # PlotObject(self.logger),
-            # PlotObject(self.logger),
+            PlotObject(self.logger,dataPath=inp),
+            PlotObject(self.logger,dataPath=inp),
+            PlotObject(self.logger,dataPath=inp),
+            PlotObject(self.logger,dataPath=inp),
+            PlotObject(self.logger,dataPath=inp),
+            PlotObject(self.logger,dataPath=inp)
         ]
 
     def mainDialog(self, dataUpdate=True):
@@ -61,27 +63,31 @@ class PlotGenerator:
             curdoc().clear()
             lArray = []
 
+            # TODO: Check idx problems
+            # TODO: Variable init with "clon"
             for idx, plot in enumerate(self.plots):
 
                 self.plotPosition = idx 
 
                 # Get data
-                if plot.dataPath != "":
-                    link = "./data/" + plot.dataPath
-                    plot.xrDataMeta = xr.open_dataset(link)
-                    self.logger.info(f"File:  {link}")
-                    plot.optVariables = [x for x in plot.xrDataMeta.variables.keys()]
+                try:
+                    if plot.dataPath != "":
+                        link = "./data/" + plot.dataPath
+                        plot.xrDataMeta = xr.open_dataset(link)
+                        self.logger.info(f"File:  {link}")
+                        plot.optVariables = [x for x in plot.xrDataMeta.variables.keys()]
 
-                    if plot.val_dict["variable"] == "None":
-                        plot.val_dict["variable"] = plot.optVariables[0]
-                else:
-                    plot.optVariables = ["None"]
+                        if plot.val_dict["variable"] == "clon":
+                            plot.val_dict["variable"] = plot.optVariables[0]
+                    else:
+                        plot.optVariables = ["clon"]
+                except Exception as e:
+                    self.logger.info(e)
 
                 #self.logger.info("New values: {}".format(plot.val_dict))
 
                 # Init widgets
                 if plot.variable == None:
-                    self.logger.info("Initialize widgets")
                     plot.generate_Parameters()
                     self.set_handler(plot)
 
@@ -95,46 +101,57 @@ class PlotGenerator:
 
                 if plot.dataPath != "":
                     newPlot.state.css_classes = ["plot_object"]
-                    #newPlot.state.sizing_mode = "stretch_both"
+                    #newPlot.state.sizing_mode = "scale_width"
                     lArray.append(newPlot.state)
                 else:
-                    lArray.append([])
+                    lArray.append(row())
 
                 # Apply to layout
-                # col = [
-                #     row(plot.urlinput,plot.slVar,plot.cbCoastlineOverlay,plot.slCMap),
-                #     row(plot.cbFixCol,plot.cbSymCol,plot.cbLogzCol,plot.txCLevels),
-                #     row(plot.txFixColoringMin,plot.txFixColoringMax,plot.cbLogX,plot.cbLogY),
-                #     row(plot.slAggregateDimension,plot.slAggregateFunction)
-                # ]
                 col = [
                     row(plot.urlinput,plot.slVar,plot.cbCoastlineOverlay,plot.slCMap, plot.cbFixCol,plot.cbSymCol,plot.cbLogzCol,plot.txCLevels, plot.txFixColoringMin,plot.txFixColoringMax,plot.cbLogX,plot.cbLogY,plot.slAggregateDimension,plot.slAggregateFunction)
                 ]
                 lArray.append(col)
 
+            # TODO: Slider below plot
             new_array = [
-                row(lArray[0],
-                lArray[2]),
+                row(
+                    lArray[0],
+                    lArray[2]
+                    ),
+                row(
+                    lArray[4],
+                    lArray[6]
+                    ),
+                row(
+                    lArray[8],
+                    lArray[10]
+                    ),
                 lArray[1],
                 lArray[3],
+                lArray[5],
+                lArray[7],
+                lArray[9],
+                lArray[11],
             ]
 
             l = layout(new_array)
 
             # Hide widgets
             for idx, widget in enumerate(l.children):
+                # l.children = widget
                 # l.children[0].children => Figures 1+2
-                # l.children[1].children => Params Fig1
-                # l.children[2].children => Params Fig2
-                # l.children[3].children => Figures 3+4
-                # l.children[4].children => Params Fig3
-                # l.children[5].children => Params Fig4
+                # l.children[1].children => Figures 3+4
+                # l.children[2].children => Figures 5+6
+                # l.children[3].children => Params Fig1
+                # l.children[4].children => Params Fig2
+                # l.children[5].children => Params Fig3
                 # ...
-                  
+                
+                # TODO: Another logic for visibility
                 try:
                     if widget.children[0].children[0].__class__.__name__ != "Figure":
                         for p in widget.children[0].children:
-                            p.visible = True
+                            p.visible = False
                     else:
                         widget.children[0].children[1].visible = False
 
@@ -142,7 +159,6 @@ class PlotGenerator:
                         widget.children[1].children[1].visible = False
 
                 except Exception as e:
-                    self.logger.info(e)
                     pass
 
             l._id = "1000"
@@ -151,7 +167,7 @@ class PlotGenerator:
             end = time.time()
             self.logger.info("MainDialog took %d" % (end - start))
         except Exception as e:
-            print(e)
+            self.logger.exception("mainDialog() Error")
 
     def call_func(self, attr, old, new, func, plot):
         new = func(attr, old, new)

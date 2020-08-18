@@ -153,4 +153,32 @@ export const cmSelect = [
 
 ]
 
+// model = window.Bokeh.documents[0].get_model_by_id("1000")
+// model.attributes.children
+// -> [e,e,e]
+// model.attributes.children[0].attributes.children
+// -> [e,e] => Figures
 
+// model.attributes.children[PLOTNUM_PARAMS].attributes.children[0].attributes.children
+// -> [e, e, e, e, e, e, e, e, e, e, e, e, e, e] => Parameter
+
+// model.attributes.children[0].attributes.children[PLOTNUM].attributes.children[1].attributes.children[1]
+// -> Slider
+
+export const POSITIONS = {
+    file: 0,
+    variable: 1,
+    showCoastline: 2,
+    colorMap: 3,
+    fixColoring: 4,
+    symColoring: 5,
+    logzColoring: 6,
+    colorLevels: 7,
+    fixColMin: 8,
+    fixColMax: 9,
+    logx: 10,
+    logy: 11,
+    aggregateDim: 12,
+    aggregateFun: 13,
+    slider: 21
+}
