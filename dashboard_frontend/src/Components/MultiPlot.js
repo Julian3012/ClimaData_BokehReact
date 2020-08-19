@@ -37,6 +37,7 @@ class MultiPlot extends Component {
                     onClick={this.props.onClick}
 
                     addPlot={this.props.addPlot}
+                    deletePlot={this.props.deletePlot}
                 />
             );
         }
@@ -77,11 +78,19 @@ class MultiPlot extends Component {
         );
     }
 
-    isSidebar = (active) => {
+    setPlots = (active) => {
         if (active) {
-            return 10;
+            return 9;
         } else {
             return 12;
+        }
+    }
+
+    setSidebar = (active) => {
+        if (active) {
+            return 2;
+        } else {
+            return 0;
         }
     }
 
@@ -129,9 +138,9 @@ class MultiPlot extends Component {
                 <div style={containerStyle}>
                     <Grid container>
                         {this.SidebarProps()}
-                        <Grid item xs={this.isSidebar(this.props.activeSidebar)}>
+                        <Grid item xs={this.setPlots(this.props.activeSidebar)}>
                             <Grid container justify="center">
-                                <Grid item xs={5} >
+                                <Grid item xs={11} >
                                     <Grid container alignItems="flex-start">
                                         <Grid item xs={12}>
                                             <Plot plotId={this.props.plotId}></Plot>

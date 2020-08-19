@@ -8,6 +8,12 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import StyledButton from "../Styles/StyledButton";
 
 class Sidebar extends Component {
+    
+    constructor(props) {
+        super(props);
+        console.log('[App.js] constructor');
+    }
+
     ParameterProps = (sess) => {
         return (
             <Parameter2
@@ -76,7 +82,11 @@ class Sidebar extends Component {
         // };
         return (
             <Grid item xs={2}>
-
+                <Grid container justify="center" style={{marginBottom: 5}}>
+                    <StyledButton onClick={this.props.deletePlot}>
+                        Delete Plots
+                    </StyledButton>
+                </Grid>
                 <Grid container>
 
                     {this.props.bk_session.map((sess) => {

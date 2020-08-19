@@ -5,6 +5,7 @@ import './App.css';
 import $ from 'jquery';
 import PlotRange from "./Counter";
 import plotLoader from "../autoload";
+import { connect } from "react-redux";
 
 class App extends Component {
 
@@ -13,16 +14,21 @@ class App extends Component {
     console.log('[App.js] constructor');
 
     // TODO: Generic ids
-    this.state = {
-      bk_session: [],
-      positions: constants.POSITIONS,
-      changeLayout: false,
-      activeSidebar: false,
-      isSynched: false,
-      observer: [],
-      plotId: "1000",
-      sessionId: "1000",
-    };
+    if (this.props.list.length === 0 || this.props.list[0] === null) {
+      this.state = {
+        bk_session: [],
+        positions: constants.POSITIONS,
+        changeLayout: false,
+        activeSidebar: false,
+        isSynched: false,
+        observer: [],
+        plotId: "1000",
+        sessionId: "1000",
+      };
+    } else {
+      this.state = JSON.parse(JSON.stringify(this.props.list[0]));
+    }
+    // this.props.add(this.state)
   }
 
   createPlot = () => {
@@ -162,15 +168,26 @@ class App extends Component {
   }
 
   addPlot = () => {
-    let promise = new Promise((resolve) => {
-      resolve(this.createPlot());
-    })
-    //promise.then(() => { this.props.add(this.state) })
-    promise.then((plot) => {
-      let plots = [...this.state.bk_session, plot];
-      this.setState({ bk_session: plots })
-    })
-    console.log("Plot added")
+    console.log(this.state.bk_session.length)
+    if (this.state.bk_session.length < 6){
+      let promise = new Promise((resolve) => {
+        resolve(this.createPlot());
+      })
+      //promise.then(() => { this.props.add(this.state) })
+      promise.then((plot) => {
+        let plots = [...this.state.bk_session, plot];
+        this.setState({ bk_session: plots })
+        this.props.add(this.state)
+      })
+      console.log("Plot added")
+    }
+  }
+
+  deletePlot = () => {
+    let plots = [];
+    this.setState({bk_session: plots})
+
+    this.props.remove();
   }
 
   handleSyncZoom = () => {
@@ -632,6 +649,8 @@ class App extends Component {
         cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.observePlots(sess) }); return "" }}
 
         addPlot={this.addPlot}
+        deletePlot={this.deletePlot}
+
       />
     )
   }
@@ -678,4 +697,22 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = (state, ownProps) => {
+  return {
+    list: state.list,
+  }
+}
+
+const mapDispachToProps = (dispatch) => {
+  return {
+    add: (value) => {
+      dispatch({ type: "ADD", payload: value })
+    },
+    remove: (value) => {
+      dispatch({ type: "REMOVE", payload: value })
+    }
+  }
+}
+
+// export default App;
+export default connect(mapStateToProps, mapDispachToProps)(App);
