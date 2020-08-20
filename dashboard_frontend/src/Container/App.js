@@ -74,15 +74,13 @@ class App extends Component {
 
   componentDidMount() {
     this.appendScript();
+
   }
 
   getWidget = (posWidget, posPlot) => {
     let model = window.Bokeh.documents[0].get_model_by_id("1000");
     try {
       if (posWidget <= 16) {
-        console.log("Position of Plot: " + posPlot)
-        console.log("Position of Widget: " + posWidget)
-
         return model.attributes.children[posPlot === 0 ? 3 : posPlot + 3].attributes.children[0].attributes.children[posWidget]
       } else if (posWidget === this.state.positions.slider) {
         return model.attributes.children[0].attributes.children[posPlot - 1].attributes.children[1].attributes.children[1]
@@ -104,76 +102,16 @@ class App extends Component {
     const bk_session = [...this.state.bk_session];
     bk_session[pos] = plot;
     this.setState({ bk_session: bk_session });
-  }
-
-  initState = () => {
-    console.log("Start initializing state")
-    try {
-      this.state.bk_session.map((sess) => {
-        let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, sess.pos).options);
-        let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, sess.pos).options);
-
-        const plot = {
-          ...this.state.bk_session[sess.pos]
-        };
-
-        plot.variables = optsVar;
-        plot.aggDimSelect = optsAd;
-
-        plot.file = this.getWidget(this.state.positions.file, sess.pos).value;
-        this.setSession(sess.pos, plot);
-
-        plot.variable = (this.getWidget(this.state.positions.variable, sess.pos).value != null) ? this.getWidget(this.state.positions.variable, sess.pos).value : "";
-
-        const hasCoastline = this.getActiveEvent(this.getWidget(this.state.positions.showCoastline, sess.pos).active);
-        plot.showCoastline = hasCoastline;
-
-        plot.colorMap = this.getWidget(this.state.positions.colorMap, sess.pos).value;
-
-        const hasFixedColoring = this.getActiveEvent(this.getWidget(this.state.positions.fixColoring, sess.pos).active);
-        plot.fixColoring = hasFixedColoring;
-
-        const hasSymColoring = this.getActiveEvent(this.getWidget(this.state.positions.symColoring, sess.pos).active);
-        plot.symColoring = hasSymColoring;
-
-        const hasLogzColoring = this.getActiveEvent(this.getWidget(this.state.positions.logzColoring, sess.pos).active);
-        plot.logzColoring = hasLogzColoring;
-
-        plot.colorLevels = this.getWidget(this.state.positions.colorLevels, sess.pos).value;
-
-        let aggregateDim = this.getWidget(this.state.positions.aggregateDim, sess.pos).value;
-        if (aggregateDim === null) {
-          aggregateDim = "None";
-        }
-        plot.aggregateDim = aggregateDim;
-
-        plot.aggregateFun = this.getWidget(this.state.positions.aggregateFun, sess.pos).value;
-
-        this.setSession(sess.pos, plot)
-
-        console.log(plot)
-
-        this.checkActive(sess.pos);
-        this.initSlider([sess.pos]);
-
-        if (this.state.isSynched) {
-          this.observePlots(sess);
-        }
-
-        return console.log("model loaded")
-      })
-    } catch (e) {
-      console.log(e);
-    }
+    this.props.add(this.state);
   }
 
   addPlot = () => {
     console.log(this.state.bk_session.length)
-    if (this.state.bk_session.length < 6){
+    if (this.state.bk_session.length < 6) {
       let promise = new Promise((resolve) => {
         resolve(this.createPlot());
       })
-      //promise.then(() => { this.props.add(this.state) })
+
       promise.then((plot) => {
         let plots = [...this.state.bk_session, plot];
         this.setState({ bk_session: plots })
@@ -185,7 +123,7 @@ class App extends Component {
 
   deletePlot = () => {
     let plots = [];
-    this.setState({bk_session: plots})
+    this.setState({ bk_session: plots })
 
     this.props.remove();
   }
@@ -197,7 +135,7 @@ class App extends Component {
     console.log("Sync zoom: " + !isActive)
   }
 
-  observePlots = (sess) => {
+  plotObserver = (sess) => {
     if (!this.state.isSynched) {
 
       const adjustZoom = () => { this.adjustZoom(sess.pos) };
@@ -235,7 +173,6 @@ class App extends Component {
       console.log("Observer disconnected")
     }
   }
-
 
   checkActive = (posPlot) => {
     const plot = {
@@ -339,13 +276,13 @@ class App extends Component {
   };
 
   handleSymColoring = (event, posPlot) => {
-    
+
     try {
       posPlot.map((sess) => {
         let doesShow = this.state.bk_session[sess.pos].symColoring;
         sess.symColoring = !doesShow;
         this.getWidget(this.state.positions.symColoring, sess.pos).active = this.setActiveEvent(doesShow);
-  
+
         return this.setSession(sess.pos, sess);
       })
     } catch (error) {
@@ -481,7 +418,6 @@ class App extends Component {
 
       return this.setSession(sess.pos, sess);
 
-      // return setTimeout(() => { this.initSlider([sess.pos]) }, 1500);
     })
     console.log("State variable changed")
   };
@@ -490,28 +426,30 @@ class App extends Component {
 
     if (event.keyCode === 13) {
       posPlot.map((pos) => {
-        console.log(pos)
+        console.log("handleSubmit: " + pos)
         return this.getWidget(this.state.positions.file, pos).value = this.state.bk_session[pos].file;
       })
       console.log(this.state.bk_session)
+      setTimeout(() => { this.setParams(posPlot[0]) }, 3000)
     }
-    setTimeout(() => { this.setParams(posPlot[0]) }, 2000)
   };
 
   setParams = (posPlot) => {
     try {
-      console.log("setParams" + posPlot)
+      console.log("setParams " + posPlot)
+    
       let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
       let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
-  
+      console.log(optsVar)
       const plot = {
         ...this.state.bk_session[posPlot]
       };
-  
+
       plot.variables = optsVar;
       plot.aggDimSelect = optsAd;
-  
+
       this.setSession(posPlot, plot);
+      this.props.add(this.state);
     } catch (error) {
       console.log(error)
     }
@@ -646,7 +584,7 @@ class App extends Component {
         showSidebar={this.handleSidebar}
 
         cbStSyZoom={this.state.isSynched}
-        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.observePlots(sess) }); return "" }}
+        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.plotObserver(sess) }); return "" }}
 
         addPlot={this.addPlot}
         deletePlot={this.deletePlot}
