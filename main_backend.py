@@ -37,17 +37,17 @@ class PlotGenerator:
 
         # Get plot pbjects
         self.logger.info("Get plots")
-        self.plotPosition = -1 
+        self.plotPosition = -1
 
-        #inp1 = "2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc"
+        # inp1 = "2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc"
         inp = ""
         self.plots = [
-            PlotObject(self.logger,dataPath=inp),
-            PlotObject(self.logger,dataPath=inp),
-            PlotObject(self.logger,dataPath=inp),
-            PlotObject(self.logger,dataPath=inp),
-            PlotObject(self.logger,dataPath=inp),
-            PlotObject(self.logger,dataPath=inp)
+            PlotObject(self.logger, dataPath=inp),
+            PlotObject(self.logger, dataPath=inp),
+            PlotObject(self.logger, dataPath=inp),
+            PlotObject(self.logger, dataPath=inp),
+            PlotObject(self.logger, dataPath=inp),
+            PlotObject(self.logger, dataPath=inp),
         ]
 
     def mainDialog(self, dataUpdate=True):
@@ -67,7 +67,7 @@ class PlotGenerator:
             # TODO: Variable init with "clon"
             for idx, plot in enumerate(self.plots):
 
-                self.plotPosition = idx 
+                self.plotPosition = idx
 
                 # Get data
                 try:
@@ -75,7 +75,9 @@ class PlotGenerator:
                         link = "./data/" + plot.dataPath
                         plot.xrDataMeta = xr.open_dataset(link)
                         self.logger.info(f"File:  {link}")
-                        plot.optVariables = [x for x in plot.xrDataMeta.variables.keys()]
+                        plot.optVariables = [
+                            x for x in plot.xrDataMeta.variables.keys()
+                        ]
 
                         if plot.val_dict["variable"] == "clon":
                             plot.val_dict["variable"] = plot.optVariables[0]
@@ -84,7 +86,7 @@ class PlotGenerator:
                 except Exception as e:
                     self.logger.info(e)
 
-                #self.logger.info("New values: {}".format(plot.val_dict))
+                # self.logger.info("New values: {}".format(plot.val_dict))
 
                 # Init widgets
                 if plot.variable == None:
@@ -101,62 +103,75 @@ class PlotGenerator:
 
                 if plot.dataPath != "":
                     newPlot.state.css_classes = ["plot_object"]
-                    #newPlot.state.sizing_mode = "scale_width"
+                    # newPlot.state.sizing_mode = "scale_width"
                     lArray.append(newPlot.state)
                 else:
                     lArray.append(row())
 
+                # Specify css
+                plot.slVar.css_classes = ["variableOptions_" + str(idx)]
+                plot.slAggregateDimension.css_classes = ["aggdimOptions_" + str(idx)]
                 # Apply to layout
                 col = [
-                    row(plot.urlinput,plot.slVar,plot.cbCoastlineOverlay,plot.slCMap, plot.cbFixCol,plot.cbSymCol,plot.cbLogzCol,plot.txCLevels, plot.txFixColoringMin,plot.txFixColoringMax,plot.cbLogX,plot.cbLogY,plot.slAggregateDimension,plot.slAggregateFunction)
+                    row(
+                        plot.urlinput,
+                        plot.slVar,
+                        plot.cbCoastlineOverlay,
+                        plot.slCMap,
+                        plot.cbFixCol,
+                        plot.cbSymCol,
+                        plot.cbLogzCol,
+                        plot.txCLevels,
+                        plot.txFixColoringMin,
+                        plot.txFixColoringMax,
+                        plot.cbLogX,
+                        plot.cbLogY,
+                        plot.slAggregateDimension,
+                        plot.slAggregateFunction,
+                    )
                 ]
                 lArray.append(col)
 
+            # Delete button
+            self.deletePlots = CheckboxGroup(
+                labels=["Delete Button"], active=[]
+            )
+            self.deletePlots.on_click(self.deleteUpdate)
+            self.deletePlots.visible = False
+            lArray.append(self.deletePlots)
+
             # TODO: Slider below plot
             new_array = [
-                row(
-                    lArray[0],
-                    lArray[2]
-                    ),
-                row(
-                    lArray[4],
-                    lArray[6]
-                    ),
-                row(
-                    lArray[8],
-                    lArray[10]
-                    ),
+                row(lArray[0], lArray[2]),
+                row(lArray[4], lArray[6]),
+                row(lArray[8], lArray[10]),
                 lArray[1],
                 lArray[3],
                 lArray[5],
                 lArray[7],
                 lArray[9],
                 lArray[11],
+                lArray[12]
             ]
 
             l = layout(new_array)
 
             # Hide widgets
             for idx, widget in enumerate(l.children):
-                # l.children = widget
-                # l.children[0].children => Figures 1+2
-                # l.children[1].children => Figures 3+4
-                # l.children[2].children => Figures 5+6
-                # l.children[3].children => Params Fig1
-                # l.children[4].children => Params Fig2
-                # l.children[5].children => Params Fig3
-                # ...
-                
-                # TODO: Another logic for visibility
+            #     # l.children = widget
+            #     # l.children[0].children => Figures 1+2
+            #     # l.children[1].children => Figures 3+4
+            #     # l.children[2].children => Figures 5+6
+            #     # l.children[3].children => Params Fig1
+            #     # l.children[4].children => Params Fig2
+            #     # l.children[5].children => Params Fig3
+            #     # ...
+
+            # TODO: Another logic for visibility
                 try:
                     if widget.children[0].children[0].__class__.__name__ != "Figure":
                         for p in widget.children[0].children:
                             p.visible = False
-                    else:
-                        widget.children[0].children[1].visible = False
-
-                    if widget.children[1].children[0].__class__.__name__ == "Figure":
-                        widget.children[1].children[1].visible = False
 
                 except Exception as e:
                     pass
@@ -175,9 +190,9 @@ class PlotGenerator:
         plot.dataPath = new
         self.mainDialog(True)
 
-    def set_handler(self,plot):
+    def set_handler(self, plot):
 
-        plot.urlinput.on_change("value", plot.fileUpdate ,self.fileUpdate)
+        plot.urlinput.on_change("value", plot.fileUpdate, self.fileUpdate)
         plot.slVar.on_change("value", self.variableUpdate)
         plot.slCMap.on_change("value", self.cmapUpdate)
         plot.slAggregateFunction.on_change("value", self.aggFnUpdate)
@@ -189,13 +204,22 @@ class PlotGenerator:
         plot.cbLogX.on_click(self.coloringUpdate)
         plot.cbLogY.on_click(self.coloringUpdate)
 
+    def deleteUpdate(self, new):
+        """
+        Handler to delete plots
+        """
+        self.__init__()
+        self.mainDialog(True)
+
     def variableUpdate(self, attr, old, new):
         """
         This function is only a wrapper round the self.main function for building the buildDynamicMap.
         It is called if at property like the cmap is changed and the whole buildDynamicMap needs
         to be rebuild.
         """
-        self.plots[self.plotPosition].val_dict["variable"] = self.plots[self.plotPosition].slVar.value
+        self.plots[self.plotPosition].val_dict["variable"] = self.plots[
+            self.plotPosition
+        ].slVar.value
         self.mainDialog(True)
 
     def fileUpdate(self, attr, old, new):
@@ -204,9 +228,9 @@ class PlotGenerator:
         """
         curdoc().clear()
         self.logger.info("New File: {}".format(new))
-        try: 
+        try:
             self.mainDialog(True)
-        except Exception as e: 
+        except Exception as e:
             print(e)
 
     def cmapUpdate(self, attr, old, new):
@@ -215,18 +239,24 @@ class PlotGenerator:
         It is called if at property like the cmap is changed and the whole buildDynamicMap needs
         to be rebuild.
         """
-        self.plots[self.plotPosition].val_dict["cm"] = self.plots[self.plotPosition].slCMap.value
+        self.plots[self.plotPosition].val_dict["cm"] = self.plots[
+            self.plotPosition
+        ].slCMap.value
         self.mainDialog(True)
 
     def aggDimUpdate(self, attr, old, new):
-        self.plots[self.plotPosition].val_dict["aggDim"] = self.plots[self.plotPosition].slAggregateDimension.value
+        self.plots[self.plotPosition].val_dict["aggDim"] = self.plots[
+            self.plotPosition
+        ].slAggregateDimension.value
         if attr.slAggregateFunction.value != "None":
             self.mainDialog(True)
         else:
             self.mainDialog(False)
 
     def aggFnUpdate(self, attr, old, new):
-        self.plots[self.plotPosition].val_dict["aggFn"] = self.plots[self.plotPosition].slAggregateFunction.value
+        self.plots[self.plotPosition].val_dict["aggFn"] = self.plots[
+            self.plotPosition
+        ].slAggregateFunction.value
         self.logger.info("Aggregate Function Update: {}".format(attr.val_dict["aggFn"]))
         if attr.slAggregateDimension.value != "None":
             self.mainDialog(True)
@@ -246,6 +276,7 @@ class PlotGenerator:
     #     plot.xrDataMeta = xr.open_dataset(link)
     #     plot.tmPlot = plot.cuPlot = plot.hpPlot = None
     #     self.mainDialog(True)
+
 
 # Define the main method here
 def entry():

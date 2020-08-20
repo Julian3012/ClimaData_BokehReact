@@ -13,7 +13,7 @@ class App extends Component {
     super(props);
     console.log('[App.js] constructor');
 
-    // TODO: Generic ids
+    // TODO: Random ids
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       this.state = {
         bk_session: [],
@@ -84,6 +84,9 @@ class App extends Component {
         return model.attributes.children[posPlot === 0 ? 3 : posPlot + 3].attributes.children[0].attributes.children[posWidget]
       } else if (posWidget === this.state.positions.slider) {
         return model.attributes.children[0].attributes.children[posPlot - 1].attributes.children[1].attributes.children[1]
+      } else if (posWidget === 17) {
+        console.log("delte")
+        return model.attributes.children[6 + 3]
       } else {
         console.log("Position value does not exist")
       }
@@ -123,8 +126,8 @@ class App extends Component {
 
   deletePlot = () => {
     let plots = [];
-    this.setState({ bk_session: plots })
-
+    this.getWidget(17,-1).active = [0];
+    this.setState({ bk_session: plots });
     this.props.remove();
   }
 
@@ -437,7 +440,7 @@ class App extends Component {
   setParams = (posPlot) => {
     try {
       console.log("setParams " + posPlot)
-    
+
       let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
       let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
       console.log(optsVar)
@@ -450,6 +453,7 @@ class App extends Component {
 
       this.setSession(posPlot, plot);
       this.props.add(this.state);
+      
     } catch (error) {
       console.log(error)
     }
@@ -626,7 +630,7 @@ class App extends Component {
 
   render() {
     console.log('[App.js] render method');
-
+    // TODO: Add scroll in sidebar
     return (
       <div className="App" >
         {this.activeLayout()}
