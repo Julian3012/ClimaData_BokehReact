@@ -28,15 +28,12 @@ from src.plots.TriMeshPlot import TriMeshPlot
 
 class PlotObject():
 
-    def __init__(self, logger, dataPath = ""):
+    def __init__(self, logger, title, dataPath = ""):
 
-        print("Start PlotObject()")
         # TODO: Add Styling from themes.Bokeh
         hv.extension("bokeh")
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
         self.logger = logger
-
-        logger.info("Start PlotObject()")
 
          # Constant
         self.COLORMAPS = COLORMAPS
@@ -70,6 +67,7 @@ class PlotObject():
         self.cLogZ = None
         self.logX = None
         self.logY = None
+        self.title = title
 
         # Val Dict
         self.optVariables = ["clon"]
@@ -244,7 +242,7 @@ class PlotObject():
         """
         try: 
             curdoc().clear()
-            self.__init__(logger=self.logger, dataPath=new)
+            self.__init__(logger=self.logger, title=self.title, dataPath=new)
         except Exception as e: 
             self.logger.info(e)
 
@@ -279,7 +277,7 @@ class PlotObject():
                 self.cuPlot = CurvePlot(self.logger, self.renderer, self.xrData)
             plot = self.cuPlot.getPlotObject(
                 variable=self.variable,
-                title="",
+                title=self.title,
                 aggDim=self.aggDim,
                 aggFn=self.aggFn,
                 logX=self.logX,
@@ -301,7 +299,7 @@ class PlotObject():
                 self.hpPlot = HeightProfilePlot(self.logger, self.renderer, self.xrData)
             plot = self.hpPlot.getPlotObject(
                 variable=self.variable,
-                title="",
+                title=self.title,
                 aggDim=self.aggDim,
                 aggFn=self.aggFn,
                 cm=self.cm,
@@ -316,7 +314,7 @@ class PlotObject():
                 self.tmPlot = TriMeshPlot(self.logger, self.renderer, self.xrDataMeta)
             plot = self.tmPlot.getPlotObject(
                 variable=self.variable,
-                title="",
+                title=self.title,
                 cm=self.cm,
                 aggDim=self.aggDim,
                 aggFn=self.aggFn,
