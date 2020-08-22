@@ -42,12 +42,12 @@ class PlotGenerator:
         # inp1 = "2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc"
         inp = ""
         self.plots = [
-            PlotObject(self.logger, dataPath=inp),
-            PlotObject(self.logger, dataPath=inp),
-            PlotObject(self.logger, dataPath=inp),
-            PlotObject(self.logger, dataPath=inp),
-            PlotObject(self.logger, dataPath=inp),
-            PlotObject(self.logger, dataPath=inp),
+            PlotObject(self.logger, title="Plot 1",dataPath=inp),
+            PlotObject(self.logger, title="Plot 2",dataPath=inp),
+            PlotObject(self.logger, title="Plot 3",dataPath=inp),
+            PlotObject(self.logger, title="Plot 4",dataPath=inp),
+            PlotObject(self.logger, title="Plot 5",dataPath=inp),
+            PlotObject(self.logger, title="Plot 6",dataPath=inp),
         ]
 
     def mainDialog(self, dataUpdate=True):
@@ -65,6 +65,8 @@ class PlotGenerator:
 
             # TODO: Check idx problems
             # TODO: Variable init with "clon"
+            # TODO: Wrong file input check
+            # TODO: Styling for plot and slider
             for idx, plot in enumerate(self.plots):
 
                 self.plotPosition = idx
@@ -95,16 +97,22 @@ class PlotGenerator:
 
                 # Generate plot type
                 if plot.dataPath != "":
-                    newPlot = plot.genPlot(dataUpdate)
+                    figureElement = plot.genPlot(dataUpdate)
 
                 # Disable widgets for specific inputs
                 if plot.dataPath != "":
                     plot.disableWidgets()
 
                 if plot.dataPath != "":
-                    newPlot.state.css_classes = ["plot_object"]
-                    # newPlot.state.sizing_mode = "scale_width"
-                    lArray.append(newPlot.state)
+                    figureElement.state.css_classes = ["plot_object"]
+                    # figureElement.state.sizing_mode = "scale_width"
+                    try:
+                        figure = figureElement.state.children[0]
+                        slider = figureElement.state.children[1]
+                        lArray.append(column(figure, slider))
+                    except Exception as e:
+                        self.logger.info(e)
+                        lArray.append(figureElement.state)                        
                 else:
                     lArray.append(row())
 
@@ -172,7 +180,6 @@ class PlotGenerator:
                     if widget.children[0].children[0].__class__.__name__ != "Figure":
                         for p in widget.children[0].children:
                             p.visible = False
-
                 except Exception as e:
                     pass
 
