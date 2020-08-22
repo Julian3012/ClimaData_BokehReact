@@ -14,7 +14,10 @@ class App extends Component {
     console.log('[App.js] constructor');
 
     // TODO: Random ids
+    // TODO: Unique key prop for render methods
+    // TODO: Delete redux storage when window closes
     if (this.props.list.length === 0 || this.props.list[0] === null) {
+      let sessionId = Math.random().toString(36).substring(2,10);
       this.state = {
         bk_session: [],
         positions: constants.POSITIONS,
@@ -22,8 +25,8 @@ class App extends Component {
         activeSidebar: false,
         isSynched: false,
         observer: [],
-        plotId: "1000",
-        sessionId: "1000",
+        plotId: "plot-el",
+        sessionId: sessionId,
       };
     } else {
       this.state = JSON.parse(JSON.stringify(this.props.list[0]));
@@ -126,9 +129,13 @@ class App extends Component {
 
   deletePlot = () => {
     let plots = [];
-    this.getWidget(17,-1).active = [0];
     this.setState({ bk_session: plots });
     this.props.remove();
+    try{
+      this.getWidget(17,-1).active = [0];
+    } catch (error){
+      console.log(error)
+    }
   }
 
   handleSyncZoom = () => {

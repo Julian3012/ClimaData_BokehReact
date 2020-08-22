@@ -148,7 +148,6 @@ class PlotGenerator:
             self.deletePlots.visible = False
             lArray.append(self.deletePlots)
 
-            # TODO: Slider below plot
             new_array = [
                 row(lArray[0], lArray[2]),
                 row(lArray[4], lArray[6]),
