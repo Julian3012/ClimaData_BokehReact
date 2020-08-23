@@ -329,3 +329,17 @@ class PlotObject():
             )
 
         return plot
+
+
+
+    def variableUpdate(self, attr, old, new):
+        self.val_dict["variable"] = new
+
+    def cmapUpdate(self, attr, old, new):
+        self.val_dict["cm"] = new
+
+    def aggDimUpdate(self, attr, old, new):
+        self.val_dict["aggDim"] = new
+
+    def aggFnUpdate(self, attr, old, new):
+        self.val_dict["aggFn"] = new

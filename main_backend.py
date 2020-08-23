@@ -42,12 +42,12 @@ class PlotGenerator:
         # inp1 = "2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc"
         inp = ""
         self.plots = [
-            PlotObject(self.logger, title="Plot 1",dataPath=inp),
-            PlotObject(self.logger, title="Plot 2",dataPath=inp),
-            PlotObject(self.logger, title="Plot 3",dataPath=inp),
-            PlotObject(self.logger, title="Plot 4",dataPath=inp),
-            PlotObject(self.logger, title="Plot 5",dataPath=inp),
-            PlotObject(self.logger, title="Plot 6",dataPath=inp),
+            PlotObject(self.logger, title="Plot 1", dataPath=inp),
+            PlotObject(self.logger, title="Plot 2", dataPath=inp),
+            PlotObject(self.logger, title="Plot 3", dataPath=inp),
+            PlotObject(self.logger, title="Plot 4", dataPath=inp),
+            PlotObject(self.logger, title="Plot 5", dataPath=inp),
+            PlotObject(self.logger, title="Plot 6", dataPath=inp),
         ]
 
     def mainDialog(self, dataUpdate=True):
@@ -63,10 +63,10 @@ class PlotGenerator:
             curdoc().clear()
             lArray = []
 
-            # TODO: Check idx problems
             # TODO: Variable init with "clon"
             # TODO: Wrong file input check
             # TODO: Styling for plot and slider
+            # TODO: Try except wrong inputs -> example: clon, lat, mean
             for idx, plot in enumerate(self.plots):
 
                 self.plotPosition = idx
@@ -116,9 +116,6 @@ class PlotGenerator:
                 else:
                     lArray.append(row())
 
-                # Specify css
-                plot.slVar.css_classes = ["variableOptions_" + str(idx)]
-                plot.slAggregateDimension.css_classes = ["aggdimOptions_" + str(idx)]
                 # Apply to layout
                 col = [
                     row(
@@ -141,12 +138,30 @@ class PlotGenerator:
                 lArray.append(col)
 
             # Delete button
-            self.deletePlots = CheckboxGroup(
-                labels=["Delete Button"], active=[]
-            )
-            self.deletePlots.on_click(self.deleteUpdate)
-            self.deletePlots.visible = False
+            self.addDeleteButton()
             lArray.append(self.deletePlots)
+
+            # Sync zoom
+            plot_positions = [0,2,4,6,8,10]
+            plots = []
+            for idx, plot in zip(plot_positions, self.plots):
+                if plot.dataPath != "":
+                    try:
+                        if lArray[idx].__class__.__name__ == "Figure":
+                            plots.append(lArray[idx])
+                        else:
+                            plots.append(lArray[idx].children[0])
+                    except Exception as e:
+                        pass
+                            
+            self.logger.info(plots)
+            try:
+                for plot in plots[1:]:
+                    plot.x_range = plots[0].x_range
+                    plot.y_range = plots[0].y_range
+            except Exception as e:
+                self.logger.info(e)
+                pass
 
             new_array = [
                 row(lArray[0], lArray[2]),
@@ -190,6 +205,13 @@ class PlotGenerator:
         except Exception as e:
             self.logger.exception("mainDialog() Error")
 
+    def addDeleteButton(self):
+        self.deletePlots = CheckboxGroup(
+                        labels=["Delete Button"], active=[]
+                    )
+        self.deletePlots.on_click(self.deleteUpdate)
+        self.deletePlots.visible = False
+
     def call_func(self, attr, old, new, func, plot):
         new = func(attr, old, new)
 
@@ -199,10 +221,10 @@ class PlotGenerator:
     def set_handler(self, plot):
 
         plot.urlinput.on_change("value", plot.fileUpdate, self.fileUpdate)
-        plot.slVar.on_change("value", self.variableUpdate)
-        plot.slCMap.on_change("value", self.cmapUpdate)
-        plot.slAggregateFunction.on_change("value", self.aggFnUpdate)
-        plot.slAggregateDimension.on_change("value", self.aggDimUpdate)
+        plot.slVar.on_change("value", plot.variableUpdate, self.variableUpdate)
+        plot.slCMap.on_change("value", plot.cmapUpdate, self.cmapUpdate)
+        plot.slAggregateFunction.on_change("value", plot.aggFnUpdate, self.aggFnUpdate)
+        plot.slAggregateDimension.on_change("value", plot.aggDimUpdate, self.aggDimUpdate)
         plot.cbCoastlineOverlay.on_click(self.coastlineUpdate)
         plot.cbFixCol.on_click(self.coloringUpdate)
         plot.cbSymCol.on_click(self.coloringUpdate)
@@ -217,17 +239,6 @@ class PlotGenerator:
         self.__init__()
         self.mainDialog(True)
 
-    def variableUpdate(self, attr, old, new):
-        """
-        This function is only a wrapper round the self.main function for building the buildDynamicMap.
-        It is called if at property like the cmap is changed and the whole buildDynamicMap needs
-        to be rebuild.
-        """
-        self.plots[self.plotPosition].val_dict["variable"] = self.plots[
-            self.plotPosition
-        ].slVar.value
-        self.mainDialog(True)
-
     def fileUpdate(self, attr, old, new):
         """
         
@@ -239,35 +250,25 @@ class PlotGenerator:
         except Exception as e:
             print(e)
 
+    def variableUpdate(self, attr, old, new):
+        self.mainDialog(True)
+
     def cmapUpdate(self, attr, old, new):
-        """
-        This function is only a wrapper round the self.main function for building the buildDynamicMap.
-        It is called if at property like the cmap is changed and the whole buildDynamicMap needs
-        to be rebuild.
-        """
-        self.plots[self.plotPosition].val_dict["cm"] = self.plots[
-            self.plotPosition
-        ].slCMap.value
         self.mainDialog(True)
 
     def aggDimUpdate(self, attr, old, new):
-        self.plots[self.plotPosition].val_dict["aggDim"] = self.plots[
-            self.plotPosition
-        ].slAggregateDimension.value
-        if attr.slAggregateFunction.value != "None":
-            self.mainDialog(True)
-        else:
-            self.mainDialog(False)
+        self.mainDialog(True)
+        # if attr.slAggregateFunction.value != "None":
+        #     self.mainDialog(True)
+        # else:
+        #     self.mainDialog(False)
 
     def aggFnUpdate(self, attr, old, new):
-        self.plots[self.plotPosition].val_dict["aggFn"] = self.plots[
-            self.plotPosition
-        ].slAggregateFunction.value
-        self.logger.info("Aggregate Function Update: {}".format(attr.val_dict["aggFn"]))
-        if attr.slAggregateDimension.value != "None":
-            self.mainDialog(True)
-        else:
-            self.mainDialog(False)
+        self.mainDialog(True)
+        # if attr.slAggregateDimension.value != "None":
+        #     self.mainDialog(True)
+        # else:
+        #     self.mainDialog(False)
 
     def coastlineUpdate(self, new):
         self.logger.info("coastlineUpdate")
@@ -276,13 +277,6 @@ class PlotGenerator:
     def coloringUpdate(self, new):
         self.logger.info("ColoringUpdate")
         self.mainDialog(True)
-
-    # def btClick(self, plot):
-    #     link = plot.getFile()
-    #     plot.xrDataMeta = xr.open_dataset(link)
-    #     plot.tmPlot = plot.cuPlot = plot.hpPlot = None
-    #     self.mainDialog(True)
-
 
 # Define the main method here
 def entry():
