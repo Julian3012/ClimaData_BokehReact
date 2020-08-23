@@ -13,9 +13,11 @@ class App extends Component {
     super(props);
     console.log('[App.js] constructor');
 
-    // TODO: Random ids
     // TODO: Unique key prop for render methods
     // TODO: Delete redux storage when window closes
+    // TODO: ColorMap in Sidebar
+    // TODO: Put handler in respective components
+    // TODO: Do not disable Navbar Parameter
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2,10);
       this.state = {
@@ -31,7 +33,6 @@ class App extends Component {
     } else {
       this.state = JSON.parse(JSON.stringify(this.props.list[0]));
     }
-    // this.props.add(this.state)
   }
 
   createPlot = () => {
@@ -81,8 +82,8 @@ class App extends Component {
   }
 
   getWidget = (posWidget, posPlot) => {
-    let model = window.Bokeh.documents[0].get_model_by_id("1000");
     try {
+      let model = window.Bokeh.documents[0].get_model_by_id("1000");
       if (posWidget <= 16) {
         return model.attributes.children[posPlot === 0 ? 3 : posPlot + 3].attributes.children[0].attributes.children[posWidget]
       } else if (posWidget === this.state.positions.slider) {
@@ -433,14 +434,17 @@ class App extends Component {
   };
 
   handleSubmit = (event, posPlot) => {
-
-    if (event.keyCode === 13) {
-      posPlot.map((pos) => {
-        console.log("handleSubmit: " + pos)
-        return this.getWidget(this.state.positions.file, pos).value = this.state.bk_session[pos].file;
-      })
-      console.log(this.state.bk_session)
-      setTimeout(() => { this.setParams(posPlot[0]) }, 3000)
+    try{
+      if (event.keyCode === 13) {
+        posPlot.map((pos) => {
+          console.log("handleSubmit: " + pos)
+          return this.getWidget(this.state.positions.file, pos).value = this.state.bk_session[pos].file;
+        })
+        console.log(this.state.bk_session)
+        setTimeout(() => { this.setParams(posPlot[0]) }, 3000)
+      }
+    } catch(e){
+      console.log(e)
     }
   };
 
