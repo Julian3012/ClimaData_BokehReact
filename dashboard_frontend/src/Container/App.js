@@ -18,6 +18,7 @@ class App extends Component {
     // TODO: ColorMap in Sidebar
     // TODO: Put handler in respective components
     // TODO: Do not disable Navbar Parameter
+    // TODO: Synchronize zoom checkbox too much
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2,10);
       this.state = {
@@ -25,7 +26,6 @@ class App extends Component {
         positions: constants.POSITIONS,
         changeLayout: false,
         activeSidebar: false,
-        isSynched: false,
         observer: [],
         plotId: "plot-el",
         sessionId: sessionId,
@@ -136,52 +136,6 @@ class App extends Component {
       this.getWidget(17,-1).active = [0];
     } catch (error){
       console.log(error)
-    }
-  }
-
-  handleSyncZoom = () => {
-    let isActive = this.state.isSynched;
-    this.setState({ isSynched: !isActive });
-
-    console.log("Sync zoom: " + !isActive)
-  }
-
-  plotObserver = (sess) => {
-    if (!this.state.isSynched) {
-
-      const adjustZoom = () => { this.adjustZoom(sess.pos) };
-      const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
-      let ranges = new PlotRange(0, model);
-
-      var plotObserver = new MutationObserver(function (mutations) {
-        try {
-          const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
-          if (ranges.compare(model)) {
-            if (ranges.counter % 25 === 0 || ranges.isDefault(model)) {
-              adjustZoom();
-              ranges.adjust();
-            }
-            ranges.add();
-          }
-        } catch (e) {
-          console.log(e)
-        }
-      });
-
-      const plotId = "#" + sess.id;
-      var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');
-      plotObserver.observe(myElement[0], {
-        childList: true,
-        subtree: true
-      });
-
-      let observer = this.state.observer;
-      observer.push(plotObserver);
-      this.setState({ observer: observer });
-
-      console.log("Observer added to plot: " + sess.pos)
-    } else {
-      console.log("Observer disconnected")
     }
   }
 
@@ -597,9 +551,6 @@ class App extends Component {
 
         activeSidebar={this.state.activeSidebar}
         showSidebar={this.handleSidebar}
-
-        cbStSyZoom={this.state.isSynched}
-        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.plotObserver(sess) }); return "" }}
 
         addPlot={this.addPlot}
         deletePlot={this.deletePlot}

@@ -122,22 +122,6 @@ class Navbar extends Component {
         );
     }
 
-    CbSynchZoom = () => {
-        return (
-            <StyledFormControlLabel
-                control={
-                    <StyledCheckbox
-                        checked={this.props.cbStSyZoom}
-                        variant="outlined"
-                        size="small"
-                        onChange={this.props.cbChSyZoom}
-                        inputProps={{ 'aria-label': 'primary  Checkbox' }}
-                    />}
-                label={this.props.cbLabSyZoom}
-            />
-        )
-    }
-
     render() {
         const navbarStyle = {
             background: "white",
@@ -158,7 +142,6 @@ class Navbar extends Component {
                 </Typography>
 
                 <Grid container justify="center" alignItems="center" spacing={1}>
-                    {this.CbSynchZoom()}
                     {this.SelCm()}
                     {this.CbCoastline()}
                     {this.CbFixColoring()}
