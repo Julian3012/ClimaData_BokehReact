@@ -15,6 +15,8 @@ class MultiPlot extends Component {
                     txChFile={this.props.txChFile}
                     txSbFile={this.props.txSbFile}
 
+                    selChCm={this.props.selChCm}
+
                     selChVar={this.props.selChVar}
 
                     selChAd={this.props.selChAd}
@@ -65,11 +67,6 @@ class MultiPlot extends Component {
                 cbLabLc="Log z Coloring"
                 cbStLc={this.props.cbStLc}
                 cbChLc={(event) => { this.props.cbChLc(event, this.props.bk_session) }}
-
-                selLabCm="Colormap"
-                selValCm={this.props.selValCm}
-                selChCm={(event) => { this.props.selChCm(event, this.props.bk_session) }}
-                selMapCm={this.props.selMapCm}
 
                 disableDefault={this.props.disableDefaultNavbar}
 

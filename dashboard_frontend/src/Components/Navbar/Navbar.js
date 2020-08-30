@@ -16,28 +16,6 @@ class Navbar extends Component {
         console.log('[Navbar.js] constructor');
     }
 
-    SelCm = () => {
-        return (
-            <StyledSelection
-                style={{ marginRight: 20 }}
-                select={true}
-                variant="outlined"
-                size="small"
-                label={this.props.selLabCm}
-                value={this.props.selValCm}
-                onChange={this.props.selChCm}
-                disabled={this.props.disableDefault}
-            >
-                {this.props.selMapCm.map((option) => (
-                    <StyledMenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </StyledMenuItem>
-                ))}
-            </StyledSelection>
-
-        );
-    }
-
     CbCoastline = () => {
         return (
             <StyledFormControlLabel
@@ -122,20 +100,20 @@ class Navbar extends Component {
         );
     }
 
-    CbSynchZoom = () => {
-        return (
-            <StyledFormControlLabel
-                control={
-                    <StyledCheckbox
-                        checked={this.props.cbStSyZoom}
-                        variant="outlined"
-                        size="small"
-                        onChange={this.props.cbChSyZoom}
-                        inputProps={{ 'aria-label': 'primary  Checkbox' }}
-                    />}
-                label={this.props.cbLabSyZoom}
-            />
-        )
+    CbSynchZoom = () => {	
+        return (	
+            <StyledFormControlLabel	
+                control={	
+                    <StyledCheckbox	
+                        checked={this.props.cbStSyZoom}	
+                        variant="outlined"	
+                        size="small"	
+                        onChange={this.props.cbChSyZoom}	
+                        inputProps={{ 'aria-label': 'primary  Checkbox' }}	
+                    />}	
+                label={this.props.cbLabSyZoom}	
+            />	
+        )	
     }
 
     render() {
@@ -158,8 +136,7 @@ class Navbar extends Component {
                 </Typography>
 
                 <Grid container justify="center" alignItems="center" spacing={1}>
-                    {this.CbSynchZoom()}
-                    {this.SelCm()}
+                    {this.CbSynchZoom()}	
                     {this.CbCoastline()}
                     {this.CbFixColoring()}
                     {this.CbLogColoring()}

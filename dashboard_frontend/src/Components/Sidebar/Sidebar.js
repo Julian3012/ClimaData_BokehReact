@@ -6,6 +6,7 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import StyledButton from "../Styles/StyledButton";
+import * as constants from "../../Components/constants"
 
 class Sidebar extends Component {
     
@@ -26,6 +27,11 @@ class Sidebar extends Component {
                 selValVar={sess.variable}
                 selChVar={(event) => { this.props.selChVar(event, [sess.pos]) }}
                 selMapVar={sess.variables}
+
+                selLabCm="Colormap"
+                selValCm={sess.colorMap}
+                selChCm={(event) => { this.props.selChCm(event, [sess.pos]) }}
+                selMapCm={constants.cmSelect}
 
                 selLabAd="Dimension"
                 selValAd={sess.aggregateDim}

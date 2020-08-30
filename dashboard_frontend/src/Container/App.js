@@ -18,15 +18,16 @@ class App extends Component {
     // TODO: ColorMap in Sidebar
     // TODO: Put handler in respective components
     // TODO: Do not disable Navbar Parameter
+    // TODO: Fix Coloring
     if (this.props.list.length === 0 || this.props.list[0] === null) {
-      let sessionId = Math.random().toString(36).substring(2,10);
+      let sessionId = Math.random().toString(36).substring(2, 10);
       this.state = {
         bk_session: [],
         positions: constants.POSITIONS,
         changeLayout: false,
         activeSidebar: false,
-        isSynched: false,
         observer: [],
+        isSynched: false,	
         plotId: "plot-el",
         sessionId: sessionId,
       };
@@ -132,56 +133,10 @@ class App extends Component {
     let plots = [];
     this.setState({ bk_session: plots });
     this.props.remove();
-    try{
-      this.getWidget(17,-1).active = [0];
-    } catch (error){
+    try {
+      this.getWidget(17, -1).active = [0];
+    } catch (error) {
       console.log(error)
-    }
-  }
-
-  handleSyncZoom = () => {
-    let isActive = this.state.isSynched;
-    this.setState({ isSynched: !isActive });
-
-    console.log("Sync zoom: " + !isActive)
-  }
-
-  plotObserver = (sess) => {
-    if (!this.state.isSynched) {
-
-      const adjustZoom = () => { this.adjustZoom(sess.pos) };
-      const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
-      let ranges = new PlotRange(0, model);
-
-      var plotObserver = new MutationObserver(function (mutations) {
-        try {
-          const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
-          if (ranges.compare(model)) {
-            if (ranges.counter % 25 === 0 || ranges.isDefault(model)) {
-              adjustZoom();
-              ranges.adjust();
-            }
-            ranges.add();
-          }
-        } catch (e) {
-          console.log(e)
-        }
-      });
-
-      const plotId = "#" + sess.id;
-      var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');
-      plotObserver.observe(myElement[0], {
-        childList: true,
-        subtree: true
-      });
-
-      let observer = this.state.observer;
-      observer.push(plotObserver);
-      this.setState({ observer: observer });
-
-      console.log("Observer added to plot: " + sess.pos)
-    } else {
-      console.log("Observer disconnected")
     }
   }
 
@@ -215,6 +170,52 @@ class App extends Component {
     this.setSession(posPlot, plot)
   }
 
+  handleSyncZoom = () => {	
+    let isActive = this.state.isSynched;	
+    this.setState({ isSynched: !isActive });	
+
+    console.log("Sync zoom: " + !isActive)	
+  }	
+
+  plotObserver = (sess) => {	
+    if (!this.state.isSynched) {	
+
+      const adjustZoom = () => { this.adjustZoom(sess.pos) };	
+      const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");	
+      let ranges = new PlotRange(0, model);	
+
+      var plotObserver = new MutationObserver(function (mutations) {	
+        try {	
+          const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");	
+          if (ranges.compare(model)) {	
+            if (ranges.counter % 25 === 0 || ranges.isDefault(model)) {	
+              adjustZoom();	
+              ranges.adjust();	
+            }	
+            ranges.add();	
+          }	
+        } catch (e) {	
+          console.log(e)	
+        }	
+      });	
+
+      const plotId = "#" + sess.id;	
+      var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');	
+      plotObserver.observe(myElement[0], {	
+        childList: true,	
+        subtree: true	
+      });	
+
+      let observer = this.state.observer;	
+      observer.push(plotObserver);	
+      this.setState({ observer: observer });	
+
+      console.log("Observer added to plot: " + sess.pos)	
+    } else {	
+      console.log("Observer disconnected")	
+    }	
+  }	
+
   mkOptions = (option) => {
     let arr = []
     option.map(el => {
@@ -222,21 +223,6 @@ class App extends Component {
     });
     return arr;
   }
-
-  handleColorMap = (event, posPlot) => {
-    try {
-      posPlot.map((sess) => {
-        sess.colorMap = event.target.value;
-        this.getWidget(this.state.positions.colorMap, sess.pos).value = event.target.value;
-
-        this.setSession(sess.pos, sess);
-
-        return "";
-      })
-    } catch (e) {
-      console.log(e)
-    }
-  };
 
   setActiveEvent = (doesShow) => {
     if (doesShow === true) {
@@ -416,6 +402,23 @@ class App extends Component {
     console.log("State colorLevels changed")
   };
 
+  handleColorMap = (event, posPlot) => {
+    let plot = []
+    posPlot.map((pos) => {
+      return plot.push(this.state.bk_session[pos]);
+    })
+
+    plot.map((sess) => {
+
+      sess.colorMap = event.target.value;
+      this.getWidget(this.state.positions.colorMap, sess.pos).value = event.target.value;
+
+      return this.setSession(sess.pos, sess);
+
+    })
+    console.log("State variable changed")
+  };
+
   handleVariable = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
@@ -434,7 +437,7 @@ class App extends Component {
   };
 
   handleSubmit = (event, posPlot) => {
-    try{
+    try {
       if (event.keyCode === 13) {
         posPlot.map((pos) => {
           console.log("handleSubmit: " + pos)
@@ -443,7 +446,7 @@ class App extends Component {
         console.log(this.state.bk_session)
         setTimeout(() => { this.setParams(posPlot[0]) }, 3000)
       }
-    } catch(e){
+    } catch (e) {
       console.log(e)
     }
   };
@@ -452,9 +455,14 @@ class App extends Component {
     try {
       console.log("setParams " + posPlot)
 
-      let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
-      let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
-      console.log(optsVar)
+      let optsVar = "";
+      let optsAd = "";        
+
+      for (let index = 0; index < 3; index++) {
+        optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
+        optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);        
+      }
+
       const plot = {
         ...this.state.bk_session[posPlot]
       };
@@ -464,7 +472,7 @@ class App extends Component {
 
       this.setSession(posPlot, plot);
       this.props.add(this.state);
-      
+
     } catch (error) {
       console.log(error)
     }
@@ -505,45 +513,6 @@ class App extends Component {
     }
   };
 
-  handleExpandClick = () => {
-    let exp = this.state.expanded;
-    this.setState({ expanded: !exp });
-  }
-
-  initSlider = (posPlot) => {
-    let plot = []
-    posPlot.map((pos) => {
-      return plot.push(this.state.bk_session[pos]);
-    })
-
-    plot.map((sess) => {
-
-      let model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
-      let hasSlider = false;
-
-      if (model.children.length === 22) {
-        hasSlider = model.children[this.state.positions.slider].attributes.children[0].attributes.hasOwnProperty("children");
-      } else {
-        hasSlider = false;
-      }
-
-      console.log("Slider active: " + hasSlider);
-
-      if (hasSlider) {
-        let slider = this.getWidget(this.state.positions.slider, sess.pos);
-        sess.sliderEnd = slider.end;
-        sess.sliderStart = slider.start;
-        sess.diabled_Slider = false;
-
-        console.log("Slider initialized");
-      } else {
-        sess.diabled_Slider = true;
-      }
-
-      return this.setSession(sess.pos, sess);
-    })
-  }
-
   handleSidebar = () => {
     let activeSidebar = this.state.activeSidebar;
     this.setState({ activeSidebar: !activeSidebar });
@@ -568,10 +537,6 @@ class App extends Component {
         cbStLc={this.state.bk_session.length === 0 ? false : this.state.bk_session[0].logzColoring}
         cbChLc={this.handleLogzColoring}
 
-        selValCm={this.state.bk_session.length === 0 ? "Blues" : this.state.bk_session[0].colorMap}
-        selChCm={this.handleColorMap}
-        selMapCm={cmSelect}
-
         disableDefaultNavbar={this.state.bk_session.length === 0 ? false : this.state.bk_session[0].disabled_default}
 
         // Plots
@@ -579,6 +544,9 @@ class App extends Component {
         txSbFile={this.handleSubmit}
 
         selChVar={this.handleVariable}
+
+        // selValCm={this.state.bk_session.length === 0 ? "Blues" : this.state.bk_session[0].colorMap}
+        selChCm={this.handleColorMap}
 
         selChAd={this.handleAggregateDim}
         selChAf={this.handleAggregateFun}
@@ -598,8 +566,8 @@ class App extends Component {
         activeSidebar={this.state.activeSidebar}
         showSidebar={this.handleSidebar}
 
-        cbStSyZoom={this.state.isSynched}
-        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.plotObserver(sess) }); return "" }}
+        cbStSyZoom={this.state.isSynched}	
+        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.plotObserver(sess) }); return "" }}	
 
         addPlot={this.addPlot}
         deletePlot={this.deletePlot}
@@ -667,5 +635,4 @@ const mapDispachToProps = (dispatch) => {
   }
 }
 
-// export default App;
 export default connect(mapStateToProps, mapDispachToProps)(App);

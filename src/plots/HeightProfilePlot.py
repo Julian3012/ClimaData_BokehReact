@@ -1,11 +1,8 @@
 #!/usr/bin/python
-
-
 import pandas as pd
 import xarray as xr
 import holoviews as hv
 import numpy as np
-
 
 from .Plot import Plot
 

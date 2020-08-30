@@ -42,6 +42,28 @@ class Parameter extends Component {
         );
     }
 
+    SelCm = () => {
+        return (
+            <StyledSelection
+                style={{ marginRight: 20 }}
+                select={true}
+                variant="outlined"
+                size="small"
+                label={this.props.selLabCm}
+                value={this.props.selValCm}
+                onChange={this.props.selChCm}
+                disabled={this.props.disableDefault}
+            >
+                {this.props.selMapCm.map((option) => (
+                    <StyledMenuItem key={option.value} value={option.value}>
+                        {option.label}
+                    </StyledMenuItem>
+                ))}
+            </StyledSelection>
+
+        );
+    }
+
     SelAggDimension = () => {
         return (
             <StyledSelection
@@ -208,6 +230,7 @@ class Parameter extends Component {
 
                     <Grid item md={12} xs={4} >
                         {this.SelVariable()}
+                        {this.SelCm()}
                     </Grid>
 
                     <Grid item md={12} xs={4} >
