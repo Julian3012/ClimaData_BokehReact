@@ -1,6 +1,12 @@
 export class PlotRange {
-    constructor(cnt, model) {
+
+    constructor(cnt, posPlot) {
         this.counter = cnt;
+        const model = window.Bokeh.documents[0].get_model_by_id("1000");
+        const divPlot = Math.floor(posPlot/2)
+        let numPlot = posPlot % 2;
+
+        this.plot_attributes = model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0];
 
         this.newRange = {
             "model_y_end": 0,
@@ -11,17 +17,17 @@ export class PlotRange {
 
         try {
             this.oldRange = {
-                "model_y_end": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end,
-                "model_y_start": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start,
-                "model_x_end": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end,
-                "model_x_start": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start,
+                "model_y_end": this.plot_attributes.y_range.end,
+                "model_y_start": this.plot_attributes.y_range.start,
+                "model_x_end": this.plot_attributes.x_range.end,
+                "model_x_start": this.plot_attributes.x_range.start,
             }
 
             this.default_ranges = {
-                "model_y_end": Math.round(model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.reset_end),
-                "model_y_start": Math.round(model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.reset_start),
-                "model_x_end": Math.round(model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.reset_end),
-                "model_x_start": Math.round(model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.reset_start),
+                "model_y_end": Math.round(this.plot_attributes.y_range.reset_end),
+                "model_y_start": Math.round(this.plot_attributes.y_range.reset_start),
+                "model_x_end": Math.round(this.plot_attributes.x_range.reset_end),
+                "model_x_start": Math.round(this.plot_attributes.x_range.reset_start),
             }
         } catch (e) {
             console.log(e);
@@ -30,10 +36,10 @@ export class PlotRange {
 
     compare(model) {
         this.newRange = {
-            "model_y_end": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end,
-            "model_y_start": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start,
-            "model_x_end": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end,
-            "model_x_start": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start,
+            "model_y_end": this.plot_attributes.y_range.end,
+            "model_y_start": this.plot_attributes.y_range.start,
+            "model_x_end": this.plot_attributes.x_range.end,
+            "model_x_start": this.plot_attributes.x_range.start,
         }
 
         if (JSON.stringify(this.oldRange) === JSON.stringify(this.newRange)) {
@@ -45,10 +51,10 @@ export class PlotRange {
 
     isDefault(model) {
         this.newRange = {
-            "model_y_end": Math.round(model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end),
-            "model_y_start": Math.round(model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start),
-            "model_x_end": Math.round(model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end),
-            "model_x_start": Math.round(model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start),
+            "model_y_end": Math.round(this.plot_attributes.y_range.end),
+            "model_y_start": Math.round(this.plot_attributes.y_range.start),
+            "model_x_end": Math.round(this.plot_attributes.x_range.end),
+            "model_x_start": Math.round(this.plot_attributes.x_range.start),
         }
 
         if (JSON.stringify(this.newRange) === JSON.stringify(this.default_ranges)) {

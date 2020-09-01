@@ -67,6 +67,7 @@ class PlotGenerator:
             # TODO: Wrong file input check
             # TODO: Styling for plot and slider
             # TODO: Try except wrong inputs -> example: clon, lat, mean
+            # TODO: Execute everything in one command
             for idx, plot in enumerate(self.plots):
 
                 self.plotPosition = idx
@@ -90,6 +91,7 @@ class PlotGenerator:
 
                 # self.logger.info("New values: {}".format(plot.val_dict))
 
+                # TODO: generate parameter directly
                 # Init widgets
                 if plot.variable == None:
                     plot.generate_Parameters()
@@ -98,20 +100,25 @@ class PlotGenerator:
                 # Generate plot type
                 if plot.dataPath != "":
                     figureElement = plot.genPlot(dataUpdate)
+                    # if(figureElement==""):
+                    #     self.deletePlots.active = [0]
 
                 # Disable widgets for specific inputs
                 if plot.dataPath != "":
                     plot.disableWidgets()
 
                 if plot.dataPath != "":
-                    figureElement.state.css_classes = ["plot_object"]
+                    # figureElement.state.css_classes = ["plot_object"]
                     # figureElement.state.sizing_mode = "scale_width"
+                    classname = "plot_" + str(idx)
                     try:
                         figure = figureElement.state.children[0]
                         slider = figureElement.state.children[1]
+                        figure.css_classes = [classname]
                         lArray.append(column(figure, slider))
                     except Exception as e:
                         self.logger.info(e)
+                        figureElement.state.css_classes = [classname]
                         lArray.append(figureElement.state)                        
                 else:
                     lArray.append(row())
@@ -141,27 +148,28 @@ class PlotGenerator:
             self.addDeleteButton()
             lArray.append(self.deletePlots)
 
+            # TODO: Sync only trimesh plots 
             # Sync zoom
-            plot_positions = [0,2,4,6,8,10]
-            plots = []
-            for idx, plot in zip(plot_positions, self.plots):
-                if plot.dataPath != "":
-                    try:
-                        if lArray[idx].__class__.__name__ == "Figure":
-                            plots.append(lArray[idx])
-                        else:
-                            plots.append(lArray[idx].children[0])
-                    except Exception as e:
-                        pass
+            # plot_positions = [0,2,4,6,8,10]
+            # plots = []
+            # for idx, plot in zip(plot_positions, self.plots):
+            #     if plot.dataPath != "":
+            #         try:
+            #             if lArray[idx].__class__.__name__ == "Figure":
+            #                 plots.append(lArray[idx])
+            #             else:
+            #                 plots.append(lArray[idx].children[0])
+            #         except Exception as e:
+            #             pass
                             
-            self.logger.info(plots)
-            try:
-                for plot in plots[1:]:
-                    plot.x_range = plots[0].x_range
-                    plot.y_range = plots[0].y_range
-            except Exception as e:
-                self.logger.info(e)
-                pass
+            # self.logger.info(plots)
+            # try:
+            #     for plot in plots[1:]:
+            #         plot.x_range = plots[0].x_range
+            #         plot.y_range = plots[0].y_range
+            # except Exception as e:
+            #     self.logger.info(e)
+            #     pass
 
             new_array = [
                 row(lArray[0], lArray[2]),
@@ -179,23 +187,23 @@ class PlotGenerator:
             l = layout(new_array)
 
             # Hide widgets
-            for idx, widget in enumerate(l.children):
-            #     # l.children = widget
-            #     # l.children[0].children => Figures 1+2
-            #     # l.children[1].children => Figures 3+4
-            #     # l.children[2].children => Figures 5+6
-            #     # l.children[3].children => Params Fig1
-            #     # l.children[4].children => Params Fig2
-            #     # l.children[5].children => Params Fig3
-            #     # ...
+            # for idx, widget in enumerate(l.children):
+            # #     # l.children = widget
+            # #     # l.children[0].children => Figures 1+2
+            # #     # l.children[1].children => Figures 3+4
+            # #     # l.children[2].children => Figures 5+6
+            # #     # l.children[3].children => Params Fig1
+            # #     # l.children[4].children => Params Fig2
+            # #     # l.children[5].children => Params Fig3
+            # #     # ...
 
-            # TODO: Another logic for visibility
-                try:
-                    if widget.children[0].children[0].__class__.__name__ != "Figure":
-                        for p in widget.children[0].children:
-                            p.visible = False
-                except Exception as e:
-                    pass
+            # # TODO: Another logic for visibility
+            #     try:
+            #         if widget.children[0].children[0].__class__.__name__ != "Figure":
+            #             for p in widget.children[0].children:
+            #                 p.visible = False
+            #     except Exception as e:
+            #         pass
 
             l._id = "1000"
             curdoc().add_root(l)
@@ -204,6 +212,7 @@ class PlotGenerator:
             self.logger.info("MainDialog took %d" % (end - start))
         except Exception as e:
             self.logger.exception("mainDialog() Error")
+            self.logger.exception(e)
 
     def addDeleteButton(self):
         self.deletePlots = CheckboxGroup(
@@ -212,14 +221,7 @@ class PlotGenerator:
         self.deletePlots.on_click(self.deleteUpdate)
         self.deletePlots.visible = False
 
-    def call_func(self, attr, old, new, func, plot):
-        new = func(attr, old, new)
-
-        plot.dataPath = new
-        self.mainDialog(True)
-
     def set_handler(self, plot):
-
         plot.urlinput.on_change("value", plot.fileUpdate, self.fileUpdate)
         plot.slVar.on_change("value", plot.variableUpdate, self.variableUpdate)
         plot.slCMap.on_change("value", plot.cmapUpdate, self.cmapUpdate)
@@ -256,6 +258,7 @@ class PlotGenerator:
     def cmapUpdate(self, attr, old, new):
         self.mainDialog(True)
 
+    # TODO: Check for problems in aggdim and aggfct handler
     def aggDimUpdate(self, attr, old, new):
         self.mainDialog(True)
         # if attr.slAggregateFunction.value != "None":
@@ -271,11 +274,9 @@ class PlotGenerator:
         #     self.mainDialog(False)
 
     def coastlineUpdate(self, new):
-        self.logger.info("coastlineUpdate")
         self.mainDialog(True)
 
     def coloringUpdate(self, new):
-        self.logger.info("ColoringUpdate")
         self.mainDialog(True)
 
 # Define the main method here

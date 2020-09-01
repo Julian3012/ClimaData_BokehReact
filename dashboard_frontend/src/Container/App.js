@@ -19,6 +19,7 @@ class App extends Component {
     // TODO: Put handler in respective components
     // TODO: Do not disable Navbar Parameter
     // TODO: Fix Coloring
+    // TODO: Colorlevels
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2, 10);
       this.state = {
@@ -27,7 +28,7 @@ class App extends Component {
         changeLayout: false,
         activeSidebar: false,
         observer: [],
-        isSynched: false,	
+        isSynched: false,
         plotId: "plot-el",
         sessionId: sessionId,
       };
@@ -38,7 +39,7 @@ class App extends Component {
 
   createPlot = () => {
     const numPlots = this.state.bk_session.length;
-    const newPos = this.state.bk_session.length === 0 ? 0 : this.state.bk_session[numPlots - 1].pos + 1;
+    const newPos = numPlots === 0 ? 0 : this.state.bk_session[numPlots - 1].pos + 1;
     return {
       pos: newPos,
       file: "",
@@ -68,8 +69,6 @@ class App extends Component {
       disabled_FixCol: true,
       diabled_Slider: true,
       disabled_default: false,
-      sliderStart: 0,
-      sliderEnd: 20,
       x_range_start: 0,
       x_range_end: 0,
       y_range_start: 0,
@@ -87,10 +86,10 @@ class App extends Component {
       let model = window.Bokeh.documents[0].get_model_by_id("1000");
       if (posWidget <= 16) {
         return model.attributes.children[posPlot === 0 ? 3 : posPlot + 3].attributes.children[0].attributes.children[posWidget]
-      } else if (posWidget === this.state.positions.slider) {
-        return model.attributes.children[0].attributes.children[posPlot - 1].attributes.children[1].attributes.children[1]
+      } else if (posWidget === this.state.positions.plot) {
+        return model.attributes.children[Math.floor(posPlot / 2)].attributes.children[posWidget].attributes.children[0]
       } else if (posWidget === 17) {
-        console.log("delte")
+        console.log("delete")
         return model.attributes.children[6 + 3]
       } else {
         console.log("Position value does not exist")
@@ -170,51 +169,50 @@ class App extends Component {
     this.setSession(posPlot, plot)
   }
 
-  handleSyncZoom = () => {	
-    let isActive = this.state.isSynched;	
-    this.setState({ isSynched: !isActive });	
+  handleSyncZoom = () => {
+    let isActive = this.state.isSynched;
+    this.setState({ isSynched: !isActive });
 
-    console.log("Sync zoom: " + !isActive)	
-  }	
+    console.log("Sync zoom: " + !isActive)
+  }
 
-  plotObserver = (sess) => {	
-    if (!this.state.isSynched) {	
+  plotObserver = (sess) => {
+    if (!this.state.isSynched) {
 
-      const adjustZoom = () => { this.adjustZoom(sess.pos) };	
-      const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");	
-      let ranges = new PlotRange(0, model);	
+      const adjustZoom = () => { this.adjustZoom(sess.pos) };
+      let ranges = new PlotRange(0, sess.pos);
 
-      var plotObserver = new MutationObserver(function (mutations) {	
-        try {	
-          const model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");	
-          if (ranges.compare(model)) {	
-            if (ranges.counter % 25 === 0 || ranges.isDefault(model)) {	
-              adjustZoom();	
-              ranges.adjust();	
-            }	
-            ranges.add();	
-          }	
-        } catch (e) {	
-          console.log(e)	
-        }	
-      });	
+      var plotObserver = new MutationObserver(function (mutations) {
+        try {
+          const model = window.Bokeh.documents[0].get_model_by_id("1000");
+          if (ranges.compare(model)) {
+            if (ranges.counter % 25 === 0 || ranges.isDefault(model)) {
+              adjustZoom();
+              ranges.adjust();
+            }
+            ranges.add();
+          }
+        } catch (e) {
+          console.log(e)
+        }
+      });
 
-      const plotId = "#" + sess.id;	
-      var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');	
-      plotObserver.observe(myElement[0], {	
-        childList: true,	
-        subtree: true	
-      });	
+      const plotId = ".plot_" + sess.pos;
+      var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');
+      plotObserver.observe(myElement[0], {
+        childList: true,
+        subtree: true
+      });
 
-      let observer = this.state.observer;	
-      observer.push(plotObserver);	
-      this.setState({ observer: observer });	
+      let observer = this.state.observer;
+      observer.push(plotObserver);
+      this.setState({ observer: observer });
 
-      console.log("Observer added to plot: " + sess.pos)	
-    } else {	
-      console.log("Observer disconnected")	
-    }	
-  }	
+      console.log("Observer added to plot: " + sess.pos)
+    } else {
+      console.log("Observer disconnected")
+    }
+  }
 
   mkOptions = (option) => {
     let arr = []
@@ -456,11 +454,11 @@ class App extends Component {
       console.log("setParams " + posPlot)
 
       let optsVar = "";
-      let optsAd = "";        
+      let optsAd = "";
 
       for (let index = 0; index < 3; index++) {
         optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
-        optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);        
+        optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
       }
 
       const plot = {
@@ -566,8 +564,8 @@ class App extends Component {
         activeSidebar={this.state.activeSidebar}
         showSidebar={this.handleSidebar}
 
-        cbStSyZoom={this.state.isSynched}	
-        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.plotObserver(sess) }); return "" }}	
+        cbStSyZoom={this.state.isSynched}
+        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.plotObserver(sess) }); return "" }}
 
         addPlot={this.addPlot}
         deletePlot={this.deletePlot}
@@ -576,28 +574,34 @@ class App extends Component {
     )
   }
 
-  getPlotRange = (model) => {
-    let range_dict = {
-      "model_y_end": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end,
-      "model_y_start": model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start,
-      "model_x_end": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end,
-      "model_x_start": model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start,
+  getPlotRange = (posPlot) => {
+    let model = window.Bokeh.documents[0].get_model_by_id("1000");
+    let divPlot = Math.floor(posPlot / 2);
+    let numPlot = posPlot % 2;
+
+    return {
+      "model_y_end": model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].y_range.end,
+      "model_y_start": model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].y_range.start,
+      "model_x_end": model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].x_range.end,
+      "model_x_start": model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].x_range.start,
     }
-    return range_dict;
   }
 
   adjustZoom = (posPlot) => {
+    // model.attributes.children[PlotDiv].attributes.children[PlotPosition].attributes.children[0].attributes.y_range.start = -20
+
     try {
-      let model = window.Bokeh.documents[posPlot].get_model_by_id("1000");
-      const ranges = this.getPlotRange(model);
+      const ranges = this.getPlotRange(posPlot);
 
       this.state.bk_session.map((sess) => {
-        let model = window.Bokeh.documents[sess.pos].get_model_by_id("1000");
+        let model = window.Bokeh.documents[0].get_model_by_id("1000");
+        let divPlot = Math.floor(sess.pos / 2);
+        let numPlot = sess.pos % 2;
 
-        model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.end = ranges["model_y_end"];
-        model.attributes.children[21].attributes.children[0].attributes.children[0].y_range.start = ranges["model_y_start"];
-        model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.end = ranges["model_x_end"];
-        model.attributes.children[21].attributes.children[0].attributes.children[0].x_range.start = ranges["model_x_start"];
+        model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].y_range.end = ranges["model_y_end"];
+        model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].y_range.start = ranges["model_y_start"];
+        model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].x_range.end = ranges["model_x_end"];
+        model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].x_range.start = ranges["model_x_start"];
       })
 
       console.log("Zoom")
