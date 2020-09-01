@@ -100,6 +100,7 @@ class Navbar extends Component {
         );
     }
 
+<<<<<<< HEAD
     CbSynchZoom = () => {	
         return (	
             <StyledFormControlLabel	
@@ -116,6 +117,8 @@ class Navbar extends Component {
         )	
     }
 
+=======
+>>>>>>> 823c3a46cf2faacb5af7337b1791c220cb16e683
     render() {
         const navbarStyle = {
             background: "white",
@@ -136,7 +139,11 @@ class Navbar extends Component {
                 </Typography>
 
                 <Grid container justify="center" alignItems="center" spacing={1}>
+<<<<<<< HEAD
                     {this.CbSynchZoom()}	
+=======
+                    {this.SelCm()}
+>>>>>>> 823c3a46cf2faacb5af7337b1791c220cb16e683
                     {this.CbCoastline()}
                     {this.CbFixColoring()}
                     {this.CbLogColoring()}

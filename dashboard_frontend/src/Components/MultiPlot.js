@@ -48,10 +48,6 @@ class MultiPlot extends Component {
     NavbarProps = () => {
         return (
             <Navbar
-                cbLabSyZoom="Synchonize Zoom"
-                cbStSyZoom={this.props.cbStSyZoom}
-                cbChSyZoom={this.props.cbChSyZoom}
-
                 cbLabCl="Show Coastline"
                 cbStCl={this.props.cbStCl}
                 cbChCl={(event) => { this.props.cbChCl(event, this.props.bk_session) }}
