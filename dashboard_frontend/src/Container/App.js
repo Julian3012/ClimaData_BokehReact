@@ -18,7 +18,8 @@ class App extends Component {
     // TODO: ColorMap in Sidebar
     // TODO: Put handler in respective components
     // TODO: Do not disable Navbar Parameter
-    // TODO: Synchronize zoom checkbox too much
+    // TODO: Fix Coloring
+    // TODO: Colorlevels
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2, 10);
       this.state = {
@@ -166,6 +167,51 @@ class App extends Component {
     }
 
     this.setSession(posPlot, plot)
+  }
+
+  handleSyncZoom = () => {
+    let isActive = this.state.isSynched;
+    this.setState({ isSynched: !isActive });
+
+    console.log("Sync zoom: " + !isActive)
+  }
+
+  plotObserver = (sess) => {
+    if (!this.state.isSynched) {
+
+      const adjustZoom = () => { this.adjustZoom(sess.pos) };
+      let ranges = new PlotRange(0, sess.pos);
+
+      var plotObserver = new MutationObserver(function (mutations) {
+        try {
+          const model = window.Bokeh.documents[0].get_model_by_id("1000");
+          if (ranges.compare(model)) {
+            if (ranges.counter % 25 === 0 || ranges.isDefault(model)) {
+              adjustZoom();
+              ranges.adjust();
+            }
+            ranges.add();
+          }
+        } catch (e) {
+          console.log(e)
+        }
+      });
+
+      const plotId = ".plot_" + sess.pos;
+      var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');
+      plotObserver.observe(myElement[0], {
+        childList: true,
+        subtree: true
+      });
+
+      let observer = this.state.observer;
+      observer.push(plotObserver);
+      this.setState({ observer: observer });
+
+      console.log("Observer added to plot: " + sess.pos)
+    } else {
+      console.log("Observer disconnected")
+    }
   }
 
   mkOptions = (option) => {
