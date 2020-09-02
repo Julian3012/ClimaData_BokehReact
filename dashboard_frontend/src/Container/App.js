@@ -15,7 +15,6 @@ class App extends Component {
 
     // TODO: Unique key prop for render methods
     // TODO: Delete redux storage when window closes
-    // TODO: ColorMap in Sidebar
     // TODO: Put handler in respective components
     // TODO: Do not disable Navbar Parameter
     // TODO: Fix Coloring
@@ -567,6 +566,9 @@ class App extends Component {
         addPlot={this.addPlot}
         deletePlot={this.deletePlot}
 
+        cbStSyZoom={this.handleSyncZoom}
+        cbStSyZoom={this.state.isSynched}
+        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.plotObserver(sess) }); return "" }}
       />
     )
   }
