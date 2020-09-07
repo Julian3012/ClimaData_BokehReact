@@ -35,6 +35,8 @@ class PlotObject():
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
         self.logger = logger
 
+        self.logger.info(f"[Constructor] {title}")
+
          # Constant
         self.COLORMAPS = COLORMAPS
 
@@ -95,7 +97,7 @@ class PlotObject():
         self.hpPlot = None
         self.xrData = None
         self.xrDataMeta = None
-
+        
     def generate_Parameters(self):
 
         self.urlinput = TextInput(value=self.dataPath, title="File")
@@ -236,6 +238,7 @@ class PlotObject():
 
         return link
 
+    # TODO: Do not call constructor every time
     def fileUpdate(self, attr, old, new):
         """
         
@@ -250,85 +253,90 @@ class PlotObject():
         """
         Generate plot object depending on the data
         """
-        self.variable = self.slVar.value
-        self.cm = self.slCMap.value
-        self.aggDim = self.slAggregateDimension.value
-        self.aggFn = self.slAggregateFunction.value
-        self.showCoastline = 0 in self.cbCoastlineOverlay.active
-        self.useFixColoring = 0 in self.cbFixCol.active
-        self.cSymmetric = 0 in self.cbSymCol.active
-        self.cLogZ = 0 in self.cbLogzCol.active
-        self.logX = 0 in self.cbLogX.active
-        self.logY = 0 in self.cbLogY.active
+        try: 
+            self.variable = self.slVar.value
+            self.cm = self.slCMap.value
+            self.aggDim = self.slAggregateDimension.value
+            self.aggFn = self.slAggregateFunction.value
+            self.showCoastline = 0 in self.cbCoastlineOverlay.active
+            self.useFixColoring = 0 in self.cbFixCol.active
+            self.cSymmetric = 0 in self.cbSymCol.active
+            self.cLogZ = 0 in self.cbLogzCol.active
+            self.logX = 0 in self.cbLogX.active
+            self.logY = 0 in self.cbLogY.active
 
-        cLevels, fixColorMin, fixColorMax = self.checkInputs()
+            cLevels, fixColorMin, fixColorMax = self.checkInputs()
 
-        if self.aggDim == "lat" and self.aggFn != "None":
-            if self.xrData is None:
-                self.logger.info("Loading unchunked data for curveplot")
-                try:
-                    link = self.getFile()
-                    self.xrData = xr.open_dataset(link)
-                    assert self.xrData != None
-                except:
-                    self.logger.error("Error for loading unchunked data.")
-            if self.cuPlot is None:
-                self.logger.info("Build CurvePlot")
-                self.cuPlot = CurvePlot(self.logger, self.renderer, self.xrData)
-            plot = self.cuPlot.getPlotObject(
-                variable=self.variable,
-                title=self.title,
-                aggDim=self.aggDim,
-                aggFn=self.aggFn,
-                logX=self.logX,
-                logY=self.logY,
-                dataUpdate=dataUpdate,
-            )
-            self.logger.info("Returned plot")
-        elif self.aggDim == "heightProfile" and self.aggFn != "None":
-            if self.xrData is None:
-                self.logger.info("Loading unchunked data for curveplot")
-                try:
-                    link = self.getFile()
-                    self.xrData = xr.open_dataset(link)
-                    assert self.xrData != None
-                except:
-                    self.logger.error("Error for loading unchunked data.")
-            if self.hpPlot is None:
-                self.logger.info("Build HeightProfilePlot")
-                self.hpPlot = HeightProfilePlot(self.logger, self.renderer, self.xrData)
-            plot = self.hpPlot.getPlotObject(
-                variable=self.variable,
-                title=self.title,
-                aggDim=self.aggDim,
-                aggFn=self.aggFn,
-                cm=self.cm,
-                cSymmetric=self.cSymmetric,
-                cLogZ=self.cLogZ,
-                cLevels=cLevels,
-                dataUpdate=dataUpdate,
-            )
-        else:
-            if self.tmPlot is None:
-                self.logger.info("Build TriMeshPlot")
-                self.tmPlot = TriMeshPlot(self.logger, self.renderer, self.xrDataMeta)
-            plot = self.tmPlot.getPlotObject(
-                variable=self.variable,
-                title=self.title,
-                cm=self.cm,
-                aggDim=self.aggDim,
-                aggFn=self.aggFn,
-                showCoastline=self.showCoastline,
-                useFixColoring=self.useFixColoring,
-                fixColoringMin=fixColorMin,
-                fixColoringMax=fixColorMax,
-                cSymmetric=self.cSymmetric,
-                cLogZ=self.cLogZ,
-                cLevels=cLevels,
-                dataUpdate=dataUpdate,
-            )
+            if self.aggDim == "lat" and self.aggFn != "None":
+                if self.xrData is None:
+                    self.logger.info("Loading unchunked data for curveplot")
+                    try:
+                        link = self.getFile()
+                        self.xrData = xr.open_dataset(link)
+                        assert self.xrData != None
+                    except:
+                        self.logger.error("Error for loading unchunked data.")
+                if self.cuPlot is None:
+                    self.logger.info("Build CurvePlot")
+                    self.cuPlot = CurvePlot(self.logger, self.renderer, self.xrData)
+                plot = self.cuPlot.getPlotObject(
+                    variable=self.variable,
+                    title=self.title,
+                    aggDim=self.aggDim,
+                    aggFn=self.aggFn,
+                    logX=self.logX,
+                    logY=self.logY,
+                    dataUpdate=dataUpdate,
+                )
+                self.logger.info("Returned plot")
+            elif self.aggDim == "heightProfile" and self.aggFn != "None":
+                if self.xrData is None:
+                    self.logger.info("Loading unchunked data for curveplot")
+                    try:
+                        link = self.getFile()
+                        self.xrData = xr.open_dataset(link)
+                        assert self.xrData != None
+                    except:
+                        self.logger.error("Error for loading unchunked data.")
+                if self.hpPlot is None:
+                    self.logger.info("Build HeightProfilePlot")
+                    self.hpPlot = HeightProfilePlot(self.logger, self.renderer, self.xrData)
+                plot = self.hpPlot.getPlotObject(
+                    variable=self.variable,
+                    title=self.title,
+                    aggDim=self.aggDim,
+                    aggFn=self.aggFn,
+                    cm=self.cm,
+                    cSymmetric=self.cSymmetric,
+                    cLogZ=self.cLogZ,
+                    cLevels=cLevels,
+                    dataUpdate=dataUpdate,
+                )
+            else:
+                if self.tmPlot is None:
+                    self.logger.info("Build TriMeshPlot")
+                    self.tmPlot = TriMeshPlot(self.logger, self.renderer, self.xrDataMeta)
+                plot = self.tmPlot.getPlotObject(
+                    variable=self.variable,
+                    title=self.title,
+                    cm=self.cm,
+                    aggDim=self.aggDim,
+                    aggFn=self.aggFn,
+                    showCoastline=self.showCoastline,
+                    useFixColoring=self.useFixColoring,
+                    fixColoringMin=fixColorMin,
+                    fixColoringMax=fixColorMax,
+                    cSymmetric=self.cSymmetric,
+                    cLogZ=self.cLogZ,
+                    cLevels=cLevels,
+                    dataUpdate=dataUpdate,
+                )
 
-        return plot
+            return plot
+        except Exception as e:
+            self.logger.exception(e)
+            self.__init__(self.logger,self.title)
+            return ""
 
 
 

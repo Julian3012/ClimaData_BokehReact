@@ -28,15 +28,15 @@ from src.plots.TriMeshPlot import TriMeshPlot
 class PlotGenerator:
     def __init__(self):
 
-        print("Start PlotGenerator()")
         FORMAT = "%(asctime)-15s %(clientip)s %(user)-8s %(message)s"
         logging.basicConfig(format=FORMAT, level=logging.DEBUG)
         self.logger = logging.getLogger("ncview2")
         self.logger.setLevel(logging.DEBUG)
         self.logger.info({i.__name__: i.__version__ for i in [hv, np, pd]})
+        self.logger.info("[Constructor] PlotGenerator")
 
         # Get plot pbjects
-        self.logger.info("Get plots")
+        self.logger.info("[Constructor] Get plots")
         self.plotPosition = -1
 
         # inp1 = "2016031500-ART-chemtracer_grid_DOM01_PL_0010.nc"
@@ -50,6 +50,8 @@ class PlotGenerator:
             PlotObject(self.logger, title="Plot 6", dataPath=inp),
         ]
 
+        self.restart = entry
+
     def mainDialog(self, dataUpdate=True):
         """
         This function build up and manages the Main-Graph Dialog
@@ -59,7 +61,6 @@ class PlotGenerator:
             self.logger.info("Started mainDialog()")
             start = time.time()
 
-            # Clear doc when update occurs
             curdoc().clear()
             lArray = []
 
@@ -69,39 +70,37 @@ class PlotGenerator:
             # TODO: Try except wrong inputs -> example: clon, lat, mean
             # TODO: Execute everything in one command
             for idx, plot in enumerate(self.plots):
-
+                self.logger.info(f"Plot Number: {idx}")
                 self.plotPosition = idx
 
                 # Get data
                 try:
                     if plot.dataPath != "":
+                        self.logger.info(f"File1")
                         link = "./data/" + plot.dataPath
                         plot.xrDataMeta = xr.open_dataset(link)
                         self.logger.info(f"File:  {link}")
                         plot.optVariables = [
                             x for x in plot.xrDataMeta.variables.keys()
                         ]
-
                         if plot.val_dict["variable"] == "clon":
                             plot.val_dict["variable"] = plot.optVariables[0]
                     else:
                         plot.optVariables = ["clon"]
                 except Exception as e:
+                    plot.dataPath = ""
                     self.logger.info(e)
-
-                # self.logger.info("New values: {}".format(plot.val_dict))
 
                 # TODO: generate parameter directly
                 # Init widgets
                 if plot.variable == None:
+                    self.logger.info("[mainDialog] Generate parameters")
                     plot.generate_Parameters()
                     self.set_handler(plot)
 
                 # Generate plot type
                 if plot.dataPath != "":
                     figureElement = plot.genPlot(dataUpdate)
-                    # if(figureElement==""):
-                    #     self.deletePlots.active = [0]
 
                 # Disable widgets for specific inputs
                 if plot.dataPath != "":
@@ -123,7 +122,6 @@ class PlotGenerator:
                 else:
                     lArray.append(row())
 
-                # Apply to layout
                 col = [
                     row(
                         plot.urlinput,
@@ -143,34 +141,16 @@ class PlotGenerator:
                     )
                 ]
                 lArray.append(col)
-
+                    
             # Delete button
             self.addDeleteButton()
             lArray.append(self.deletePlots)
 
-            # TODO: Sync only trimesh plots 
-            # Sync zoom
-            # plot_positions = [0,2,4,6,8,10]
-            # plots = []
-            # for idx, plot in zip(plot_positions, self.plots):
-            #     if plot.dataPath != "":
-            #         try:
-            #             if lArray[idx].__class__.__name__ == "Figure":
-            #                 plots.append(lArray[idx])
-            #             else:
-            #                 plots.append(lArray[idx].children[0])
-            #         except Exception as e:
-            #             pass
-                            
-            # self.logger.info(plots)
-            # try:
-            #     for plot in plots[1:]:
-            #         plot.x_range = plots[0].x_range
-            #         plot.y_range = plots[0].y_range
-            # except Exception as e:
-            #     self.logger.info(e)
-            #     pass
+            # Apply button
+            self.addApplyButton()
+            lArray.append(self.applyChanges)
 
+            # TODO: Sync only trimesh plots 
             new_array = [
                 row(lArray[0], lArray[2]),
                 row(lArray[4], lArray[6]),
@@ -181,38 +161,42 @@ class PlotGenerator:
                 lArray[7],
                 lArray[9],
                 lArray[11],
-                lArray[12]
+                lArray[12],
+                lArray[13]
             ]
 
             l = layout(new_array)
-
             # Hide widgets
-            # for idx, widget in enumerate(l.children):
-            # #     # l.children = widget
-            # #     # l.children[0].children => Figures 1+2
-            # #     # l.children[1].children => Figures 3+4
-            # #     # l.children[2].children => Figures 5+6
-            # #     # l.children[3].children => Params Fig1
-            # #     # l.children[4].children => Params Fig2
-            # #     # l.children[5].children => Params Fig3
-            # #     # ...
-
-            # # TODO: Another logic for visibility
-            #     try:
-            #         if widget.children[0].children[0].__class__.__name__ != "Figure":
-            #             for p in widget.children[0].children:
-            #                 p.visible = False
-            #     except Exception as e:
-            #         pass
-
+            self.hideWidgets(l)
             l._id = "1000"
             curdoc().add_root(l)
 
             end = time.time()
             self.logger.info("MainDialog took %d" % (end - start))
         except Exception as e:
-            self.logger.exception("mainDialog() Error")
+            self.logger.info("[mainDialog] Exception")
             self.logger.exception(e)
+            self.restart()
+
+    def hideWidgets(self,layout):
+        """
+        l.children = widget
+        l.children[0].children => Figures 1+2
+        l.children[1].children => Figures 3+4
+        l.children[2].children => Figures 5+6
+        l.children[3].children => Params Fig1
+        l.children[4].children => Params Fig2
+        l.children[5].children => Params Fig3
+        """
+        for idx, widget in enumerate(layout.children):
+        
+            # TODO: Another logic for visibility
+                try:
+                    if widget.children[0].children[0].__class__.__name__ != "Figure":
+                        for p in widget.children[0].children:
+                            p.visible = False
+                except Exception as e:
+                    pass
 
     def addDeleteButton(self):
         self.deletePlots = CheckboxGroup(
@@ -220,6 +204,13 @@ class PlotGenerator:
                     )
         self.deletePlots.on_click(self.deleteUpdate)
         self.deletePlots.visible = False
+    
+    def addApplyButton(self):
+        self.applyChanges = CheckboxGroup(
+                        labels=["Apply"], active=[]
+                    )
+        self.applyChanges.on_click(self.applyUpdate)
+        self.applyChanges.visible = False
 
     def set_handler(self, plot):
         plot.urlinput.on_change("value", plot.fileUpdate, self.fileUpdate)
@@ -240,6 +231,12 @@ class PlotGenerator:
         """
         self.__init__()
         self.mainDialog(True)
+
+    def applyUpdate(self, new):
+        """
+        Handler to delete plots
+        """
+        self.mainDialog(False)
 
     def fileUpdate(self, attr, old, new):
         """
