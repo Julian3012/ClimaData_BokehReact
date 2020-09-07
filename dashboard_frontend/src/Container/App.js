@@ -14,10 +14,12 @@ class App extends Component {
     console.log('[App.js] constructor');
 
     // TODO: Unique key prop for render methods
+    // TODO: JSDoc
     // TODO: Delete redux storage when window closes
     // TODO: Put handler in respective components
     // TODO: Do not disable Navbar Parameter
     // TODO: Fix Coloring
+    // TODO: Sticky Navbar
     // TODO: Colorlevels
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2, 10);
@@ -86,10 +88,19 @@ class App extends Component {
       if (posWidget <= 16) {
         return model.attributes.children[posPlot === 0 ? 3 : posPlot + 3].attributes.children[0].attributes.children[posWidget]
       } else if (posWidget === this.state.positions.plot) {
-        return model.attributes.children[Math.floor(posPlot / 2)].attributes.children[posWidget].attributes.children[0]
+        let divPlot = Math.floor(posPlot / 2);
+        let numPlot = posPlot % 2;
+        if (model.attributes.children[divPlot].attributes.children[numPlot].attributes.hasOwnProperty("children")) {
+          return model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0]
+        } else {
+          return model.attributes.children[divPlot].attributes.children[numPlot]
+        }
       } else if (posWidget === 17) {
         console.log("delete")
         return model.attributes.children[6 + 3]
+      } else if (posWidget === 18) {
+        console.log("delete")
+        return model.attributes.children[6 + 4]
       } else {
         console.log("Position value does not exist")
       }
@@ -108,6 +119,7 @@ class App extends Component {
     const bk_session = [...this.state.bk_session];
     bk_session[pos] = plot;
     this.setState({ bk_session: bk_session });
+    this.setState({ isSynched: false });
     this.props.add(this.state);
   }
 
@@ -120,7 +132,8 @@ class App extends Component {
 
       promise.then((plot) => {
         let plots = [...this.state.bk_session, plot];
-        this.setState({ bk_session: plots })
+        this.setState({ bk_session: plots });
+        this.setState({ isSynched: false });
         this.props.add(this.state)
       })
       console.log("Plot added")
@@ -133,6 +146,14 @@ class App extends Component {
     this.props.remove();
     try {
       this.getWidget(17, -1).active = [0];
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  handleApply = () => {
+    try {
+      this.getWidget(18, -1).active = [0];
     } catch (error) {
       console.log(error)
     }
@@ -176,6 +197,7 @@ class App extends Component {
   }
 
   plotObserver = (sess) => {
+
     if (!this.state.isSynched) {
 
       const adjustZoom = () => { this.adjustZoom(sess.pos) };
@@ -196,18 +218,18 @@ class App extends Component {
         }
       });
 
-      const plotId = ".plot_" + sess.pos;
-      var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');
-      plotObserver.observe(myElement[0], {
-        childList: true,
-        subtree: true
-      });
+      try {
+        const plotId = ".plot_" + sess.pos;
+        var myElement = $(plotId).find('.bk-toolbar.bk-toolbar-right');
+        plotObserver.observe(myElement[0], {
+          childList: true,
+          subtree: true
+        });
 
-      let observer = this.state.observer;
-      observer.push(plotObserver);
-      this.setState({ observer: observer });
-
-      console.log("Observer added to plot: " + sess.pos)
+        console.log("Observer added to plot: " + sess.pos)
+      } catch (error) {
+        console.log("Observer failed on position: " + sess.pos)
+      }
     } else {
       console.log("Observer disconnected")
     }
@@ -399,6 +421,36 @@ class App extends Component {
     console.log("State colorLevels changed")
   };
 
+  handleFixColMi = (event, posPlot) => {
+    let plot = []
+    posPlot.map((pos) => {
+      return plot.push(this.state.bk_session[pos]);
+    })
+
+    plot.map((sess) => {
+
+      sess.fixColMin = event.target.value;
+      this.getWidget(this.state.positions.fixColMin, sess.pos).value = event.target.value;
+
+      return this.setSession(sess.pos, sess);
+    });
+  };
+
+  handleFixColMa = (event, posPlot) => {
+    let plot = []
+    posPlot.map((pos) => {
+      return plot.push(this.state.bk_session[pos]);
+    })
+
+    plot.map((sess) => {
+
+      sess.fixColMax = event.target.value;
+      this.getWidget(this.state.positions.fixColMax, sess.pos).value = event.target.value;
+
+      return this.setSession(sess.pos, sess);
+    });
+  };
+
   handleColorMap = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
@@ -559,6 +611,7 @@ class App extends Component {
 
         slChLev={this.handleSlider}
         bk_session={this.state.bk_session}
+        handleApply={this.handleApply}
 
         activeSidebar={this.state.activeSidebar}
         showSidebar={this.handleSidebar}
@@ -566,47 +619,41 @@ class App extends Component {
         addPlot={this.addPlot}
         deletePlot={this.deletePlot}
 
-        cbStSyZoom={this.handleSyncZoom}
         cbStSyZoom={this.state.isSynched}
-        cbChSyZoom={() => { this.handleSyncZoom(); this.state.bk_session.map((sess) => { this.plotObserver(sess) }); return "" }}
+        cbChSyZoom={() => {
+          this.handleSyncZoom();
+          this.state.bk_session.map((sess) => {
+            this.plotObserver(sess)
+          }); return ""
+        }
+        }
       />
     )
   }
 
   getPlotRange = (posPlot) => {
-    let model = window.Bokeh.documents[0].get_model_by_id("1000");
-    let divPlot = Math.floor(posPlot / 2);
-    let numPlot = posPlot % 2;
-
     return {
-      "model_y_end": model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].y_range.end,
-      "model_y_start": model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].y_range.start,
-      "model_x_end": model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].x_range.end,
-      "model_x_start": model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].x_range.start,
+      "model_y_end": this.getWidget(this.state.positions.plot, posPlot).y_range.end,
+      "model_y_start": this.getWidget(this.state.positions.plot, posPlot).y_range.start,
+      "model_x_end": this.getWidget(this.state.positions.plot, posPlot).x_range.end,
+      "model_x_start": this.getWidget(this.state.positions.plot, posPlot).x_range.start,
     }
   }
 
   adjustZoom = (posPlot) => {
-    // model.attributes.children[PlotDiv].attributes.children[PlotPosition].attributes.children[0].attributes.y_range.start = -20
-
     try {
       const ranges = this.getPlotRange(posPlot);
-
       this.state.bk_session.map((sess) => {
-        let model = window.Bokeh.documents[0].get_model_by_id("1000");
-        let divPlot = Math.floor(sess.pos / 2);
-        let numPlot = sess.pos % 2;
-
-        model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].y_range.end = ranges["model_y_end"];
-        model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].y_range.start = ranges["model_y_start"];
-        model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].x_range.end = ranges["model_x_end"];
-        model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0].x_range.start = ranges["model_x_start"];
+        this.getWidget(this.state.positions.plot, sess.pos).y_range.end = ranges["model_y_end"];
+        this.getWidget(this.state.positions.plot, sess.pos).y_range.start = ranges["model_y_start"];
+        this.getWidget(this.state.positions.plot, sess.pos).x_range.end = ranges["model_x_end"];
+        this.getWidget(this.state.positions.plot, sess.pos).x_range.start = ranges["model_x_start"];
       })
 
       console.log("Zoom")
     }
     catch (e) {
-      console.log(e);
+      console.log("Zoom failed on position: " + posPlot);
     }
   }
 

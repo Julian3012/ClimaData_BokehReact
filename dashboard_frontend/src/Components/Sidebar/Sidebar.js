@@ -63,6 +63,8 @@ class Sidebar extends Component {
                 cbChLy={(event) => { this.props.cbChLy(event, [sess.pos]) }}
                 cbStLy={sess.logy}
 
+                handleApply = {this.props.handleApply}
+
                 cbActLxy={sess.disabled_Logxy}
                 txActFm={sess.disabled_FixCol}
                 disableDefault={sess.disableDefault}
@@ -87,7 +89,7 @@ class Sidebar extends Component {
         //     borderBottom: "solid #DADDE7 1px",
         // };
         return (
-            <Grid item xs={2}>
+            <Grid item xs={2} style={{maxHeight: "90vh", overflow: 'auto'}}>
                 <Grid container justify="center" style={{marginBottom: 5}}>
                     <StyledButton onClick={this.props.deletePlot}>
                         Delete Plots

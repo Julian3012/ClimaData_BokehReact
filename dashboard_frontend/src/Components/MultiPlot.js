@@ -40,6 +40,8 @@ class MultiPlot extends Component {
 
                     addPlot={this.props.addPlot}
                     deletePlot={this.props.deletePlot}
+
+                    handleApply={this.props.handleApply}
                 />
             );
         }
@@ -89,25 +91,6 @@ class MultiPlot extends Component {
         } else {
             return 0;
         }
-    }
-
-    SliderLev = (sess) => {
-        return (
-            <StyledSlider
-                ValueLabelComponent={ValueLabelComponent}
-                defaultValue={0}
-                orientation="horizontal"
-                aria-labelledby="vertical-slider"
-                getAriaValueText={this.valuetext}
-                step={1}
-                min={sess.sliderStart}
-                max={sess.sliderEnd}
-                valueLabelDisplay="on"
-                disabled={sess.diabled_Slider}
-                onChange={(event, newValue) => { this.props.slChLev(event, newValue, [sess.pos]) }}
-                display="none"
-            />
-        );
     }
 
     render() {

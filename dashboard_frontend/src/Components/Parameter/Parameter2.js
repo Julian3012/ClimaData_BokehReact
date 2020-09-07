@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import { StyledSlider, ValueLabelComponent } from '../Styles/StyledSlider';
 import StyledButton from "../Styles/StyledButton";
+import Button from '@material-ui/core/Button';
 import FileTextField from "../Styles/FileTextField";
 import { StyledCheckbox, StyledFormControlLabel } from "../Styles/StyledCheckbox";
 import { StyledSelection, StyledMenuItem } from "../Styles/StyledSelection";
 import Grid from '@material-ui/core/Grid';
 import StyledTextField from '../Styles/StyledTextField';
 import Hidden from '@material-ui/core/Hidden';
+import TextField from '@material-ui/core/TextField';
 
 class Parameter extends Component {
 
@@ -133,8 +135,9 @@ class Parameter extends Component {
 
     TxFixColMin = () => {
         return (
-            <StyledTextField
+            <TextField
                 label={this.props.txLabFmi}
+                style={{width:"100%"}}
                 variant="outlined"
                 size="small"
                 onChange={this.props.txChFmi}
@@ -146,8 +149,9 @@ class Parameter extends Component {
 
     TxFixColMax = () => {
         return (
-            <StyledTextField
+            <TextField
                 label={this.props.txLabFma}
+                style={{width:"100%"}}
                 variant="outlined"
                 size="small"
                 onChange={this.props.txChFma}
@@ -190,32 +194,9 @@ class Parameter extends Component {
         );
     }
 
-    valuetext = (value) => {
-        return `${value}`;
-    }
-
-    SliderLev = () => {
+    applyBtn = () => {
         return (
-            <StyledSlider
-                ValueLabelComponent={ValueLabelComponent}
-                defaultValue={0}
-                orientation="horizontal"
-                aria-labelledby="vertical-slider"
-                getAriaValueText={this.valuetext}
-                step={1}
-                min={this.props.start}
-                max={this.props.end}
-                valueLabelDisplay="on"
-                disabled={this.props.isActiveSlider}
-                onChange={this.props.slChLev}
-                display={"none"}
-            />
-        );
-    }
-
-    BtnZoom = () => {
-        return (
-            <StyledButton variant="contained" onClick={this.props.onClick}>Get Zoom</StyledButton>
+            <Button variant="contained" onClick={this.props.handleApply}>Apply</Button>
         );
     }
 
@@ -223,36 +204,51 @@ class Parameter extends Component {
 
         return (
             <div>
-                <Grid container spacing={3}>
+                <Grid container spacing={1}>
                     <Grid item xs={12} >
                         {this.TxFile()}
                     </Grid>
 
                     <Grid item md={12} xs={4} >
                         {this.SelVariable()}
+                    </Grid>
+
+                    <Grid item md={6} xs={4} >
                         {this.SelCm()}
                     </Grid>
 
-                    <Grid item md={12} xs={4} >
+                    <Grid item md={6} xs={4} >
                         {this.SelAggDimension()}
+                    </Grid>
+
+                    <Grid item md={6} xs={4} >
                         {this.SelAggFunction()}
-                        <Hidden xlDown={this.props.disableDefault}>
+                    </Grid>
+                    <Hidden xlDown={this.props.disableDefault}>
+                        <Grid item md={12} xs={4} >
                             {this.TxColorlvl()}
-                        </Hidden>
-                    </Grid>
+                        </Grid>
+                    </Hidden>
 
-                    <Grid item xs={12} >
-                        <Hidden xlDown={this.props.txActFm}>
+                    <Hidden xlDown={this.props.txActFm}>
+                        <Grid item md={6} >
                             {this.TxFixColMin()}
-                            {this.TxFixColMax()}
-                        </Hidden>
-                    </Grid>
+                        </Grid>
 
-                    <Grid item xs={12}>
-                        <Hidden xlDown={this.props.cbActLxy}>
+                        <Grid item md={6} >
+                            {this.TxFixColMax()}
+                        </Grid>
+                    </Hidden>
+
+                    <Hidden xlDown={this.props.cbActLxy}>
+                        <Grid item xs={12}>
                             {this.CbLogX()}
                             {this.CbLogY()}
-                        </Hidden>
+                        </Grid>
+                    </Hidden>
+
+                    <Grid item xs={12}>
+                        {this.applyBtn()}
                     </Grid>
 
                 </Grid>
