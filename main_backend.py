@@ -12,10 +12,12 @@ import pandas as pd
 import xarray as xr
 from bokeh.io import curdoc
 from bokeh.layouts import column, layout, row, widgetbox
-from bokeh.models import Button, CheckboxGroup, ColumnDataSource, CustomJS, Div, Select
+from bokeh.models import (Button, CheckboxGroup, ColumnDataSource, CustomJS,
+                          Div, Select)
 from bokeh.models.widgets import TextInput
 from bokeh.server.server import Server
 from bokeh.themes.theme import Theme
+from bokeh.models.tools import WheelZoomTool, SaveTool, PanTool, ResetTool
 from cartopy import crs
 from holoviews.operation.datashader import datashade, rasterize
 
@@ -110,14 +112,24 @@ class PlotGenerator:
                     # figureElement.state.css_classes = ["plot_object"]
                     # figureElement.state.sizing_mode = "scale_width"
                     classname = "plot_" + str(idx)
+                    pan = PanTool()
+                    wheel = WheelZoomTool()
+                    save = SaveTool()
+                    reset = ResetTool()
+
+                    tools = [pan,wheel,save,reset]
                     try:
                         figure = figureElement.state.children[0]
                         slider = figureElement.state.children[1]
+                        self.logger.info(figure.tools)
+                        figure.tools = tools
+                        # figure.add_too
                         figure.css_classes = [classname]
                         lArray.append(column(figure, slider))
                     except Exception as e:
                         self.logger.info(e)
                         figureElement.state.css_classes = [classname]
+                        figureElement.state.tools = tools
                         lArray.append(figureElement.state)                        
                 else:
                     lArray.append(row())
