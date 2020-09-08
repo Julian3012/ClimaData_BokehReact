@@ -18,9 +18,7 @@ class App extends Component {
     // TODO: Delete redux storage when window closes
     // TODO: Put handler in respective components
     // TODO: Do not disable Navbar Parameter
-    // TODO: Fix Coloring
     // TODO: Sticky Navbar
-    // TODO: Colorlevels
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2, 10);
       this.state = {
@@ -32,6 +30,7 @@ class App extends Component {
         isSynched: false,
         plotId: "plot-el",
         sessionId: sessionId,
+        disableOnLoad: false,
       };
     } else {
       this.state = JSON.parse(JSON.stringify(this.props.list[0]));
@@ -157,36 +156,6 @@ class App extends Component {
     } catch (error) {
       console.log(error)
     }
-  }
-
-  checkActive = (posPlot) => {
-    const plot = {
-      ...this.state.bk_session[posPlot]
-    };
-
-    if (this.state.bk_session[posPlot].aggregateDim !== "lat" || this.state.bk_session[posPlot].aggregateFun === "None") {
-      plot.disabled_default = false;
-    } else {
-      plot.disabled_default = true;
-    }
-
-    if (this.state.bk_session[posPlot].fixColoring) {
-      console.log("Enable Fix Coloring")
-      plot.disabled_FixCol = false;
-    } else {
-      console.log("Disable Fix Coloring")
-      plot.disabled_FixCol = true;
-    }
-
-    if (this.state.bk_session[posPlot].aggregateDim === "lat" || this.state.bk_session[posPlot].aggregateFun !== "None") {
-      console.log("Enable Logx Logy")
-      plot.disabled_Logxy = false;
-    } else {
-      console.log("Disable Logx Logy")
-      plot.disabled_Logxy = true;
-    }
-
-    this.setSession(posPlot, plot)
   }
 
   handleSyncZoom = () => {
@@ -493,7 +462,10 @@ class App extends Component {
           return this.getWidget(this.state.positions.file, pos).value = this.state.bk_session[pos].file;
         })
         console.log(this.state.bk_session)
-        setTimeout(() => { this.setParams(posPlot[0]) }, 3000)
+        this.setState({disableOnLoad: true})
+
+        let timeout = posPlot[0] > 4 ? 4000 : 3000;
+        setTimeout(() => { this.setParams(posPlot[0]) }, timeout)
       }
     } catch (e) {
       console.log(e)
@@ -508,8 +480,8 @@ class App extends Component {
       let optsAd = "";
 
       for (let index = 0; index < 3; index++) {
-        optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
         optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
+        optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
       }
 
       const plot = {
@@ -520,8 +492,9 @@ class App extends Component {
       plot.aggDimSelect = optsAd;
 
       this.setSession(posPlot, plot);
+      this.setState({disableOnLoad: false});
       this.props.add(this.state);
-
+      
     } catch (error) {
       console.log(error)
     }
@@ -587,6 +560,7 @@ class App extends Component {
         cbChLc={this.handleLogzColoring}
 
         disableDefaultNavbar={this.state.bk_session.length === 0 ? false : this.state.bk_session[0].disabled_default}
+        disableOnLoad={this.state.disableOnLoad}
 
         // Plots
         txChFile={this.handleDataPath}

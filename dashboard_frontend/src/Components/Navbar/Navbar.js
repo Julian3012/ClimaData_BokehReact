@@ -26,7 +26,7 @@ class Navbar extends Component {
                         variant="outlined"
                         size="small"
                         inputProps={{ 'aria-label': 'primary  Checkbox' }}
-                        disabled={this.props.disableDefault}
+                        disabled={this.props.disableOnLoad}
                     />}
                 label={this.props.cbLabCl}
             />
@@ -44,7 +44,7 @@ class Navbar extends Component {
                         variant="outlined"
                         size="small"
                         inputProps={{ 'aria-label': 'primary  Checkbox' }}
-                        disabled={this.props.disableDefault}
+                        disabled={this.props.disableOnLoad}
                     />}
                 label={this.props.cbLabFc}
             />
@@ -60,7 +60,7 @@ class Navbar extends Component {
                         onChange={this.props.cbChSc}
                         size="small"
                         inputProps={{ 'aria-label': 'primary  Checkbox' }}
-                        disabled={this.props.disableDefault}
+                        disabled={this.props.disableOnLoad}
                     />}
                 label={this.props.cbLabSc}
             />
@@ -76,7 +76,7 @@ class Navbar extends Component {
                         onChange={this.props.cbChLc}
                         size="small"
                         inputProps={{ 'aria-label': 'primary  Checkbox' }}
-                        disabled={this.props.disableDefault}
+                        disabled={this.props.disableOnLoad}
                     />}
                 label={this.props.cbLabLc}
             />
@@ -93,7 +93,7 @@ class Navbar extends Component {
                         size="small"
                         onChange={this.props.cbChLx}
                         inputProps={{ 'aria-label': 'primary  Checkbox' }}
-                        disabled={this.props.cbActLxy}
+                        disabled={this.props.cbActLxy || this.props.disableOnLoad}
                     />}
                 label={this.props.cbLabLx}
             />
@@ -110,6 +110,7 @@ class Navbar extends Component {
                         size="small"	
                         onChange={this.props.cbChSyZoom}	
                         inputProps={{ 'aria-label': 'primary  Checkbox' }}	
+                        disabled={this.props.disableOnLoad}
                     />}	
                 label={this.props.cbLabSyZoom}	
             />	

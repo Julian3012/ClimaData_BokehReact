@@ -21,6 +21,7 @@ class Parameter extends Component {
                 label={this.props.txLabFile}
                 onChange={this.props.txChFile}
                 onKeyDown={this.props.txSbFile}
+                disabled={this.props.disableOnLoad}
             />
         );
     }
@@ -34,6 +35,7 @@ class Parameter extends Component {
                 label={this.props.selLabVar}
                 value={this.props.selValVar}
                 onChange={this.props.selChVar}
+                disabled={this.props.disableOnLoad}
             >
                 {this.props.selMapVar.map((option) => (
                     <StyledMenuItem key={option.value} value={option.value}>
@@ -54,7 +56,7 @@ class Parameter extends Component {
                 label={this.props.selLabCm}
                 value={this.props.selValCm}
                 onChange={this.props.selChCm}
-                disabled={this.props.disableDefault}
+                disabled={this.props.disableDefault || this.props.disableOnLoad}
             >
                 {this.props.selMapCm.map((option) => (
                     <StyledMenuItem key={option.value} value={option.value}>
@@ -75,6 +77,7 @@ class Parameter extends Component {
                 label={this.props.selLabAd}
                 value={this.props.selValAd}
                 onChange={this.props.selChAd}
+                disabled={this.props.disableOnLoad}
             >
                 {this.props.selMapAd.map((option) => (
                     <StyledMenuItem key={option.value} value={option.value}>
@@ -94,6 +97,7 @@ class Parameter extends Component {
                 label={this.props.selLabAf}
                 value={this.props.selValAf}
                 onChange={this.props.selChAf}
+                disabled={this.props.disableOnLoad}
             >
                 {this.props.selMapAf.map((option) => (
                     <StyledMenuItem key={option.value} value={option.value}>
@@ -127,7 +131,7 @@ class Parameter extends Component {
                 size="small"
                 onChange={this.props.txChCol}
                 value={this.props.txValCol}
-                disabled={this.props.disableDefault}
+                disabled={this.props.disableDefault || this.props.disableOnLoad}
                 onKeyDown={this.props.txSbFile}
             />
         );
@@ -137,12 +141,12 @@ class Parameter extends Component {
         return (
             <TextField
                 label={this.props.txLabFmi}
-                style={{width:"100%"}}
+                style={{ width: "100%" }}
                 variant="outlined"
                 size="small"
                 onChange={this.props.txChFmi}
                 value={this.props.txValFmi}
-                disabled={this.props.txActFm} />
+                disabled={this.props.txActFm || this.props.disableOnLoad} />
 
         );
     }
@@ -151,12 +155,12 @@ class Parameter extends Component {
         return (
             <TextField
                 label={this.props.txLabFma}
-                style={{width:"100%"}}
+                style={{ width: "100%" }}
                 variant="outlined"
                 size="small"
                 onChange={this.props.txChFma}
                 value={this.props.txValFma}
-                disabled={this.props.txActFm} />
+                disabled={this.props.txActFm || this.props.disableOnLoad} />
         );
     }
 
@@ -170,7 +174,7 @@ class Parameter extends Component {
                         size="small"
                         onChange={this.props.cbChLx}
                         inputProps={{ 'aria-label': 'primary checkbox' }}
-                        disabled={this.props.cbActLxy}
+                        disabled={this.props.cbActLxy || this.props.disableOnLoad}
                     />}
                 label={this.props.cbLabLx}
             />
@@ -187,7 +191,7 @@ class Parameter extends Component {
                         size="small"
                         onChange={this.props.cbChLy}
                         inputProps={{ 'aria-label': 'primary checkbox' }}
-                        disabled={this.props.cbActLxy}
+                        disabled={this.props.cbActLxy || this.props.disableOnLoad}
                     />}
                 label={this.props.cbLabLy}
             />
@@ -196,7 +200,13 @@ class Parameter extends Component {
 
     applyBtn = () => {
         return (
-            <Button variant="contained" onClick={this.props.handleApply}>Apply</Button>
+            <Button
+                variant="contained"
+                onClick={this.props.handleApply}
+                disabled={this.props.disableOnLoad}
+            >
+                Apply
+            </Button>
         );
     }
 

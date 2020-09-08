@@ -68,6 +68,7 @@ class Sidebar extends Component {
                 cbActLxy={sess.disabled_Logxy}
                 txActFm={sess.disabled_FixCol}
                 disableDefault={sess.disableDefault}
+                disableOnLoad={this.props.disableOnLoad}
 
             // start={sess.sliderStart}
             // end={sess.sliderEnd}
@@ -91,7 +92,7 @@ class Sidebar extends Component {
         return (
             <Grid item xs={2} style={{maxHeight: "90vh", overflow: 'auto'}}>
                 <Grid container justify="center" style={{marginBottom: 5}}>
-                    <StyledButton onClick={this.props.deletePlot}>
+                    <StyledButton onClick={this.props.deletePlot} disabled={this.props.disableOnLoad}>
                         Delete Plots
                     </StyledButton>
                 </Grid>
@@ -115,7 +116,7 @@ class Sidebar extends Component {
                     })}
 
                     <Grid container justify="center">
-                        <StyledButton onClick={this.props.addPlot}>
+                        <StyledButton onClick={this.props.addPlot} disabled={this.props.disableOnLoad}>
                             Add Plot
                         </StyledButton>
                     </Grid>

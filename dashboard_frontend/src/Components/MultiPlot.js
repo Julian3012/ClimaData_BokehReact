@@ -42,6 +42,8 @@ class MultiPlot extends Component {
                     deletePlot={this.props.deletePlot}
 
                     handleApply={this.props.handleApply}
+
+                    disableOnLoad={this.props.disableOnLoad}
                 />
             );
         }
@@ -71,6 +73,7 @@ class MultiPlot extends Component {
                 cbChLc={(event) => { this.props.cbChLc(event, this.props.bk_session) }}
 
                 disableDefault={this.props.disableDefaultNavbar}
+                disableOnLoad={this.props.disableOnLoad}
 
                 showSidebar={this.props.showSidebar}
             />
