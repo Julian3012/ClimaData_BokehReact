@@ -1,0 +1,2 @@
+cd dashboard_frontend
+npm start
