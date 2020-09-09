@@ -160,6 +160,10 @@ class App extends Component {
     let isActive = this.state.isSynched;
     this.setState({ isSynched: !isActive });
 
+    if (!isActive === false) {
+      this.handleApply();
+    }
+
     console.log("Sync zoom: " + !isActive)
   }
 
