@@ -8,6 +8,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Typography from '@material-ui/core/Typography';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Button from '@material-ui/core/Button';
+import { AppBar } from '@material-ui/core';
 
 class Navbar extends Component {
 
@@ -121,14 +122,17 @@ class Navbar extends Component {
         const navbarStyle = {
             background: "white",
             paddingLeft: 50,
+            width: "100%",
             align: "right",
             borderRight: "solid #DADDE7 1px",
             borderTop: "solid #DADDE7 1px",
             borderBottom: "solid #DADDE7 1px",
+            position: "fixed",
+            zIndex: 1
         };
 
         return (
-            <Toolbar style={navbarStyle}>
+            <Toolbar style={navbarStyle} >
                 <IconButton edge="start" color="inherit" aria-label="menu" onClick={this.props.showSidebar}>
                     <MenuIcon />
                 </IconButton>

@@ -17,8 +17,6 @@ class App extends Component {
     // TODO: JSDoc
     // TODO: Delete redux storage when window closes
     // TODO: Put handler in respective components
-    // TODO: Do not disable Navbar Parameter
-    // TODO: Sticky Navbar
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2, 10);
       this.state = {
@@ -492,12 +490,12 @@ class App extends Component {
       plot.aggDimSelect = optsAd;
 
       this.setSession(posPlot, plot);
-      this.setState({disableOnLoad: false});
       this.props.add(this.state);
       
     } catch (error) {
       console.log(error)
     }
+    this.setState({disableOnLoad: false});
   }
 
   handleDataPath = (event, posPlot) => {
@@ -633,7 +631,6 @@ class App extends Component {
 
   render() {
     console.log('[App.js] render method');
-    // TODO: Add scroll in sidebar
     return (
       <div className="App" >
         {this.activeLayout()}

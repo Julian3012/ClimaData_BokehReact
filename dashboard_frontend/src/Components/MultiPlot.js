@@ -114,25 +114,18 @@ class MultiPlot extends Component {
         }
 
         return (
-            <div className="App">
+            <div>
                 {this.NavbarProps()}
 
 
-                <div style={containerStyle}>
+                <div >
                     <Grid container>
                         {this.SidebarProps()}
                         <Grid item xs={this.setPlots(this.props.activeSidebar)}>
                             <Grid container justify="center">
-                                <Grid item xs={11} >
+                                <Grid item xs={12} >
                                     <Grid container alignItems="flex-start">
-                                        <Grid item xs={12}>
-                                            <Plot plotId={this.props.plotId}></Plot>
-                                        </Grid>
-                                        {/* <Grid item xs={9}>
-                                            <Hidden xlDown={sess.diabled_Slider}>
-                                                {this.SliderLev(sess)}
-                                            </Hidden>
-                                        </Grid> */}
+                                        <Plot plotId={this.props.plotId} activeSidebar={this.props.activeSidebar}></Plot>
                                     </Grid>
                                 </Grid>
                             </Grid>

@@ -109,7 +109,6 @@ class PlotGenerator:
                     plot.disableWidgets()
 
                 if plot.dataPath != "":
-                    # figureElement.state.css_classes = ["plot_object"]
                     # figureElement.state.sizing_mode = "scale_width"
                     classname = "plot_" + str(idx)
                     pan = PanTool()

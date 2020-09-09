@@ -9,7 +9,7 @@ import StyledButton from "../Styles/StyledButton";
 import * as constants from "../../Components/constants"
 
 class Sidebar extends Component {
-    
+
     constructor(props) {
         super(props);
         console.log('[App.js] constructor');
@@ -63,7 +63,7 @@ class Sidebar extends Component {
                 cbChLy={(event) => { this.props.cbChLy(event, [sess.pos]) }}
                 cbStLy={sess.logy}
 
-                handleApply = {this.props.handleApply}
+                handleApply={this.props.handleApply}
 
                 cbActLxy={sess.disabled_Logxy}
                 txActFm={sess.disabled_FixCol}
@@ -81,45 +81,43 @@ class Sidebar extends Component {
     }
 
     render() {
-        // const gridLeftStyle = {
-        //     background: "white",
-        //     // height: 450,
-        //     borderRight: "solid #DADDE7 1px",
-        //     borderLeft: "solid #DADDE7 1px",
-        //     borderTop: "solid #DADDE7 1px",
-        //     borderBottom: "solid #DADDE7 1px",
-        // };
+        const gridSidebar = {
+            marginTop: 70,
+            maxHeight: "90vh",
+            overflow: 'auto',
+            position: "fixed",
+            width: "100%",
+            zIndex: 1,
+        };
         return (
-            <Grid item xs={2} style={{maxHeight: "90vh", overflow: 'auto'}}>
-                <Grid container justify="center" style={{marginBottom: 5}}>
+            <Grid item xs={2} style={gridSidebar}>
+                <Grid container justify="center" style={{ marginBottom: 5 }}>
                     <StyledButton onClick={this.props.deletePlot} disabled={this.props.disableOnLoad}>
                         Delete Plots
                     </StyledButton>
                 </Grid>
-                <Grid container>
 
-                    {this.props.bk_session.map((sess) => {
-                        return (
-                            <Accordion>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel1a-content"
-                                    id="panel1a-header"
-                                >
-                                    Plot {sess.pos + 1}
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    {this.ParameterProps(sess)}
-                                </AccordionDetails>
-                            </Accordion>
-                        )
-                    })}
+                {this.props.bk_session.map((sess) => {
+                    return (
+                        <Accordion>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1a-content"
+                                id="panel1a-header"
+                            >
+                                Plot {sess.pos + 1}
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                {this.ParameterProps(sess)}
+                            </AccordionDetails>
+                        </Accordion>
+                    )
+                })}
 
-                    <Grid container justify="center">
-                        <StyledButton onClick={this.props.addPlot} disabled={this.props.disableOnLoad}>
-                            Add Plot
+                <Grid container justify="center">
+                    <StyledButton onClick={this.props.addPlot} disabled={this.props.disableOnLoad}>
+                        Add Plot
                         </StyledButton>
-                    </Grid>
                 </Grid>
             </Grid>
         )
