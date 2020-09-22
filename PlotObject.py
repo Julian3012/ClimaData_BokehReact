@@ -12,8 +12,7 @@ import pandas as pd
 import xarray as xr
 from bokeh.io import curdoc
 from bokeh.layouts import column, layout, row, widgetbox
-from bokeh.models import (Button, CheckboxGroup, ColumnDataSource, CustomJS,
-                          Div, Select)
+from bokeh.models import Button, CheckboxGroup, ColumnDataSource, CustomJS, Div, Select
 from bokeh.models.widgets import TextInput
 from bokeh.server.server import Server
 from bokeh.themes.theme import Theme
@@ -26,9 +25,12 @@ from src.plots.HeightProfilePlot import HeightProfilePlot
 from src.plots.TriMeshPlot import TriMeshPlot
 
 
-class PlotObject():
+class PlotObject:
+    """
+    Class calculates plots and parameters depending on the input it gets from main_backend.py
+    """
 
-    def __init__(self, logger, title, dataPath = ""):
+    def __init__(self, logger, title, dataPath=""):
 
         # TODO: Add Styling from themes.Bokeh
         hv.extension("bokeh")
@@ -37,7 +39,7 @@ class PlotObject():
 
         self.logger.info(f"[Constructor] {title}")
 
-         # Constant
+        # Constant
         self.COLORMAPS = COLORMAPS
 
         # Parameter
@@ -97,57 +99,63 @@ class PlotObject():
         self.hpPlot = None
         self.xrData = None
         self.xrDataMeta = None
-        
-    def generate_Parameters(self):
 
+    def generate_Parameters(self):
+        """
+        Generate parameters.
+
+        Full list:
+        1. urlinput: textfield for datapath
+        2. slVar: selection for variable
+        3. slCMap: selection for colormap
+        4. txFixColoringMin: minimum fixcoloring
+        5. txFixColoringMax: maximum fixcoloring
+        6. slAggregateFunction: selection for aggregate function
+        7. slAggregateDimension: selection for aggregate dimension
+        8. cbFixCol: checkbox to enable 4. and 5.
+        9. cbSymCol: checkbox for symmetric coloring
+        10. cbLogZCol: checkbox for logarithmic coloring
+        11. cbLogX: checkbox to transform curveplot
+        12. cbLogY: checkbox to transform curveplot
+        """
         self.urlinput = TextInput(value=self.dataPath, title="File")
         self.slVar = Select(
             title="Variable", options=self.optVariables, value=self.val_dict["variable"]
         )
-
         self.slCMap = Select(
             title="Colormap", options=self.COLORMAPS, value=self.val_dict["cm"]
         )
-
         self.txFixColoringMin = TextInput(value="", title="Fix color minimum:")
         self.txFixColoringMax = TextInput(value="", title="Fix color maxmum:")
-
         self.txCLevels = TextInput(value=self.val_dict["cl"], title="Colorlevels")
-
         self.optAggDim = self.getAggDim()
-
         self.slAggregateFunction = Select(
             title="Aggregate Function",
             options=self.optAggFun,
             value=self.val_dict["aggFn"],
         )
-
         self.slAggregateDimension = Select(
             title="Aggregate Dimension",
             options=self.optAggDim,
             value=self.val_dict["aggDim"],
         )
-
         self.cbCoastlineOverlay = CheckboxGroup(labels=["Show coastline"], active=[0])
-
         self.cbFixCol = CheckboxGroup(
             labels=["Use fixed coloring"], active=self.val_dict["fcol"]
         )
-
         self.cbSymCol = CheckboxGroup(
             labels=["symmetric coloring"], active=self.val_dict["scol"]
         )
-
         self.cbLogzCol = CheckboxGroup(
             labels=["logz coloring"], active=self.val_dict["lcol"]
         )
-
         self.cbLogX = CheckboxGroup(labels=["logX"], active=self.val_dict["logX"])
-
         self.cbLogY = CheckboxGroup(labels=["logY"], active=self.val_dict["logY"])
 
-
     def disableWidgets(self):
+        """
+        Disable widgets depending on parameter settings.
+        """
         # Hide colormap option if CurvePlot is used
         if self.aggDim != "lat" or self.aggFn == "None":
             self.cbCoastlineOverlay.disabled = False
@@ -177,10 +185,10 @@ class PlotObject():
         else:
             self.cbLogX.disabled = True
             self.cbLogY.disabled = True
-    
+
     def checkInputs(self):
         """
-        Checks format of inputs
+        Checks format of inputs.
         """
         try:
             cLevels = int(self.txCLevels.value)
@@ -199,7 +207,7 @@ class PlotObject():
             fixColorMax = None
 
         return cLevels, fixColorMin, fixColorMax
-    
+
     def getAggDim(self):
         """
         Get aggregate dimensions
@@ -227,10 +235,9 @@ class PlotObject():
 
         return aggregateDimensions
 
-
     def getFile(self):
         """
-        Function to capsulate the url input.
+        Function to capsulate the url input.\n
         Returns:
             str: The entered data url
         """
@@ -241,19 +248,19 @@ class PlotObject():
     # TODO: Do not call constructor every time
     def fileUpdate(self, attr, old, new):
         """
-        
+        Handler for urlinput.
         """
-        try: 
+        try:
             curdoc().clear()
             self.__init__(logger=self.logger, title=self.title, dataPath=new)
-        except Exception as e: 
+        except Exception as e:
             self.logger.info(e)
 
     def genPlot(self, dataUpdate):
         """
-        Generate plot object depending on the data
+        Generate plot object depending on the data.
         """
-        try: 
+        try:
             self.variable = self.slVar.value
             self.cm = self.slCMap.value
             self.aggDim = self.slAggregateDimension.value
@@ -300,7 +307,9 @@ class PlotObject():
                         self.logger.error("Error for loading unchunked data.")
                 if self.hpPlot is None:
                     self.logger.info("Build HeightProfilePlot")
-                    self.hpPlot = HeightProfilePlot(self.logger, self.renderer, self.xrData)
+                    self.hpPlot = HeightProfilePlot(
+                        self.logger, self.renderer, self.xrData
+                    )
                 plot = self.hpPlot.getPlotObject(
                     variable=self.variable,
                     title=self.title,
@@ -315,7 +324,9 @@ class PlotObject():
             else:
                 if self.tmPlot is None:
                     self.logger.info("Build TriMeshPlot")
-                    self.tmPlot = TriMeshPlot(self.logger, self.renderer, self.xrDataMeta)
+                    self.tmPlot = TriMeshPlot(
+                        self.logger, self.renderer, self.xrDataMeta
+                    )
                 plot = self.tmPlot.getPlotObject(
                     variable=self.variable,
                     title=self.title,
@@ -335,19 +346,29 @@ class PlotObject():
             return plot
         except Exception as e:
             self.logger.exception(e)
-            self.__init__(self.logger,self.title)
+            self.__init__(self.logger, self.title)
             return ""
 
-
-
     def variableUpdate(self, attr, old, new):
+        """
+        Handler for selVar.
+        """
         self.val_dict["variable"] = new
 
     def cmapUpdate(self, attr, old, new):
+        """
+        Handler for selCmap.
+        """
         self.val_dict["cm"] = new
 
     def aggDimUpdate(self, attr, old, new):
+        """
+        Handler for aggregate dimension selection.
+        """
         self.val_dict["aggDim"] = new
 
     def aggFnUpdate(self, attr, old, new):
+        """
+        Handler for aggregate function selection.
+        """
         self.val_dict["aggFn"] = new
