@@ -31,7 +31,9 @@ class App extends Component {
         disableOnLoad: false,
       };
     } else {
-      this.state = JSON.parse(JSON.stringify(this.props.list[0]));
+      let rdx_store = JSON.parse(JSON.stringify(this.props.list[0]));
+      rdx_store.disableOnLoad = false;
+      this.state = rdx_store;
     }
   }
 
