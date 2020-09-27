@@ -1,4 +1,3 @@
-import * as constants from "../Components/constants";
 
 export const stateReducer = (state = [], action) => {
     switch (action.type) {

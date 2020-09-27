@@ -69,13 +69,6 @@ class Sidebar extends Component {
                 txActFm={sess.disabled_FixCol}
                 disableDefault={sess.disableDefault}
                 disableOnLoad={this.props.disableOnLoad}
-
-            // start={sess.sliderStart}
-            // end={sess.sliderEnd}
-            // isActiveSlider={sess.diabled_Slider}
-            // slChLev={(event, newValue) => { this.props.slChLev(event, newValue, [sess.pos]) }}
-
-            // onClick={() => { this.props.onClick([sess.pos]) }}
             />
         );
     }

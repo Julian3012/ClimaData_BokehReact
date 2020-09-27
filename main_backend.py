@@ -43,7 +43,6 @@ class PlotGenerator():
 
         # Get plot pbjects
         self.logger.info("[Constructor] Get plots")
-        self.plotPosition = -1
 
         inp = ""
         self.plots = [
@@ -84,7 +83,6 @@ class PlotGenerator():
             # TODO: Execute everything in one command
             for idx, plot in enumerate(self.plots):
                 self.logger.info(f"Plot Number: {idx}")
-                self.plotPosition = idx
 
                 # Get data
                 try:
@@ -214,12 +212,12 @@ class PlotGenerator():
         for idx, widget in enumerate(layout.children):
         
             # TODO: Another logic for visibility
-                try:
-                    if widget.children[0].children[0].__class__.__name__ != "Figure":
-                        for p in widget.children[0].children:
-                            p.visible = False
-                except Exception as e:
-                    pass
+            try:
+                if widget.children[0].children[0].__class__.__name__ != "Figure":
+                    for p in widget.children[0].children:
+                        p.visible = False
+            except Exception as e:
+                pass
 
     def addDeleteButton(self):
         """

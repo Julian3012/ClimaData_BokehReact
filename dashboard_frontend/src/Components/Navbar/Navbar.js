@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
 import { StyledCheckbox, StyledFormControlLabel } from "../Styles/StyledCheckbox";
-import { StyledSelection, StyledMenuItem } from "../Styles/StyledSelection";
 import Toolbar from '@material-ui/core/Toolbar';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Typography from '@material-ui/core/Typography';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import Button from '@material-ui/core/Button';
-import { AppBar } from '@material-ui/core';
 
 class Navbar extends Component {
 

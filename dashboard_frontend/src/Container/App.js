@@ -81,6 +81,15 @@ class App extends Component {
 
   }
 
+  /**
+   * Method to access bokeh parameter from react frontend.
+   * @param {int} posWidget -  Position of widget in layout. See constants.POSITIONS
+   * @param {int} posPlot -  Position of plot. Number between 1-6
+   * @returns bokehwidget 
+   * @example 
+   * this.getWidget(this.state.positions.aggregateFun, sess.pos).value
+   * "-> returns active value of aggregate function selection"
+   */
   getWidget = (posWidget, posPlot) => {
     try {
       let model = window.Bokeh.documents[0].get_model_by_id("1000");
@@ -108,12 +117,20 @@ class App extends Component {
     }
   }
 
+  /**
+   * Load bokeh session with bokeh document to react app.
+   */
   appendScript = () => {
     return new Promise((resolve) => {
       resolve(plotLoader(window, this.state.plotId, this.state.sessionId))
     })
   }
 
+  /**
+   * Update state of plot for all parameters.
+   * @param {Number} pos -  Position of plot. Number between 1-6
+   * @param {*} plot - Object containing the state of the plot.
+   */
   setSession = (pos, plot) => {
     const bk_session = [...this.state.bk_session];
     bk_session[pos] = plot;
@@ -122,6 +139,9 @@ class App extends Component {
     this.props.add(this.state);
   }
 
+  /**
+   * Add plot in frontend. This is a handler function for the add-button.
+   */
   addPlot = () => {
     console.log(this.state.bk_session.length)
     if (this.state.bk_session.length < 6) {
@@ -139,6 +159,9 @@ class App extends Component {
     }
   }
 
+  /**
+   * Handler function for the delete button. It also resets the bokeh backend.
+   */
   deletePlot = () => {
     let plots = [];
     this.setState({ bk_session: plots });
@@ -150,6 +173,9 @@ class App extends Component {
     }
   }
 
+  /**
+   * Handler function for color based parameters.
+   */
   handleApply = () => {
     try {
       this.getWidget(18, -1).active = [0];
@@ -158,6 +184,9 @@ class App extends Component {
     }
   }
 
+  /**
+   * Handler function for zoom synchronization checkbox.
+   */
   handleSyncZoom = () => {
     let isActive = this.state.isSynched;
     this.setState({ isSynched: !isActive });
@@ -169,6 +198,10 @@ class App extends Component {
     console.log("Sync zoom: " + !isActive)
   }
 
+  /**
+   * Creates an Observer class for the toolbox on a bokeh plot. If the toolbox of a plot refreshes, the ranges of all plots get synchronized.
+   * @param {*} sess - State of bokeh plot
+   */
   plotObserver = (sess) => {
 
     if (!this.state.isSynched) {
@@ -208,6 +241,10 @@ class App extends Component {
     }
   }
 
+  /**
+   * Takes array of options for a selection parameter and returns an array of objects that can be used to initialize a selection parameter.
+   * @param {Array} option - List of options
+   */
   mkOptions = (option) => {
     let arr = []
     option.map(el => {
@@ -216,6 +253,10 @@ class App extends Component {
     return arr;
   }
 
+  /**
+   * Transforms true/false values into an active/not active value for checkbox parameters.
+   * @param {boolean} doesShow 
+   */
   setActiveEvent = (doesShow) => {
     if (doesShow === true) {
       return []
@@ -224,16 +265,12 @@ class App extends Component {
     }
   }
 
-  getActiveEvent = (val) => {
-    if (val[0] === 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
+  /**
+   * Handler for the show coastline checkbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleShowCoastline = (event, posPlot) => {
-
     try {
       posPlot.map((sess) => {
         let doesShow = this.state.bk_session[sess.pos].showCoastline;
@@ -245,9 +282,13 @@ class App extends Component {
     } catch (e) {
       console.log(e)
     }
-
   };
 
+  /**
+   * Handler for the fix coloring checkbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleFixColoring = (event, posPlot) => {
 
     try {
@@ -264,8 +305,12 @@ class App extends Component {
     }
   };
 
+  /**
+   * Handler for the symmetric coloring checkbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleSymColoring = (event, posPlot) => {
-
     try {
       posPlot.map((sess) => {
         let doesShow = this.state.bk_session[sess.pos].symColoring;
@@ -279,6 +324,11 @@ class App extends Component {
     }
   };
 
+  /**
+   * Handler for the logz coloring checkbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleLogzColoring = (event, posPlot) => {
     try {
       posPlot.map((sess) => {
@@ -293,6 +343,11 @@ class App extends Component {
     }
   };
 
+  /**
+   * Handler for the logx checkbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleLogx = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
@@ -308,6 +363,11 @@ class App extends Component {
     })
   };
 
+  /**
+   * Handler for the logy checkbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleLogy = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
@@ -323,6 +383,11 @@ class App extends Component {
     })
   };
 
+  /**
+   * Handler for the aggregate function selection.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleAggregateFun = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
@@ -351,6 +416,11 @@ class App extends Component {
     console.log("State aggregateFun changed")
   };
 
+  /**
+   * Handler for the aggregate dimension selection.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleAggregateDim = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
@@ -359,7 +429,6 @@ class App extends Component {
 
     plot.map((sess) => {
       sess.aggregateDim = event.target.value;
-
       if (event.target.value !== "lat" || this.state.bk_session[sess.pos].aggregateFun === "None") {
         console.log("Enable default widgets")
         sess.disabled_default = false;
@@ -369,95 +438,105 @@ class App extends Component {
         sess.disabled_default = true;
         sess.disabled_default = false;
       }
-
       this.setSession(sess.pos, sess);
-
       return this.getWidget(this.state.positions.aggregateDim, sess.pos).value = event.target.value;
     })
-
     console.log("State aggregateDim changed")
   };
 
+  /**
+   * Handler for the color levels textbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleColorLevels = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
       return plot.push(this.state.bk_session[pos]);
     })
-
     plot.map((sess) => {
-
       sess.colorLevels = event.target.value;
       this.getWidget(this.state.positions.colorLevels, sess.pos).value = event.target.value;
-
       return this.setSession(sess.pos, sess);
     });
     console.log("State colorLevels changed")
   };
 
+  /**
+   * Handler for minimum fix coloring textbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleFixColMi = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
       return plot.push(this.state.bk_session[pos]);
     })
-
     plot.map((sess) => {
-
       sess.fixColMin = event.target.value;
       this.getWidget(this.state.positions.fixColMin, sess.pos).value = event.target.value;
-
       return this.setSession(sess.pos, sess);
     });
   };
 
+  /**
+   * Handler for maximum fix coloring textbox.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleFixColMa = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
       return plot.push(this.state.bk_session[pos]);
     })
-
     plot.map((sess) => {
-
       sess.fixColMax = event.target.value;
       this.getWidget(this.state.positions.fixColMax, sess.pos).value = event.target.value;
-
       return this.setSession(sess.pos, sess);
     });
   };
 
+  /**
+   * Handler for colormap selection.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleColorMap = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
       return plot.push(this.state.bk_session[pos]);
     })
-
     plot.map((sess) => {
-
       sess.colorMap = event.target.value;
       this.getWidget(this.state.positions.colorMap, sess.pos).value = event.target.value;
-
       return this.setSession(sess.pos, sess);
-
     })
     console.log("State variable changed")
   };
 
+  /**
+   * Handler for variable selection.
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleVariable = (event, posPlot) => {
     let plot = []
     posPlot.map((pos) => {
       return plot.push(this.state.bk_session[pos]);
     })
-
     plot.map((sess) => {
-
       sess.variable = event.target.value;
       this.getWidget(this.state.positions.variable, sess.pos).value = event.target.value;
-
       return this.setSession(sess.pos, sess);
-
     })
     console.log("State variable changed")
   };
 
+  /**
+   * Handler for filepath textbox. Submission on hitting enter key (event.keyCode === 13). 
+   * @param {*} event 
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   handleSubmit = (event, posPlot) => {
     try {
       if (event.keyCode === 13) {
@@ -466,8 +545,7 @@ class App extends Component {
           return this.getWidget(this.state.positions.file, pos).value = this.state.bk_session[pos].file;
         })
         console.log(this.state.bk_session)
-        this.setState({disableOnLoad: true})
-
+        this.setState({ disableOnLoad: true })
         let timeout = posPlot[0] > 4 ? 4000 : 3000;
         setTimeout(() => { this.setParams(posPlot[0]) }, timeout)
       }
@@ -475,59 +553,62 @@ class App extends Component {
       console.log(e)
     }
   };
-
+  /**
+   * Set variable and aggregate dimension selection.
+   * @param {*} posPlot - Number for the position of the plot. 
+   */
   setParams = (posPlot) => {
     try {
       console.log("setParams " + posPlot)
-
       let optsVar = "";
       let optsAd = "";
-
       for (let index = 0; index < 3; index++) {
         optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
         optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
       }
-
       const plot = {
         ...this.state.bk_session[posPlot]
       };
-
       plot.variables = optsVar;
       plot.aggDimSelect = optsAd;
-
       this.setSession(posPlot, plot);
       this.props.add(this.state);
-      
     } catch (error) {
       console.log(error)
     }
-    this.setState({disableOnLoad: false});
+    this.setState({ disableOnLoad: false });
   }
 
+  /**
+   * Handler for datapath textbox.
+   * @param {*} event 
+   * @param {*} posPlot - Position of plot
+   */
   handleDataPath = (event, posPlot) => {
-
     let plot = []
     posPlot.map((pos) => {
       return plot.push(this.state.bk_session[pos]);
     })
-
     plot.map((sess) => {
       sess.file = event.target.value;
-
       return this.setSession(sess.pos, sess);
     });
   }
 
+  /**
+   * Handler for slider.
+   * @param {*} event 
+   * @param {*} newValue 
+   * @param {*} posPlot 
+   */
   handleSlider = (event, newValue, posPlot) => {
     try {
       let plot = []
       posPlot.map((pos) => {
         return plot.push(this.state.bk_session[pos]);
       })
-
       plot.map((sess) => {
         let slider = this.getWidget(this.state.positions.slider, sess.pos);
-
         if (newValue <= this.state.bk_session[sess.pos].sliderEnd) {
           slider.value = newValue;
         }
@@ -537,13 +618,19 @@ class App extends Component {
     catch (e) {
       console.log(e);
     }
-  };
+  }
 
+  /**
+   * Handler for sidebar.
+   */
   handleSidebar = () => {
     let activeSidebar = this.state.activeSidebar;
     this.setState({ activeSidebar: !activeSidebar });
   }
 
+  /**
+   * All active Components
+   */
   activeLayout = () => {
     const cmSelect = constants.cmSelect;
     const funcSelect = constants.funcSelect;
@@ -572,7 +659,6 @@ class App extends Component {
 
         selChVar={this.handleVariable}
 
-        // selValCm={this.state.bk_session.length === 0 ? "Blues" : this.state.bk_session[0].colorMap}
         selChCm={this.handleColorMap}
 
         selChAd={this.handleAggregateDim}
@@ -587,7 +673,6 @@ class App extends Component {
         cbChLx={this.handleLogx}
         cbChLy={this.handleLogy}
 
-        slChLev={this.handleSlider}
         bk_session={this.state.bk_session}
         handleApply={this.handleApply}
 
@@ -602,13 +687,17 @@ class App extends Component {
           this.handleSyncZoom();
           this.state.bk_session.map((sess) => {
             this.plotObserver(sess)
-          }); return ""
+          })
         }
         }
       />
     )
   }
 
+  /**
+   * Return object with x/y-ranges of plot object.
+   * @param {*} posPlot 
+   */
   getPlotRange = (posPlot) => {
     return {
       "model_y_end": this.getWidget(this.state.positions.plot, posPlot).y_range.end,
@@ -618,6 +707,11 @@ class App extends Component {
     }
   }
 
+  //TODO: Exclude plot specified plot.
+  /**
+   * Adjust zoom of all plots.
+   * @param {*} posPlot 
+   */
   adjustZoom = (posPlot) => {
     try {
       const ranges = this.getPlotRange(posPlot);
@@ -627,7 +721,6 @@ class App extends Component {
         this.getWidget(this.state.positions.plot, sess.pos).x_range.end = ranges["model_x_end"];
         this.getWidget(this.state.positions.plot, sess.pos).x_range.start = ranges["model_x_start"];
       })
-
       console.log("Zoom")
     }
     catch (e) {
