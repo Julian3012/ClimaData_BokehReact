@@ -19,7 +19,7 @@ class Navbar extends Component {
                 control={
                     <StyledCheckbox
                         checked={this.props.cbStCl}
-                        onChange={this.handleShowCoastline}
+                        onChange={this.props.cbChCl}
                         variant="outlined"
                         size="small"
                         inputProps={{ 'aria-label': 'primary  Checkbox' }}
