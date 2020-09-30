@@ -152,40 +152,6 @@ class PlotObject:
         self.cbLogX = CheckboxGroup(labels=["logX"], active=self.val_dict["logX"])
         self.cbLogY = CheckboxGroup(labels=["logY"], active=self.val_dict["logY"])
 
-    def disableWidgets(self):
-        """
-        Disable widgets depending on parameter settings.
-        """
-        # Hide colormap option if CurvePlot is used
-        if self.aggDim != "lat" or self.aggFn == "None":
-            self.cbCoastlineOverlay.disabled = False
-            self.slCMap.disabled = False
-            self.cbFixCol.disabled = False
-            self.cbSymCol.disabled = False
-            self.cbLogzCol.disabled = False
-            self.txCLevels.disabled = False
-        else:
-            self.cbCoastlineOverlay.disabled = True
-            self.slCMap.disabled = True
-            self.cbFixCol.disabled = True
-            self.cbSymCol.disabled = True
-            self.cbLogzCol.disabled = True
-            self.txCLevels.disabled = True
-
-        if self.useFixColoring:
-            self.txFixColoringMin.disabled = False
-            self.txFixColoringMax.disabled = False
-        else:
-            self.txFixColoringMin.disabled = True
-            self.txFixColoringMax.disabled = True
-
-        if self.aggDim == "lat" or self.aggFn != "None":
-            self.cbLogX.disabled = False
-            self.cbLogY.disabled = False
-        else:
-            self.cbLogX.disabled = True
-            self.cbLogY.disabled = True
-
     def checkInputs(self):
         """
         Checks format of inputs.

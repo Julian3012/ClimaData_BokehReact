@@ -64,10 +64,9 @@ class PlotGenerator():
         1. load data
         2. generate parameters
         3. generate plot
-        4. disable widgets
-        5. extract plot components
-        6. add delete/apply button
-        7. build up layout for all plots
+        4. extract plot components
+        5. add delete/apply button
+        6. build up layout for all plots
         """
 
         try:
@@ -108,11 +107,6 @@ class PlotGenerator():
                 # Generate plot type
                 if plot.dataPath != "":
                     figureElement = plot.genPlot(dataUpdate)
-
-                # Disable widgets for specific inputs
-                # TODO: disable widgets necessary?
-                if plot.dataPath != "":
-                    plot.disableWidgets()
                 
                 # Init plotelements and bokeh tools
                 if plot.dataPath != "":
