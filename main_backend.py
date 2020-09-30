@@ -282,27 +282,18 @@ class PlotGenerator():
     def cmapUpdate(self, attr, old, new):
         self.mainDialog(True)
 
-    # TODO: Check for problems in aggdim and aggfct handler
     def aggDimUpdate(self, attr, old, new):
         """
         Handler for aggregate dimension selection.
         """
         self.mainDialog(True)
-        # if attr.slAggregateFunction.value != "None":
-        #     self.mainDialog(True)
-        # else:
-        #     self.mainDialog(False)
 
     def aggFnUpdate(self, attr, old, new):
         """
         Handler for aggregate function selection.
         """
         self.mainDialog(True)
-        # if attr.slAggregateDimension.value != "None":
-        #     self.mainDialog(True)
-        # else:
-        #     self.mainDialog(False)
-
+        
     def coastlineUpdate(self, new):
         """
         Handler for coastline checkbox.
