@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import { StyledSlider, ValueLabelComponent } from '../Styles/StyledSlider';
-import StyledButton from "../Styles/StyledButton";
 import Button from '@material-ui/core/Button';
-import FileTextField from "../Styles/FileTextField";
-import { StyledCheckbox, StyledFormControlLabel } from "../Styles/StyledCheckbox";
-import { StyledSelection, StyledMenuItem } from "../Styles/StyledSelection";
+import FileTextField from "../../Styles/FileTextField";
+import { StyledCheckbox, StyledFormControlLabel } from "../../Styles/StyledCheckbox";
+import { StyledSelection, StyledMenuItem } from "../../Styles/StyledSelection";
 import Grid from '@material-ui/core/Grid';
-import StyledTextField from '../Styles/StyledTextField';
+import StyledTextField from '../../Styles/StyledTextField';
 import Hidden from '@material-ui/core/Hidden';
 import TextField from '@material-ui/core/TextField';
 

@@ -3,8 +3,6 @@ import Plot from "./Plot/Plot";
 import Navbar from "./Navbar/Navbar";
 import Grid from '@material-ui/core/Grid';
 import Sidebar from "./Sidebar/Sidebar";
-import { StyledSlider, ValueLabelComponent } from './Styles/StyledSlider';
-import Hidden from '@material-ui/core/Hidden';
 
 class MultiPlot extends Component {
     SidebarProps = () => {
@@ -98,26 +96,9 @@ class MultiPlot extends Component {
 
     render() {
 
-        const gridRightStyle = {
-            background: "white",
-            // height: 450,
-            // padding: 0,
-            margin: 10,
-            borderRight: "solid #DADDE7 1px",
-            borderLeft: "solid #DADDE7 1px",
-            borderTop: "solid #DADDE7 1px",
-            borderBottom: "solid #DADDE7 1px",
-        };
-
-        const containerStyle = {
-            margin: 10,
-        }
-
         return (
             <div>
                 {this.NavbarProps()}
-
-
                 <div >
                     <Grid container>
                         {this.SidebarProps()}

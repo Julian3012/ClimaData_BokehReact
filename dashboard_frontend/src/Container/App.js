@@ -14,11 +14,9 @@ class App extends Component {
     console.log('[App.js] constructor');
 
     // TODO: Unique key prop for render methods
-    // TODO: JSDoc
-    // TODO: Delete redux storage when window closes
-    // TODO: Put handler in respective components
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2, 10);
+      console.log("Session ID: " + sessionId)
       this.state = {
         bk_session: [],
         positions: constants.POSITIONS,
@@ -83,7 +81,12 @@ class App extends Component {
 
   /**
    * Method to access bokeh parameter from react frontend.
-   * @param {int} posWidget -  Position of widget in layout. See constants.POSITIONS
+   * @param {int} posWidget -  Position of widget in layout:
+   * Positions:
+   * 1. For posWidget <= 16: constants.POSITIONS
+   * 2. posWidget === this.state.positions.plot: Get plot object
+   * 3. posWidget === 17: delete plot checkbox
+   * 4. posWidget === 18: apply checkbox
    * @param {int} posPlot -  Position of plot. Number between 1-6
    * @returns bokehwidget 
    * @example 
@@ -91,6 +94,7 @@ class App extends Component {
    * "-> returns active value of aggregate function selection"
    */
   getWidget = (posWidget, posPlot) => {
+    console.log("posPlot: "+posPlot)
     try {
       let model = window.Bokeh.documents[0].get_model_by_id("1000");
       if (posWidget <= 16) {
@@ -104,10 +108,8 @@ class App extends Component {
           return model.attributes.children[divPlot].attributes.children[numPlot]
         }
       } else if (posWidget === 17) {
-        console.log("delete")
         return model.attributes.children[6 + 3]
       } else if (posWidget === 18) {
-        console.log("delete")
         return model.attributes.children[6 + 4]
       } else {
         console.log("Position value does not exist")
@@ -632,11 +634,12 @@ class App extends Component {
    * All active Components
    */
   activeLayout = () => {
-    const cmSelect = constants.cmSelect;
     const funcSelect = constants.funcSelect;
     return (
       <MultiPlot
+        // Bokeh
         plotId={this.state.plotId}
+
         // Navbar
         cbStCl={this.state.bk_session.length === 0 ? true : this.state.bk_session[0].showCoastline}
         cbChCl={this.handleShowCoastline}
@@ -686,7 +689,7 @@ class App extends Component {
         cbChSyZoom={() => {
           this.handleSyncZoom();
           this.state.bk_session.map((sess) => {
-            this.plotObserver(sess)
+            this.plotObserver(sess); return ""
           })
         }
         }
@@ -707,7 +710,6 @@ class App extends Component {
     }
   }
 
-  //TODO: Exclude plot specified plot.
   /**
    * Adjust zoom of all plots.
    * @param {*} posPlot 
@@ -716,10 +718,13 @@ class App extends Component {
     try {
       const ranges = this.getPlotRange(posPlot);
       this.state.bk_session.map((sess) => {
-        this.getWidget(this.state.positions.plot, sess.pos).y_range.end = ranges["model_y_end"];
-        this.getWidget(this.state.positions.plot, sess.pos).y_range.start = ranges["model_y_start"];
-        this.getWidget(this.state.positions.plot, sess.pos).x_range.end = ranges["model_x_end"];
-        this.getWidget(this.state.positions.plot, sess.pos).x_range.start = ranges["model_x_start"];
+        if (sess.pos !== posPlot) {
+          this.getWidget(this.state.positions.plot, sess.pos).y_range.end = ranges["model_y_end"];
+          this.getWidget(this.state.positions.plot, sess.pos).y_range.start = ranges["model_y_start"];
+          this.getWidget(this.state.positions.plot, sess.pos).x_range.end = ranges["model_x_end"];
+          this.getWidget(this.state.positions.plot, sess.pos).x_range.start = ranges["model_x_start"];
+        }
+        return ""
       })
       console.log("Zoom")
     }

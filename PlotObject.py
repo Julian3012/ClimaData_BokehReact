@@ -245,7 +245,6 @@ class PlotObject:
 
         return link
 
-    # TODO: Do not call constructor every time
     def fileUpdate(self, attr, old, new):
         """
         Handler for urlinput.

@@ -77,10 +77,7 @@ class PlotGenerator():
             curdoc().clear()
             lArray = []
 
-            # TODO: Variable init with "clon"
-            # TODO: Wrong file input check
             # TODO: Styling for plot and slider
-            # TODO: Execute everything in one command
             for idx, plot in enumerate(self.plots):
                 self.logger.info(f"Plot Number: {idx}")
 
@@ -117,10 +114,8 @@ class PlotGenerator():
                 if plot.dataPath != "":
                     plot.disableWidgets()
                 
-                # TODO: Redundant multiple dataPath checks 
-                # TODO: More functions
+                # Init plotelements and bokeh tools
                 if plot.dataPath != "":
-                    # figureElement.state.sizing_mode = "scale_width"
                     classname = "plot_" + str(idx)
                     pan = PanTool()
                     wheel = WheelZoomTool()
@@ -171,7 +166,6 @@ class PlotGenerator():
             self.addApplyButton()
             lArray.append(self.applyChanges)
 
-            # TODO: Sync only trimesh plots 
             new_array = [
                 row(lArray[0], lArray[2]),
                 row(lArray[4], lArray[6]),

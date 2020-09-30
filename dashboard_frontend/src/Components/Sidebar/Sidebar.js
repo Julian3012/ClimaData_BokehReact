@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Parameter2 from "../Parameter/Parameter2";
+import Parameter from "./Parameter/Sidebar_Parameter";
 import Grid from '@material-ui/core/Grid';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
@@ -17,7 +17,7 @@ class Sidebar extends Component {
 
     ParameterProps = (sess) => {
         return (
-            <Parameter2
+            <Parameter
                 txLabFile="Filepath"
                 txValFile={sess.file}
                 txChFile={(event) => { this.props.txChFile(event, [sess.pos]) }}
