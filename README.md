@@ -19,15 +19,15 @@ pip install --upgrade --force-reinstall numpy
 ## run Bokeh server
 ```
 conda activate ncview2
-bash run_local.sh
+bash run_bokeh.sh
 ```
 
 ## run React app
 
+Make sure you installed npm before executing the command.
+
 ```
-cd dashboard_frontend
-npm install
-npm start
+bash run_react.sh
 ```
 
-After that the react app opens on localhost:3000
+After that the react app opens on localhost:3000.
