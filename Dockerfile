@@ -11,15 +11,13 @@ RUN apt-get update && \
 
 RUN mkdir -p /home/python/code
 COPY code/ /home/python/code
+WORKDIR /home/python/code
 
-RUN conda create --name ncview2 --file=env_files/spec-tg.txt
-# RUN conda install -p /opt/conda/envs/ncview2 -c conda-forge nodejs
+RUN conda create --name ncview2 --file=env_files/spec.txt
 
 WORKDIR /home/python/code/dashboard_frontend
-RUN npm install
-RUN npm start &
+RUN conda run -n ncview2 npm install
 
 WORKDIR /home/python/code
-# RUN conda run -n ncview2 /bin/bash run_bokeh.sh
 
-CMD ["conda", "run", "-n", "ncview2", "/bin/bash", "run_react.sh"]
+CMD ["/usr/bin/env", "bash", "/home/python/code/run.sh"]
