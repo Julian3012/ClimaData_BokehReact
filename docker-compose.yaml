@@ -1,0 +1,13 @@
+version: "3.7"
+
+services:
+  rokeh:
+    image: rokeh
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports: 
+      - "3000:3000"
+      - "5010:5010"
+    volumes:
+      - "./data:/home/python/code/data"
