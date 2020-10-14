@@ -7,6 +7,8 @@ import Grid from '@material-ui/core/Grid';
 import StyledTextField from '../../Styles/StyledTextField';
 import Hidden from '@material-ui/core/Hidden';
 import TextField from '@material-ui/core/TextField';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 
 class Parameter extends Component {
 
@@ -26,84 +28,94 @@ class Parameter extends Component {
 
     SelVariable = () => {
         return (
-            <StyledSelection
-                variant="outlined"
-                size="small"
-                select={true}
-                label={this.props.selLabVar}
-                value={this.props.selValVar}
-                onChange={this.props.selChVar}
-                disabled={this.props.disableOnLoad}
-            >
-                {this.props.selMapVar.map((option) => (
-                    <StyledMenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </StyledMenuItem>
-                ))}
-            </StyledSelection>
+            <FormControl variant="outlined" size="small">
+                <InputLabel>{this.props.selLabVar}</InputLabel>
+                <StyledSelection
+                    select={true}
+                    onOpen={this.props.handleVarClick}
+                    label={this.props.selLabVar}
+                    value={this.props.selValVar}
+                    onChange={this.props.selChVar}
+                    disabled={this.props.disableOnLoad}
+                >
+                    {this.props.selMapVar.map((option) => (
+                        <StyledMenuItem key={option.value} value={option.value}>
+                            {option.label}
+                        </StyledMenuItem>
+                    ))}
+                </StyledSelection>
+            </FormControl>
         );
     }
 
     SelCm = () => {
         return (
-            <StyledSelection
-                style={{ marginRight: 20 }}
-                select={true}
-                variant="outlined"
-                size="small"
-                label={this.props.selLabCm}
-                value={this.props.selValCm}
-                onChange={this.props.selChCm}
-                disabled={this.props.disableDefault || this.props.disableOnLoad}
-            >
-                {this.props.selMapCm.map((option) => (
-                    <StyledMenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </StyledMenuItem>
-                ))}
-            </StyledSelection>
-
+            <FormControl variant="outlined" size="small">
+                <InputLabel>{this.props.selLabCm}</InputLabel>
+                <StyledSelection
+                    style={{ marginRight: 20 }}
+                    select={true}
+                    variant="outlined"
+                    size="small"
+                    label={this.props.selLabCm}
+                    value={this.props.selValCm}
+                    onChange={this.props.selChCm}
+                    disabled={this.props.disableDefault || this.props.disableOnLoad}
+                    >
+                    {this.props.selMapCm.map((option) => (
+                        <StyledMenuItem key={option.value} value={option.value}>
+                            {option.label}
+                        </StyledMenuItem>
+                    ))}
+                </StyledSelection>
+            </FormControl>
         );
     }
-
+    
     SelAggDimension = () => {
         return (
-            <StyledSelection
-                variant="outlined"
-                size="small"
-                select={true}
-                label={this.props.selLabAd}
-                value={this.props.selValAd}
-                onChange={this.props.selChAd}
-                disabled={this.props.disableOnLoad}
-            >
-                {this.props.selMapAd.map((option) => (
-                    <StyledMenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </StyledMenuItem>
-                ))}
-            </StyledSelection>
+            <FormControl variant="outlined" size="small">
+                <InputLabel>{this.props.selLabAd}</InputLabel>
+                <StyledSelection
+                    variant="outlined"
+                    size="small"
+                    select={true}
+                    label={this.props.selLabAd}
+                    value={this.props.selValAd}
+                    onChange={this.props.selChAd}
+                    disabled={this.props.disableOnLoad}
+                >
+                    {this.props.selMapAd.map((option) => (
+                        <StyledMenuItem key={option.value} value={option.value}>
+                            {option.label}
+                        </StyledMenuItem>
+                    ))}
+                </StyledSelection>
+            </FormControl>
+
         );
     }
 
     SelAggFunction = () => {
         return (
-            <StyledSelection
-                select={true}
-                variant="outlined"
-                size="small"
-                label={this.props.selLabAf}
-                value={this.props.selValAf}
-                onChange={this.props.selChAf}
-                disabled={this.props.disableOnLoad}
-            >
-                {this.props.selMapAf.map((option) => (
-                    <StyledMenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </StyledMenuItem>
-                ))}
-            </StyledSelection>
-
+            <FormControl variant="outlined" size="small">
+                <InputLabel>{this.props.selLabAf}</InputLabel>
+                <StyledSelection
+                    select={true}
+                    variant="outlined"
+                    size="small"
+                    label={this.props.selLabAf}
+                    value={this.props.selValAf}
+                    onChange={this.props.selChAf}
+                    disabled={this.props.disableOnLoad}
+                >
+                    {this.props.selMapAf.map((option) => (
+                        <StyledMenuItem key={option.value} value={option.value}>
+                            {option.label}
+                        </StyledMenuItem>
+                    ))}
+                </StyledSelection>
+            </FormControl>
         );
     }
 

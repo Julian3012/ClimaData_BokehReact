@@ -27,6 +27,7 @@ class Sidebar extends Component {
                 selValVar={sess.variable}
                 selChVar={(event) => { this.props.selChVar(event, [sess.pos]) }}
                 selMapVar={sess.variables}
+                handleVarClick={(event) => { this.props.handleVarClick(event, sess.pos) }}
 
                 selLabCm="Colormap"
                 selValCm={sess.colorMap}
@@ -63,7 +64,7 @@ class Sidebar extends Component {
                 cbChLy={(event) => { this.props.cbChLy(event, [sess.pos]) }}
                 cbStLy={sess.logy}
 
-                handleApply={this.props.handleApply}
+                handleApply={(event) => { this.props.handleApply(sess.pos) }}
 
                 cbActLxy={sess.disabled_Logxy}
                 txActFm={sess.disabled_FixCol}
