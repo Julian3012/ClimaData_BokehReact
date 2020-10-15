@@ -87,9 +87,7 @@ class PlotGenerator():
                         link = "./data/" + plot.dataPath
                         plot.xrDataMeta = xr.open_dataset(link)
                         self.logger.info(f"File:  {link}")
-                        plot.optVariables = [
-                            x for x in plot.xrDataMeta.variables.keys()
-                        ]
+                        plot.optVariables = list(plot.xrDataMeta.data_vars)
                         if plot.val_dict["variable"] == "clon":
                             plot.val_dict["variable"] = plot.optVariables[0]
                     else:

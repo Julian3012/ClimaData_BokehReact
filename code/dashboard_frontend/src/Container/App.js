@@ -94,7 +94,7 @@ class App extends Component {
    * "-> returns active value of aggregate function selection"
    */
   getWidget = (posWidget, posPlot) => {
-    console.log("posPlot: "+posPlot)
+    console.log("posPlot: " + posPlot)
     try {
       let model = window.Bokeh.documents[0].get_model_by_id("1000");
       if (posWidget <= 16) {
@@ -178,12 +178,19 @@ class App extends Component {
   /**
    * Handler function for color based parameters.
    */
-  handleApply = () => {
+  handleApply = (posPlot) => {
     try {
-      this.getWidget(18, -1).active = [0];
+      let plot = this.state.bk_session[posPlot]
+      if (plot.file !== this.getWidget(this.state.positions.file, posPlot).value) {
+        this.setState({ disableOnLoad: true })
+        this.getWidget(this.state.positions.file, posPlot).value = plot.file
+      } else {
+        this.getWidget(18, -1).active = [0];
+      }
     } catch (error) {
       console.log(error)
     }
+    setTimeout(() => { this.setState({ disableOnLoad: false }) }, 2000)
   }
 
   /**
@@ -548,8 +555,7 @@ class App extends Component {
         })
         console.log(this.state.bk_session)
         this.setState({ disableOnLoad: true })
-        let timeout = posPlot[0] > 4 ? 4000 : 3000;
-        setTimeout(() => { this.setParams(posPlot[0]) }, timeout)
+        setTimeout(() => { this.setParams(posPlot[0]) }, 2000)
       }
     } catch (e) {
       console.log(e)
@@ -562,12 +568,9 @@ class App extends Component {
   setParams = (posPlot) => {
     try {
       console.log("setParams " + posPlot)
-      let optsVar = "";
-      let optsAd = "";
-      for (let index = 0; index < 3; index++) {
-        optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
-        optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
-      }
+      let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
+      let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
+
       const plot = {
         ...this.state.bk_session[posPlot]
       };
@@ -623,6 +626,19 @@ class App extends Component {
   }
 
   /**
+   * Handler for opening the variable selection
+   * @param {*} event 
+   * @param {*} posPlot 
+   */
+  handleVarClick = (event, posPlot) => {
+    try {
+      this.setParams(posPlot)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  /**
    * Handler for sidebar.
    */
   handleSidebar = () => {
@@ -661,6 +677,7 @@ class App extends Component {
         txSbFile={this.handleSubmit}
 
         selChVar={this.handleVariable}
+        handleVarClick={this.handleVarClick}
 
         selChCm={this.handleColorMap}
 

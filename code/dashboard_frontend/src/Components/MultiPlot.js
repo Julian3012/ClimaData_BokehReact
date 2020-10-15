@@ -42,6 +42,7 @@ class MultiPlot extends Component {
                     handleApply={this.props.handleApply}
 
                     disableOnLoad={this.props.disableOnLoad}
+                    handleVarClick={this.props.handleVarClick}
                 />
             );
         }
