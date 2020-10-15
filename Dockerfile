@@ -20,4 +20,8 @@ RUN conda run -n ncview2 npm install
 
 WORKDIR /home/python/code
 
+# New version
 CMD ["/usr/bin/env", "bash", "/home/python/code/run.sh"]
+
+# Old version
+#CMD ["conda", "run", "-n","ncview2", "bokeh","serve","--show","/home/python/code/main_old.py","--port","5010"]
