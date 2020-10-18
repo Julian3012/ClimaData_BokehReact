@@ -109,17 +109,16 @@ class PlotGenerator():
                 # Init plotelements and bokeh tools
                 if plot.dataPath != "":
                     classname = "plot_" + str(idx)
-                    pan = PanTool()
-                    wheel = WheelZoomTool()
-                    save = SaveTool()
-                    reset = ResetTool()
+                    # pan = PanTool()
+                    # wheel = WheelZoomTool()
+                    # save = SaveTool()
+                    # reset = ResetTool()
 
-                    tools = [pan,wheel,save,reset]
+                    # tools = [pan,wheel,save,reset]
                     try:
                         figure = figureElement.state.children[0]
                         slider = figureElement.state.children[1]
-                        self.logger.info(figure.tools)
-                        figure.tools = tools
+                        # figure.tools = tools
                         figure.css_classes = [classname]
                         lArray.append(column(figure, slider))
                     except Exception as e:
