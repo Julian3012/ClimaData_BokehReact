@@ -37,7 +37,7 @@ class PlotObject:
         self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
         self.logger = logger
 
-        self.logger.info(f"[Constructor] {title}")
+        self.logger.info(f"[PlotObject] Constructor {title}")
 
         # Constant
         self.COLORMAPS = COLORMAPS
@@ -74,12 +74,12 @@ class PlotObject:
         self.title = title
 
         # Val Dict
-        self.optVariables = ["clon"]
+        self.optVariables = [""]
         self.optAggDim = ["None"]
         self.optAggFun = ["None", "mean", "sum"]
 
         self.val_dict = {
-            "variable": "clon",
+            "variable": "",
             "cm": self.COLORMAPS[0],
             "aggDim": self.optAggDim[0],
             "aggFn": self.optAggFun[0],
