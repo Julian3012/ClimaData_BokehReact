@@ -117,6 +117,7 @@ class PlotGenerator():
                     # tools = [pan,wheel,save,reset]
                     try:
                         figure = figureElement.state.children[0]
+                        print(figure.x_range.start)
                         slider = figureElement.state.children[1]
                         # figure.tools = tools
                         figure.css_classes = [classname]

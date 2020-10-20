@@ -39,6 +39,14 @@ class PlotObject:
 
         self.logger.info(f"[PlotObject] Constructor {title}")
 
+        # Plot ranges
+        self.range_dict = {
+            "x_start": None,
+            "x_end": None,
+            "y_start": None,
+            "y_end": None
+        }
+
         # Constant
         self.COLORMAPS = COLORMAPS
 
@@ -251,7 +259,7 @@ class PlotObject:
                 if self.cuPlot is None:
                     self.logger.info("Build CurvePlot")
                     self.cuPlot = CurvePlot(self.logger, self.renderer, self.xrData)
-                plot = self.cuPlot.getPlotObject(
+                self.plot = self.cuPlot.getPlotObject(
                     variable=self.variable,
                     title=self.title,
                     aggDim=self.aggDim,
@@ -275,7 +283,7 @@ class PlotObject:
                     self.hpPlot = HeightProfilePlot(
                         self.logger, self.renderer, self.xrData
                     )
-                plot = self.hpPlot.getPlotObject(
+                self.plot = self.hpPlot.getPlotObject(
                     variable=self.variable,
                     title=self.title,
                     aggDim=self.aggDim,
@@ -292,7 +300,7 @@ class PlotObject:
                     self.tmPlot = TriMeshPlot(
                         self.logger, self.renderer, self.xrDataMeta
                     )
-                plot = self.tmPlot.getPlotObject(
+                self.plot = self.tmPlot.getPlotObject(
                     variable=self.variable,
                     title=self.title,
                     cm=self.cm,
@@ -307,12 +315,40 @@ class PlotObject:
                     cLevels=cLevels,
                     dataUpdate=dataUpdate,
                 )
+            
+            self.adjustRanges()
 
-            return plot
+            return self.plot
         except Exception as e:
             self.logger.exception(e)
             self.__init__(self.logger, self.title)
             return ""
+
+    def adjustRanges(self):
+        try:
+            if (self.range_dict["x_start"] != None):
+                self.plot.state.children[0].x_range.start = self.range_dict["x_start"]
+                self.plot.state.children[0].x_range.end = self.range_dict["x_end"]
+                self.plot.state.children[0].y_range.start = self.range_dict["y_start"]
+                self.plot.state.children[0].y_range.end = self.range_dict["y_end"]
+        except:
+            if (self.range_dict["x_start"] != None):
+                self.plot.state.x_range.start = self.range_dict["x_start"]
+                self.plot.state.x_range.end = self.range_dict["x_end"]
+                self.plot.state.y_range.start = self.range_dict["y_start"]
+                self.plot.state.y_range.end = self.range_dict["y_end"]
+
+    def setRanges(self):
+        try:
+            self.range_dict["x_start"] = self.plot.state.children[0].x_range.start
+            self.range_dict["x_end"] = self.plot.state.children[0].x_range.end
+            self.range_dict["y_start"] = self.plot.state.children[0].y_range.start
+            self.range_dict["y_end"] = self.plot.state.children[0].y_range.end
+        except:
+            self.range_dict["x_start"] = self.plot.state.x_range.start
+            self.range_dict["x_end"] = self.plot.state.x_range.end
+            self.range_dict["y_start"] = self.plot.state.y_range.start
+            self.range_dict["y_end"] = self.plot.state.y_range.end
 
     def variableUpdate(self, attr, old, new):
         """
@@ -324,6 +360,7 @@ class PlotObject:
         """
         Handler for selCmap.
         """
+        self.setRanges()
         self.val_dict["cm"] = new
 
     def aggDimUpdate(self, attr, old, new):
