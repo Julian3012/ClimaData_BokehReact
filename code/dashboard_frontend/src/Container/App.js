@@ -98,19 +98,19 @@ class App extends Component {
     try {
       let model = window.Bokeh.documents[0].get_model_by_id("1000");
       if (posWidget <= 16) {
-        return model.attributes.children[posPlot === 0 ? 3 : posPlot + 3].attributes.children[0].attributes.children[posWidget]
+        return model.attributes.children[posPlot === 0 ? 6 : posPlot + 6].attributes.children[0].attributes.children[posWidget]
       } else if (posWidget === this.state.positions.plot) {
-        let divPlot = Math.floor(posPlot / 2);
-        let numPlot = posPlot % 2;
+        let divPlot = posPlot;
+        let numPlot = 0;
         if (model.attributes.children[divPlot].attributes.children[numPlot].attributes.hasOwnProperty("children")) {
           return model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0]
         } else {
           return model.attributes.children[divPlot].attributes.children[numPlot]
         }
       } else if (posWidget === 17) {
-        return model.attributes.children[6 + 3]
+        return model.attributes.children[6 + 3 + 3]
       } else if (posWidget === 18) {
-        return model.attributes.children[6 + 4]
+        return model.attributes.children[6 + 3 + 4]
       } else {
         console.log("Position value does not exist")
       }

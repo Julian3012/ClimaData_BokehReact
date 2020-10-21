@@ -159,10 +159,13 @@ class PlotGenerator():
             lArray.append(self.applyChanges)
 
             new_array = [
-                row(lArray[0], lArray[2]),
-                row(lArray[4], lArray[6]),
-                row(lArray[8], lArray[10]),
-                lArray[1],
+                row(lArray[0]),
+                row(lArray[2]),
+                row(lArray[4]),
+                row(lArray[6]),
+                row(lArray[8]),
+                row(lArray[10]),
+                lArray[1], 
                 lArray[3],
                 lArray[5],
                 lArray[7],
@@ -174,7 +177,7 @@ class PlotGenerator():
 
             l = layout(new_array)
             # Hide widgets
-            self.hideWidgets(l)
+            self.hideWidgets(l)  # TODO Look out it seems with hidden widgets
             l._id = "1000"
             curdoc().add_root(l)
 

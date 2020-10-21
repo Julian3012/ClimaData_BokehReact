@@ -3,8 +3,8 @@ export class PlotRange {
     constructor(cnt, posPlot) {
         this.counter = cnt;
         const model = window.Bokeh.documents[0].get_model_by_id("1000");
-        const divPlot = Math.floor(posPlot/2)
-        let numPlot = posPlot % 2;
+        const divPlot = posPlot
+        let numPlot = 0;
         if(model.attributes.children[divPlot].attributes.children[numPlot].attributes.hasOwnProperty("children")){
             this.plot_attributes = model.attributes.children[divPlot].attributes.children[numPlot].attributes.children[0]
           } else {
