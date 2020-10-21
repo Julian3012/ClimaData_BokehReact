@@ -10,10 +10,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /home/python/code
-COPY code/ /home/python/code
 WORKDIR /home/python/code
+COPY code/env_files/spec.txt .
 
-RUN conda create --name ncview2 --file=env_files/spec.txt
+RUN conda create --name ncview2 --file=spec.txt
+COPY code/ /home/python/code
 
 WORKDIR /home/python/code/dashboard_frontend
 RUN conda run -n ncview2 npm install
