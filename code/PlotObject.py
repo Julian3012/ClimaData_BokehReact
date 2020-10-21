@@ -34,7 +34,7 @@ class PlotObject:
 
         # TODO: Add Styling from themes.Bokeh
         hv.extension("bokeh")
-        self.renderer = hv.renderer("bokeh").instance(mode="server", size=300)
+        self.renderer = hv.renderer("bokeh").instance(mode="server")
         self.logger = logger
 
         self.logger.info(f"[PlotObject] Constructor {title}")

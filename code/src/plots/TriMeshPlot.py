@@ -98,7 +98,7 @@ class TriMeshPlot(Plot):
         coastln = gf.coastline.opts(projection=crs.PlateCarree(), line_width=2)
         rasterizedgraphopts = {"cmap": self.cm, "colorbar": True}
         # TODO do not hardcode the sizes
-        totalgraphopts = {"height": 100, "width": 200}
+        totalgraphopts = {"height": 600, "width": 1200}
 
         if len(self.freeDims) > 0:
             self.logger.info("Show with DynamicMap")

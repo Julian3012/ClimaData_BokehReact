@@ -44,7 +44,7 @@ class CurvePlot(Plot):
         ranges = self.getRanges()
 
         # TODO do not hardcode the sizes
-        totalgraphopts = {"height":100, "width":200}
+        totalgraphopts = {"height":600, "width":1200}
         dm = hv.DynamicMap(self.buildCurvePlot, kdims=self.freeDims).redim.range(**ranges)
         self.logger.info("Build into Dynamic Map")
         return self.renderer.get_widget(dm.opts(**totalgraphopts),'widgets')
