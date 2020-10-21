@@ -70,7 +70,7 @@ class PlotGenerator():
         """
 
         try:
-            self.logger.info("Started mainDialog()")
+            self.logger.info("[main_backend] Started mainDialog()")
             start = time.time()
 
             curdoc().clear()
@@ -78,54 +78,54 @@ class PlotGenerator():
 
             # TODO: Styling for plot and slider
             for idx, plot in enumerate(self.plots):
-                self.logger.info(f"Plot Number: {idx}")
+                self.logger.info(f"[main_backend] Plot number: {idx}")
 
                 # Get data
                 try:
+                    self.logger.info("[main_backend] Load data")
                     if plot.dataPath != "":
-                        self.logger.info(f"File1")
                         link = "./data/" + plot.dataPath
                         plot.xrDataMeta = xr.open_dataset(link)
-                        self.logger.info(f"File:  {link}")
                         plot.optVariables = list(plot.xrDataMeta.data_vars)
-                        if plot.val_dict["variable"] == "clon":
+                        if plot.val_dict["variable"] == "":
                             plot.val_dict["variable"] = plot.optVariables[0]
                     else:
-                        plot.optVariables = ["clon"]
+                        plot.optVariables = [""]
                 except Exception as e:
                     plot.dataPath = ""
                     self.logger.info(e)
 
                 # Init widgets
                 if plot.variable == None:
-                    self.logger.info("[mainDialog] Generate parameters")
+                    self.logger.info("[main_backend] Generate parameters")
                     plot.generate_Parameters()
                     self.set_handler(plot)
 
                 # Generate plot type
                 if plot.dataPath != "":
+                    self.logger.info("[main_backend] Generate plot")
                     figureElement = plot.genPlot(dataUpdate)
                 
                 # Init plotelements and bokeh tools
                 if plot.dataPath != "":
                     classname = "plot_" + str(idx)
-                    pan = PanTool()
-                    wheel = WheelZoomTool()
-                    save = SaveTool()
-                    reset = ResetTool()
+                    # pan = PanTool()
+                    # wheel = WheelZoomTool()
+                    # save = SaveTool()
+                    # reset = ResetTool()
 
-                    tools = [pan,wheel,save,reset]
+                    # tools = [pan,wheel,save,reset]
                     try:
                         figure = figureElement.state.children[0]
+                        print(figure.x_range.start)
                         slider = figureElement.state.children[1]
-                        self.logger.info(figure.tools)
-                        figure.tools = tools
+                        # figure.tools = tools
                         figure.css_classes = [classname]
                         lArray.append(column(figure, slider))
                     except Exception as e:
                         self.logger.info(e)
                         figureElement.state.css_classes = [classname]
-                        figureElement.state.tools = tools
+                        #figureElement.state.tools = tools
                         lArray.append(figureElement.state)                        
                 else:
                     lArray.append(row())
@@ -181,7 +181,7 @@ class PlotGenerator():
             end = time.time()
             self.logger.info("MainDialog took %d" % (end - start))
         except Exception as e:
-            self.logger.info("[mainDialog] Exception")
+            self.logger.info("[main_backend] Exception")
             self.logger.exception(e)
             self.restart()
 

@@ -42,7 +42,7 @@ class App extends Component {
       pos: newPos,
       file: "",
       mesh: "DOM1",
-      variable: "clon",
+      variable: "",
       showCoastline: true,
       colorMap: "Blues",
       fixColoring: false,
@@ -60,8 +60,8 @@ class App extends Component {
         label: "None",
       }],
       variables: [{
-        value: "clon",
-        label: "clon",
+        value: "",
+        label: "",
       }],
       disabled_Logxy: true,
       disabled_FixCol: true,
@@ -190,7 +190,7 @@ class App extends Component {
     } catch (error) {
       console.log(error)
     }
-    setTimeout(() => { this.setState({ disableOnLoad: false }) }, 2000)
+    setTimeout(() => { this.setState({ disableOnLoad: false }) }, 3000)
   }
 
   /**
@@ -555,7 +555,7 @@ class App extends Component {
         })
         console.log(this.state.bk_session)
         this.setState({ disableOnLoad: true })
-        setTimeout(() => { this.setParams(posPlot[0]) }, 2000)
+        setTimeout(() => { this.setParams(posPlot[0]) }, 3000)
       }
     } catch (e) {
       console.log(e)
@@ -575,6 +575,7 @@ class App extends Component {
         ...this.state.bk_session[posPlot]
       };
       plot.variables = optsVar;
+      plot.variable = this.state.bk_session[posPlot].variable === "" ? this.state.bk_session[posPlot].variables[0].label : this.state.bk_session[posPlot].variable;
       plot.aggDimSelect = optsAd;
       this.setSession(posPlot, plot);
       this.props.add(this.state);
