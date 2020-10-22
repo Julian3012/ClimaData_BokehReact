@@ -16,13 +16,8 @@ COPY code/env_files/spec.txt .
 RUN conda create --name ncview2 --file=spec.txt
 COPY code/ /home/python/code
 
-WORKDIR /home/python/code/dashboard_frontend
-RUN conda run -n ncview2 npm install
-
 WORKDIR /home/python/code
 
-# New version
-CMD ["/usr/bin/env", "bash", "/home/python/code/run.sh"]
+ENV PATH /opt/conda/bin:$PATH
 
-# Old version
-#CMD ["conda", "run", "-n","ncview2", "bokeh","serve","--show","/home/python/code/main_old.py","--port","5010"]
+CMD ["conda", "run", "-n", "ncview2", "bokeh", "serve", "--port=5010", "--allow-websocket-origin", "localhost:5010", "--allow-websocket-origin", "react:3000", "--allow-websocket-origin", "localhost:3000", "--allow-websocket-origin", "127.0.0.1:3000", "main_backend.py"]
