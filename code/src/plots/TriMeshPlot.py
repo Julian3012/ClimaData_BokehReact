@@ -220,7 +220,7 @@ class TriMeshPlot(Plot):
             self.tris["var"] = self.tris["var"] * factor
 
         res = hv.TriMesh((self.tris, self.verts), label=(self.title))
-        
+
         return res
 
     def loadMesh(self, xrData):
@@ -248,8 +248,8 @@ class TriMeshPlot(Plot):
                         xrData.clat_bnds.isel().stack(z=("vertices", "ncells")),
                     )
                 )
-        except:
-            self.logger.error("Failed to build loadMesh():verts!")
+        except Exception as e:
+            self.logger.error(f"Failed to build loadMesh():verts! Error: {e}")
 
         # Calc degrees from radians
         f = 180 / math.pi
@@ -282,6 +282,6 @@ class TriMeshPlot(Plot):
         tris["v0"] = tris["v0"].astype(np.int32)
         tris["v1"] = tris["v1"].astype(np.int32)
         tris["v2"] = tris["v2"].astype(np.int32)
-        
+
         self.tris = tris
         self.verts = verts
