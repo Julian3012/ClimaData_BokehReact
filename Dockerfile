@@ -14,10 +14,9 @@ WORKDIR /home/python/code
 COPY code/env_files/spec.txt .
 
 RUN conda create --name ncview2 --file=spec.txt
+COPY code/cartopy-shapefiles/ /root/.local/share/cartopy/shapefiles/natural_earth/physical
 COPY code/ /home/python/code
 
-WORKDIR /home/python/code
 
-ENV PATH /opt/conda/bin:$PATH
 
 CMD ["/opt/conda/envs/ncview2/bin/bokeh", "serve", "--port=5010", "--allow-websocket-origin", "localhost:5010", "--allow-websocket-origin", "react:3000", "--allow-websocket-origin", "localhost:3000", "--allow-websocket-origin", "127.0.0.1:3000", "main_backend.py"]
