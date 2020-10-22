@@ -158,7 +158,7 @@ def preDialog():
     logger.info("preDialog took %d" % (end - start))
 
 
-def variableUpdate(_, _, new):
+def variableUpdate(_a, _b, new):
     """
     This function is only a wrapper round the main function for building the buildDynamicMap.
     It is called if at property like the cmap is changed and the whole buildDynamicMap needs
@@ -168,7 +168,7 @@ def variableUpdate(_, _, new):
     mainDialog(True)
 
 
-def cmapUpdate(_, _, _):
+def cmapUpdate(_a, _b, _c):
     """
     This function is only a wrapper round the main function for building the buildDynamicMap.
     It is called if at property like the cmap is changed and the whole buildDynamicMap needs
@@ -177,7 +177,7 @@ def cmapUpdate(_, _, _):
     mainDialog(False)
 
 
-def aggDimUpdate(_, _, _):
+def aggDimUpdate(_a, _b, _c):
     global slAggregateFunction
     if slAggregateFunction.value != "None":
         mainDialog(True)
@@ -185,7 +185,7 @@ def aggDimUpdate(_, _, _):
         mainDialog(False)
 
 
-def aggFnUpdate(_, _, _):
+def aggFnUpdate(_a, _b, _c):
     global slAggregateDimension
     if slAggregateDimension.value != "None":
         mainDialog(True)

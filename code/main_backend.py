@@ -257,7 +257,7 @@ class PlotGenerator():
         """
         self.mainDialog(False)
 
-    def fileUpdate(self, _, _, new):
+    def fileUpdate(self, _a, _b, new):
         """
         Handler for urlinput button.
         """
@@ -268,22 +268,22 @@ class PlotGenerator():
         except Exception as e:
             print(e)
 
-    def variableUpdate(self, _, _, _):
+    def variableUpdate(self, _a, _b, _c):
         """
         Handler for variable selection.
         """
         self.mainDialog(True)
 
-    def cmapUpdate(self, _, _, _):
+    def cmapUpdate(self, _a, _b, _c):
         self.mainDialog(True)
 
-    def aggDimUpdate(self, _, _, _):
+    def aggDimUpdate(self, _a, _b, _c):
         """
         Handler for aggregate dimension selection.
         """
         self.mainDialog(True)
 
-    def aggFnUpdate(self, _, _, _):
+    def aggFnUpdate(self, _a, _b, _c):
         """
         Handler for aggregate function selection.
         """
