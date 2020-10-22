@@ -158,7 +158,7 @@ def preDialog():
     logger.info("preDialog took %d" % (end - start))
 
 
-def variableUpdate(attr, old, new):
+def variableUpdate(_, _, new):
     """
     This function is only a wrapper round the main function for building the buildDynamicMap.
     It is called if at property like the cmap is changed and the whole buildDynamicMap needs
@@ -168,7 +168,7 @@ def variableUpdate(attr, old, new):
     mainDialog(True)
 
 
-def cmapUpdate(attr, old, new):
+def cmapUpdate(_, _, _):
     """
     This function is only a wrapper round the main function for building the buildDynamicMap.
     It is called if at property like the cmap is changed and the whole buildDynamicMap needs
@@ -177,7 +177,7 @@ def cmapUpdate(attr, old, new):
     mainDialog(False)
 
 
-def aggDimUpdate(attr, old, new):
+def aggDimUpdate(_, _, _):
     global slAggregateFunction
     if slAggregateFunction.value != "None":
         mainDialog(True)
@@ -185,7 +185,7 @@ def aggDimUpdate(attr, old, new):
         mainDialog(False)
 
 
-def aggFnUpdate(attr, old, new):
+def aggFnUpdate(_, _, _):
     global slAggregateDimension
     if slAggregateDimension.value != "None":
         mainDialog(True)
@@ -193,12 +193,12 @@ def aggFnUpdate(attr, old, new):
         mainDialog(False)
 
 
-def coastlineUpdate(new):
+def coastlineUpdate(_):
     logger.info("coastlineUpdate")
     mainDialog(False)
 
 
-def ColoringUpdate(new):
+def ColoringUpdate(_):
     logger.info("ColoringUpdate")
     mainDialog(False)
 

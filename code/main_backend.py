@@ -244,20 +244,20 @@ class PlotGenerator():
         plot.cbLogX.on_click(self.coloringUpdate)
         plot.cbLogY.on_click(self.coloringUpdate)
 
-    def deleteUpdate(self, new):
+    def deleteUpdate(self, _):
         """
         Handler for delete button.
         """
         self.__init__()
         self.mainDialog(True)
 
-    def applyUpdate(self, new):
+    def applyUpdate(self, _):
         """
         Handler for apply button.
         """
         self.mainDialog(False)
 
-    def fileUpdate(self, attr, old, new):
+    def fileUpdate(self, _, _, new):
         """
         Handler for urlinput button.
         """
@@ -268,34 +268,34 @@ class PlotGenerator():
         except Exception as e:
             print(e)
 
-    def variableUpdate(self, attr, old, new):
+    def variableUpdate(self, _, _, _):
         """
         Handler for variable selection.
         """
         self.mainDialog(True)
 
-    def cmapUpdate(self, attr, old, new):
+    def cmapUpdate(self, _, _, _):
         self.mainDialog(True)
 
-    def aggDimUpdate(self, attr, old, new):
+    def aggDimUpdate(self, _, _, _):
         """
         Handler for aggregate dimension selection.
         """
         self.mainDialog(True)
 
-    def aggFnUpdate(self, attr, old, new):
+    def aggFnUpdate(self, _, _, _):
         """
         Handler for aggregate function selection.
         """
         self.mainDialog(True)
         
-    def coastlineUpdate(self, new):
+    def coastlineUpdate(self, _):
         """
         Handler for coastline checkbox.
         """
         self.mainDialog(True)
 
-    def coloringUpdate(self, new):
+    def coloringUpdate(self, _):
         """
         Handler for coloring parameters.
         """

@@ -219,7 +219,7 @@ class PlotObject:
 
         return link
 
-    def fileUpdate(self, attr, old, new):
+    def fileUpdate(self, _, _, new):
         """
         Handler for urlinput.
         """
@@ -350,26 +350,26 @@ class PlotObject:
             self.range_dict["y_start"] = self.plot.state.y_range.start
             self.range_dict["y_end"] = self.plot.state.y_range.end
 
-    def variableUpdate(self, attr, old, new):
+    def variableUpdate(self, _, _, new):
         """
         Handler for selVar.
         """
         self.val_dict["variable"] = new
 
-    def cmapUpdate(self, attr, old, new):
+    def cmapUpdate(self, _, _, new):
         """
         Handler for selCmap.
         """
         self.setRanges()
         self.val_dict["cm"] = new
 
-    def aggDimUpdate(self, attr, old, new):
+    def aggDimUpdate(self, _, _, new):
         """
         Handler for aggregate dimension selection.
         """
         self.val_dict["aggDim"] = new
 
-    def aggFnUpdate(self, attr, old, new):
+    def aggFnUpdate(self, _, _, new):
         """
         Handler for aggregate function selection.
         """
