@@ -20,4 +20,4 @@ WORKDIR /home/python/code
 
 ENV PATH /opt/conda/bin:$PATH
 
-CMD ["conda", "run", "-n", "ncview2", "bokeh", "serve", "--port=5010", "--allow-websocket-origin", "localhost:5010", "--allow-websocket-origin", "react:3000", "--allow-websocket-origin", "localhost:3000", "--allow-websocket-origin", "127.0.0.1:3000", "main_backend.py"]
+CMD ["/opt/conda/envs/ncview2/bin/bokeh", "serve", "--port=5010", "--allow-websocket-origin", "localhost:5010", "--allow-websocket-origin", "react:3000", "--allow-websocket-origin", "localhost:3000", "--allow-websocket-origin", "127.0.0.1:3000", "main_backend.py"]
