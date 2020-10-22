@@ -1,12 +1,9 @@
 #!/usr/bin/python
 
 
-import geoviews as gv
 import geoviews.feature as gf
 
-import bokeh as bokeh
 import pandas as pd
-import xarray as xr
 import holoviews as hv
 import numpy as np
 
@@ -169,7 +166,7 @@ class TriMeshPlot(Plot):
         except Exception as e:
             print(e)
 
-        if self.showCoastline == True:
+        if self.showCoastline is True:
             graph = preGraph * coastln
         else:
             graph = preGraph
@@ -177,7 +174,6 @@ class TriMeshPlot(Plot):
         # print("Graph Atributes: ", graph.__dict__.keys())
 
         if len(self.freeDims) > 0:
-            # print("Renderer Atributes: ", self.renderer.get_widget(graph.opts(**totalgraphopts), "widgets").__dict__.keys())
             return self.renderer.get_widget(graph.opts(**totalgraphopts), "widgets")
         else:
             return self.renderer.get_plot(graph.opts(**totalgraphopts))
@@ -190,7 +186,7 @@ class TriMeshPlot(Plot):
         Returns:
             The TriMesh-Graph object
         """
-        if self.dataUpdate == True:
+        if self.dataUpdate is True:
             selectors = self.buildSelectors(args)
             self.logger.info("Selectors: " + str(selectors))
 
