@@ -31,4 +31,3 @@ COLORMAPS = [
     "YlOrBr",
     "YlOrRd",
 ]
-

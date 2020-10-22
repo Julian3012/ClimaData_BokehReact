@@ -1,35 +1,35 @@
-import json
+# import json
 import logging
-import math
+# import math
 import time
 
-import bokeh as bokeh
-import geoviews as gv
-import geoviews.feature as gf
+# import bokeh as bokeh
+# import geoviews as gv
+# import geoviews.feature as gf
 import holoviews as hv
 import numpy as np
 import pandas as pd
 import xarray as xr
 from bokeh.io import curdoc
-from bokeh.layouts import column, layout, row, widgetbox
-from bokeh.models import (Button, CheckboxGroup, ColumnDataSource, CustomJS,
-                          Div, Select)
-from bokeh.models.tools import PanTool, ResetTool, SaveTool, WheelZoomTool
-from bokeh.models.widgets import TextInput
-from bokeh.server.server import Server
-from bokeh.themes.theme import Theme
-from cartopy import crs
-from holoviews.operation.datashader import datashade, rasterize
+from bokeh.layouts import column, layout, row
+from bokeh.models import CheckboxGroup
+
+# from bokeh.models.tools import , ResetTool, SaveTool, WheelZoomTool
+# from bokeh.models.widgets import TextInput
+# from bokeh.server.server import Server
+# from bokeh.themes.theme import Theme
+# from cartopy import crs
+# from holoviews.operation.datashader import datashade, rasterize
 
 from PlotObject import PlotObject
 from src.plots.CurvePlot import CurvePlot
-from src.plots.HeightProfilePlot import HeightProfilePlot
-from src.plots.TriMeshPlot import TriMeshPlot
+# from src.plots.HeightProfilePlot import HeightProfilePlot
+# from src.plots.TriMeshPlot import TriMeshPlot
 
 
 class PlotGenerator():
     """
-    This class builds up the layout of the bokeh plots. 
+    This class builds up the layout of the bokeh plots.
     """
 
     def __init__(self):
@@ -198,7 +198,7 @@ class PlotGenerator():
         l.children[4].children => Params Fig2
         l.children[5].children => Params Fig3
         """
-        for idx, widget in enumerate(layout.children):
+        for _, widget in enumerate(layout.children):
         
             # TODO: Another logic for visibility
             try:
