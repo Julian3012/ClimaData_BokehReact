@@ -182,7 +182,7 @@ class PlotGenerator():
             curdoc().add_root(l)
 
             end = time.time()
-            self.logger.info("MainDialog took %d" % (end - start))
+            self.logger.info("MainDialog took %.4f [sec]" % (end - start))
         except Exception as e:
             self.logger.info("[main_backend] Exception")
             self.logger.exception(e)
