@@ -58,7 +58,7 @@ class PlotGenerator():
 
     def mainDialog(self, dataUpdate=True):
         """
-        This function build up and manages the main-graph dialog. 
+        This function build up and manages the main-graph dialog.
 
         Iteration over all plots specified in __init__().
         1. load data
@@ -70,7 +70,7 @@ class PlotGenerator():
         """
 
         try:
-            self.logger.info("[main_backend] Started mainDialog()")
+            self.logger.info("[main_backend] XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Started mainDialog()")
             start = time.time()
 
             curdoc().clear()
@@ -105,7 +105,7 @@ class PlotGenerator():
                 if plot.dataPath != "":
                     self.logger.info("[main_backend] Generate plot")
                     figureElement = plot.genPlot(dataUpdate)
-                
+
                 # Init plotelements and bokeh tools
                 if plot.dataPath != "":
                     classname = "plot_" + str(idx)
@@ -126,7 +126,7 @@ class PlotGenerator():
                         self.logger.info(e)
                         figureElement.state.css_classes = [classname]
                         #figureElement.state.tools = tools
-                        lArray.append(figureElement.state)                        
+                        lArray.append(figureElement.state)
                 else:
                     lArray.append(row())
 
@@ -149,7 +149,7 @@ class PlotGenerator():
                     )
                 ]
                 lArray.append(col)
-                    
+
             # Delete button
             self.addDeleteButton()
             lArray.append(self.deletePlots)
@@ -165,7 +165,7 @@ class PlotGenerator():
                 row(lArray[6]),
                 row(lArray[8]),
                 row(lArray[10]),
-                lArray[1], 
+                lArray[1],
                 lArray[3],
                 lArray[5],
                 lArray[7],
@@ -199,7 +199,7 @@ class PlotGenerator():
         l.children[5].children => Params Fig3
         """
         for _, widget in enumerate(layout.children):
-        
+
             # TODO: Another logic for visibility
             try:
                 if widget.children[0].children[0].__class__.__name__ != "Figure":
@@ -217,7 +217,7 @@ class PlotGenerator():
                     )
         self.deletePlots.on_click(self.deleteUpdate)
         self.deletePlots.visible = False
-    
+
     def addApplyButton(self):
         """
         Create a apply button. Button gets used when you make changes to colorlevels or min/max color values.
@@ -230,7 +230,7 @@ class PlotGenerator():
 
     def set_handler(self, plot):
         """
-        Add handler to plot object. 
+        Add handler to plot object.
         """
         plot.urlinput.on_change("value", plot.fileUpdate, self.fileUpdate)
         plot.slVar.on_change("value", plot.variableUpdate, self.variableUpdate)
@@ -288,7 +288,7 @@ class PlotGenerator():
         Handler for aggregate function selection.
         """
         self.mainDialog(True)
-        
+
     def coastlineUpdate(self, _):
         """
         Handler for coastline checkbox.
