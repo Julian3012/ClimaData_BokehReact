@@ -11,11 +11,11 @@ RUN apt-get update && \
 
 RUN mkdir -p /home/python/code
 WORKDIR /home/python/code
-COPY code/env_files/spec.txt .
+COPY ./env_files/spec.txt .
 
 RUN conda create --name ncview2 --file=spec.txt
-COPY code/cartopy-shapefiles/ /root/.local/share/cartopy/shapefiles/natural_earth/physical
-COPY code/ /home/python/code
+COPY ./cartopy-shapefiles/ /root/.local/share/cartopy/shapefiles/natural_earth/physical
+COPY ./ /home/python/code
 
 
 

@@ -13,12 +13,12 @@ services:
   bokeh:
     image: rokeh
     build:
-      context: ./
+      context: bokeh-backend
       dockerfile: Dockerfile
     ports:
       - "5010:5010"
     volumes:
+      - "./bokeh-backend:/home/python/code"
       - "./data:/home/python/code/data"
-      - "./code:/home/python/code"
     depends_on:
       - react
