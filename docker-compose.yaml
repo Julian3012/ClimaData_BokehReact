@@ -11,3 +11,4 @@ services:
       - "5010:5010"
     volumes:
       - "./data:/home/python/code/data"
+      - "./code:/home/python/code"
