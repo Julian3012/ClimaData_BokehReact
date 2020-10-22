@@ -1,10 +1,10 @@
-from bokeh.server.server import Server
+# from bokeh.server.server import Server
 from bokeh.layouts import layout, widgetbox, row
-from bokeh.models import ColumnDataSource, Div
+from bokeh.models import Div
 from bokeh.models.widgets import TextInput
 from bokeh.io import curdoc
-import geoviews as gv
-import geoviews.feature as gf
+# import geoviews as gv
+# import geoviews.feature as gf
 
 import bokeh as bokeh
 import pandas as pd
@@ -12,11 +12,11 @@ import xarray as xr
 import holoviews as hv
 import numpy as np
 
-from cartopy import crs
+# from cartopy import crs
 
-from holoviews.operation.datashader import datashade, rasterize
+# from holoviews.operation.datashader import datashade, rasterize
 
-import math
+# import math
 import logging
 import time
 

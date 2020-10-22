@@ -22,7 +22,7 @@ from bokeh.models import CheckboxGroup
 # from holoviews.operation.datashader import datashade, rasterize
 
 from PlotObject import PlotObject
-from src.plots.CurvePlot import CurvePlot
+# from src.plots.CurvePlot import CurvePlot
 # from src.plots.HeightProfilePlot import HeightProfilePlot
 # from src.plots.TriMeshPlot import TriMeshPlot
 
