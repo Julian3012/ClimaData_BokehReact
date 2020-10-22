@@ -93,10 +93,10 @@ class PlotGenerator():
                         plot.optVariables = [""]
                 except Exception as e:
                     plot.dataPath = ""
-                    self.logger.info(e)
+                    self.logger.exception(e)
 
                 # Init widgets
-                if plot.variable == None:
+                if plot.variable is None:
                     self.logger.info("[main_backend] Generate parameters")
                     plot.generate_Parameters()
                     self.set_handler(plot)
@@ -119,13 +119,11 @@ class PlotGenerator():
                         figure = figureElement.state.children[0]
                         print(figure.x_range.start)
                         slider = figureElement.state.children[1]
-                        # figure.tools = tools
                         figure.css_classes = [classname]
                         lArray.append(column(figure, slider))
                     except Exception as e:
-                        self.logger.info(e)
+                        self.logger.exception(e)
                         figureElement.state.css_classes = [classname]
-                        #figureElement.state.tools = tools
                         lArray.append(figureElement.state)
                 else:
                     lArray.append(row())
@@ -184,11 +182,11 @@ class PlotGenerator():
             end = time.time()
             self.logger.info("MainDialog took %.4f [sec]" % (end - start))
         except Exception as e:
-            self.logger.info("[main_backend] Exception")
+            self.logger.error("[main_backend] Exception")
             self.logger.exception(e)
             self.restart()
 
-    def hideWidgets(self,layout):
+    def hideWidgets(self, layout):
         """
         l.children = widget
         l.children[0].children => Figures 1+2
@@ -205,12 +203,17 @@ class PlotGenerator():
                 if widget.children[0].children[0].__class__.__name__ != "Figure":
                     for p in widget.children[0].children:
                         p.visible = False
-            except Exception as e:
+            except IndexError:
                 pass
+            except AttributeError:
+                pass
+            except Exception as e:
+                self.logger.exception(e)
 
     def addDeleteButton(self):
-        """
-        Create a delete button. Button gets used when the session creashes or plots get resetted.
+        """Create a delete button.
+
+        Button gets used when the session creashes or plots get resetted.
         """
         self.deletePlots = CheckboxGroup(
                         labels=["Delete Button"], active=[]
@@ -219,8 +222,10 @@ class PlotGenerator():
         self.deletePlots.visible = False
 
     def addApplyButton(self):
-        """
-        Create a apply button. Button gets used when you make changes to colorlevels or min/max color values.
+        """Create a apply button.
+
+        Button gets used when you make changes to colorlevels
+        or min/max color values.
         """
         self.applyChanges = CheckboxGroup(
                         labels=["Apply"], active=[]
@@ -266,7 +271,7 @@ class PlotGenerator():
         try:
             self.mainDialog(True)
         except Exception as e:
-            print(e)
+            self.logger.exception(e)
 
     def variableUpdate(self, _a, _b, _c):
         """
@@ -300,6 +305,7 @@ class PlotGenerator():
         Handler for coloring parameters.
         """
         self.mainDialog(True)
+
 
 def entry():
     """

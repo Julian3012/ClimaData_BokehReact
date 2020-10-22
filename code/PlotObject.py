@@ -167,17 +167,17 @@ class PlotObject:
         try:
             cLevels = int(self.txCLevels.value)
         except Exception as e:
-            self.logger.info(e)
+            self.logger.exception(e)
             cLevels = 0
         try:
             fixColorMin = float(self.txFixColoringMin.value)
         except Exception as e:
-            self.logger.info(e)
+            self.logger.exception(e)
             fixColorMin = None
         try:
             fixColorMax = float(self.txFixColoringMax.value)
         except Exception as e:
-            self.logger.info(e)
+            self.logger.exception(e)
             fixColorMax = None
 
         return cLevels, fixColorMin, fixColorMax
@@ -202,10 +202,10 @@ class PlotObject:
 
         # time can only be aggregated if it exist
         try:
-            if hasattr(self.xrDataMeta.clon_bnds, "time"):
+            if self.xrDataMeta is not None and hasattr(self.xrDataMeta.clon_bnds, "time"):
                 aggregateDimensions.append("time")
         except Exception as e:
-            pass
+            self.logger.exception(e)
 
         return aggregateDimensions
 
@@ -227,7 +227,7 @@ class PlotObject:
             curdoc().clear()
             self.__init__(logger=self.logger, title=self.title, dataPath=new)
         except Exception as e:
-            self.logger.info(e)
+            self.logger.exception(e)
 
     def genPlot(self, dataUpdate):
         """
@@ -315,7 +315,7 @@ class PlotObject:
                     cLevels=cLevels,
                     dataUpdate=dataUpdate,
                 )
-            
+
             self.adjustRanges()
 
             return self.plot

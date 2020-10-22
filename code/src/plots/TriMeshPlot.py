@@ -164,7 +164,7 @@ class TriMeshPlot(Plot):
                     )
                 )
         except Exception as e:
-            print(e)
+            self.logger.exception(e)
 
         if self.showCoastline is True:
             graph = preGraph * coastln
@@ -245,7 +245,7 @@ class TriMeshPlot(Plot):
                     )
                 )
         except Exception as e:
-            self.logger.error(f"Failed to build loadMesh():verts! Error: {e}")
+            self.logger.exception(e)
 
         # Calc degrees from radians
         f = 180 / math.pi
