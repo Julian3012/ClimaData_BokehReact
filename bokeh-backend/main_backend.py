@@ -11,6 +11,7 @@ from bokeh.models import CheckboxGroup
 
 from PlotObject import PlotObject
 
+
 class PlotGenerator:
     """
     This class builds up the layout of the bokeh plots.
@@ -93,12 +94,6 @@ class PlotGenerator:
                 # Init plotelements and bokeh tools
                 if plot.dataPath != "":
                     classname = "plot_" + str(idx)
-                    # pan = PanTool()
-                    # wheel = WheelZoomTool()
-                    # save = SaveTool()
-                    # reset = ResetTool()
-
-                    # tools = [pan,wheel,save,reset]
                     try:
                         figure = figureElement.state.children[0]
                         print(figure.x_range.start)
@@ -263,39 +258,39 @@ class PlotGenerator:
         """
         Handler for variable selection.
         """
-        self.logger.info(f"Executed `PlotGenerator::variable`")
+        self.logger.info("Executed `PlotGenerator::variable`")
         self.mainDialog(True)
 
     def cmapUpdate(self, _a, _b, _c):
-        self.logger.info(f"Executed `PlotGenerator::cmap`")
+        self.logger.info("Executed `PlotGenerator::cmap`")
         self.mainDialog(True)
 
     def aggDimUpdate(self, _a, _b, _c):
         """
         Handler for aggregate dimension selection.
         """
-        self.logger.info(f"Executed `PlotGenerator::aggDim`")
+        self.logger.info("Executed `PlotGenerator::aggDim`")
         self.mainDialog(True)
 
     def aggFnUpdate(self, _a, _b, _c):
         """
         Handler for aggregate function selection.
         """
-        self.logger.info(f"Executed `PlotGenerator::aggFn`")
+        self.logger.info("Executed `PlotGenerator::aggFn`")
         self.mainDialog(True)
 
     def coastlineUpdate(self, _):
         """
         Handler for coastline checkbox.
         """
-        self.logger.info(f"Executed `PlotGenerator::coastline`")
+        self.logger.info("Executed `PlotGenerator::coastline`")
         self.mainDialog(True)
 
     def coloringUpdate(self, _):
         """
         Handler for coloring parameters.
         """
-        self.logger.info(f"Executed `PlotGenerator::coloring`")
+        self.logger.info("Executed `PlotGenerator::coloring`")
         self.mainDialog(True)
 
 

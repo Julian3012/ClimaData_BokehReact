@@ -12,7 +12,8 @@ hv.extension("bokeh")
 
 class PlotObject:
     """
-    Class calculates plots and parameters depending on the input it gets from main_backend.py
+    Class calculates plots and parameters dependingon the input it gets
+    from main_backend.py
     """
 
     def __init__(self, logger, title, dataPath=""):
@@ -226,7 +227,7 @@ class PlotObject:
                     try:
                         link = self.get_filepath()
                         self.xrData = xr.open_dataset(link)
-                        assert self.xrData != None
+                        assert self.xrData is not None
                     except:
                         self.logger.error("Error for loading unchunked data.")
                 if self.cuPlot is None:
@@ -248,7 +249,7 @@ class PlotObject:
                     try:
                         link = self.get_filepath()
                         self.xrData = xr.open_dataset(link)
-                        assert self.xrData != None
+                        assert self.xrData is not None
                     except:
                         self.logger.error("Error for loading unchunked data.")
                 if self.hpPlot is None:
@@ -353,7 +354,7 @@ class PlotObject:
         self.setRanges()
         self.val_dict["cm"] = new
         self.logger.info(f"Changed `PlotObjekt::cmap`: {tmp} -> {new}")
-        
+
 
     def aggDimUpdate(self, _a, _b, new):
         """
@@ -367,6 +368,6 @@ class PlotObject:
         """
         Handler for aggregate function selection.
         """
-        tmp = val_dict["aggFn"]
+        tmp = self.val_dict["aggFn"]
         self.val_dict["aggFn"] = new
         self.logger.info(f"Changed `PlotObjekt::aggFn`: {tmp} -> {new}")
