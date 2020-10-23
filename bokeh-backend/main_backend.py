@@ -11,7 +11,7 @@ from bokeh.models import CheckboxGroup
 
 from PlotObject import PlotObject
 
-class PlotGenerator():
+class PlotGenerator:
     """
     This class builds up the layout of the bokeh plots.
     """
@@ -256,6 +256,8 @@ class PlotGenerator():
             self.mainDialog(True)
         except Exception as e:
             self.logger.exception(e)
+
+    # All update methods from below do nothing except calling `mainDialog`
 
     def variableUpdate(self, _a, _b, _c):
         """

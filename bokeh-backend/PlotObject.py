@@ -297,6 +297,16 @@ class PlotObject:
             self.__init__(self.logger, self.title)
             return ""
 
+    def fileUpdate(self, _a, _b, new):
+        """
+        Handler for urlinput.
+        """
+        try:
+            curdoc().clear()
+            self.__init__(logger=self.logger, title=self.title, dataPath=new)
+        except Exception as e:
+            self.logger.exception(e)
+
     def adjustRanges(self):
         try:
             if (self.range_dict["x_start"] is not None):
@@ -311,6 +321,8 @@ class PlotObject:
                 self.plot.state.y_range.start = self.range_dict["y_start"]
                 self.plot.state.y_range.end = self.range_dict["y_end"]
 
+    # All methods below do nothing except update `self.range_dict` or `self.val_dict`
+
     def setRanges(self):
         try:
             self.range_dict["x_start"] = self.plot.state.children[0].x_range.start
@@ -322,16 +334,6 @@ class PlotObject:
             self.range_dict["x_end"] = self.plot.state.x_range.end
             self.range_dict["y_start"] = self.plot.state.y_range.start
             self.range_dict["y_end"] = self.plot.state.y_range.end
-
-    def fileUpdate(self, _a, _b, new):
-        """
-        Handler for urlinput.
-        """
-        try:
-            curdoc().clear()
-            self.__init__(logger=self.logger, title=self.title, dataPath=new)
-        except Exception as e:
-            self.logger.exception(e)
 
     def variableUpdate(self, _a, _b, new):
         """
