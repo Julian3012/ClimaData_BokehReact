@@ -11,12 +11,12 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    console.log('[App.js] constructor');
+    console.info('[App.js] constructor');
 
     // TODO: Unique key prop for render methods
     if (this.props.list.length === 0 || this.props.list[0] === null) {
       let sessionId = Math.random().toString(36).substring(2, 10);
-      console.log("Session ID: " + sessionId)
+      console.info("Session ID: " + sessionId)
       this.state = {
         bk_session: [],
         positions: constants.POSITIONS,
@@ -94,7 +94,7 @@ class App extends Component {
    * "-> returns active value of aggregate function selection"
    */
   getWidget = (posWidget, posPlot) => {
-    console.log("posPlot: " + posPlot)
+    console.info("posPlot: " + posPlot)
     try {
       let model = window.Bokeh.documents[0].get_model_by_id("1000");
       if (posWidget <= 16) {
@@ -112,10 +112,10 @@ class App extends Component {
       } else if (posWidget === 18) {
         return model.attributes.children[6 + 3 + 4]
       } else {
-        console.log("Position value does not exist")
+        console.error("Position value does not exist")
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -145,7 +145,7 @@ class App extends Component {
    * Add plot in frontend. This is a handler function for the add-button.
    */
   addPlot = () => {
-    console.log(this.state.bk_session.length)
+    console.info(this.state.bk_session.length)
     if (this.state.bk_session.length < 6) {
       let promise = new Promise((resolve) => {
         resolve(this.createPlot());
@@ -157,7 +157,7 @@ class App extends Component {
         this.setState({ isSynched: false });
         this.props.add(this.state)
       })
-      console.log("Plot added")
+      console.info("Plot added")
     }
   }
 
@@ -171,7 +171,7 @@ class App extends Component {
     try {
       this.getWidget(17, -1).active = [0];
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -188,7 +188,7 @@ class App extends Component {
         this.getWidget(18, -1).active = [0];
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
     setTimeout(() => { this.setState({ disableOnLoad: false }) }, 3000)
   }
@@ -204,7 +204,7 @@ class App extends Component {
       this.handleApply();
     }
 
-    console.log("Sync zoom: " + !isActive)
+    console.info("Sync zoom: " + !isActive)
   }
 
   /**
@@ -229,7 +229,7 @@ class App extends Component {
             ranges.add();
           }
         } catch (e) {
-          console.log(e)
+          console.error(e)
         }
       });
 
@@ -241,12 +241,12 @@ class App extends Component {
           subtree: true
         });
 
-        console.log("Observer added to plot: " + sess.pos)
+        console.info("Observer added to plot: " + sess.pos)
       } catch (error) {
-        console.log("Observer failed on position: " + sess.pos)
+        console.error("Observer failed on position: " + sess.pos)
       }
     } else {
-      console.log("Observer disconnected")
+      console.info("Observer disconnected")
     }
   }
 
@@ -289,7 +289,7 @@ class App extends Component {
         return this.setSession(sess.pos, sess);
       })
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   };
 
@@ -310,7 +310,7 @@ class App extends Component {
         return this.setSession(sess.pos, sess);
       })
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   };
 
@@ -329,7 +329,7 @@ class App extends Component {
         return this.setSession(sess.pos, sess);
       })
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   };
 
@@ -348,7 +348,7 @@ class App extends Component {
         return this.setSession(sess.pos, sess);
       })
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   };
 
@@ -405,14 +405,14 @@ class App extends Component {
 
     plot.map((sess) => {
       sess.aggregateFun = event.target.value;
-      console.log("Value: " + event.target.value)
+      console.info("Value: " + event.target.value)
 
       if (this.state.bk_session[sess.pos].aggregateDim !== "lat" || event.target.value === "None") {
-        console.log("Enable default widgets")
+        console.info("Enable default widgets")
         sess.disabled_default = false;
         sess.disabled_Logxy = true;
       } else {
-        console.log("Disable default widgets")
+        console.info("Disable default widgets")
         sess.disabled_default = true;
         sess.disabled_Logxy = false;
       }
@@ -422,7 +422,7 @@ class App extends Component {
       return this.getWidget(this.state.positions.aggregateFun, sess.pos).value = event.target.value;
     })
 
-    console.log("State aggregateFun changed")
+    console.info("State aggregateFun changed")
   };
 
   /**
@@ -439,18 +439,18 @@ class App extends Component {
     plot.map((sess) => {
       sess.aggregateDim = event.target.value;
       if (event.target.value !== "lat" || this.state.bk_session[sess.pos].aggregateFun === "None") {
-        console.log("Enable default widgets")
+        console.info("Enable default widgets")
         sess.disabled_default = false;
         sess.disabled_Logxy = true;
       } else {
-        console.log("Disable default widgets")
+        console.info("Disable default widgets")
         sess.disabled_default = true;
         sess.disabled_default = false;
       }
       this.setSession(sess.pos, sess);
       return this.getWidget(this.state.positions.aggregateDim, sess.pos).value = event.target.value;
     })
-    console.log("State aggregateDim changed")
+    console.info("State aggregateDim changed")
   };
 
   /**
@@ -468,7 +468,7 @@ class App extends Component {
       this.getWidget(this.state.positions.colorLevels, sess.pos).value = event.target.value;
       return this.setSession(sess.pos, sess);
     });
-    console.log("State colorLevels changed")
+    console.info("State colorLevels changed")
   };
 
   /**
@@ -520,7 +520,7 @@ class App extends Component {
       this.getWidget(this.state.positions.colorMap, sess.pos).value = event.target.value;
       return this.setSession(sess.pos, sess);
     })
-    console.log("State variable changed")
+    console.info("State variable changed")
   };
 
   /**
@@ -538,7 +538,7 @@ class App extends Component {
       this.getWidget(this.state.positions.variable, sess.pos).value = event.target.value;
       return this.setSession(sess.pos, sess);
     })
-    console.log("State variable changed")
+    console.info("State variable changed")
   };
 
   /**
@@ -550,15 +550,15 @@ class App extends Component {
     try {
       if (event.keyCode === 13) {
         posPlot.map((pos) => {
-          console.log("handleSubmit: " + pos)
+          console.info("handleSubmit: " + pos)
           return this.getWidget(this.state.positions.file, pos).value = this.state.bk_session[pos].file;
         })
-        console.log(this.state.bk_session)
+        console.info(this.state.bk_session)
         this.setState({ disableOnLoad: true })
         setTimeout(() => { this.setParams(posPlot[0]) }, 3000)
       }
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   };
   /**
@@ -567,7 +567,7 @@ class App extends Component {
    */
   setParams = (posPlot) => {
     try {
-      console.log("setParams " + posPlot)
+      console.info("setParams " + posPlot)
       let optsAd = this.mkOptions(this.getWidget(this.state.positions.aggregateDim, posPlot).options);
       let optsVar = this.mkOptions(this.getWidget(this.state.positions.variable, posPlot).options);
 
@@ -580,7 +580,7 @@ class App extends Component {
       this.setSession(posPlot, plot);
       this.props.add(this.state);
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
     this.setState({ disableOnLoad: false });
   }
@@ -622,7 +622,7 @@ class App extends Component {
       })
     }
     catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -635,7 +635,7 @@ class App extends Component {
     try {
       this.setParams(posPlot)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -744,15 +744,15 @@ class App extends Component {
         }
         return ""
       })
-      console.log("Zoom")
+      console.info("Zoom")
     }
     catch (e) {
-      console.log("Zoom failed on position: " + posPlot);
+      console.info("Zoom failed on position: " + posPlot);
     }
   }
 
   render() {
-    console.log('[App.js] render method');
+    console.info('[App.js] render method');
     return (
       <div className="App" >
         {this.activeLayout()}

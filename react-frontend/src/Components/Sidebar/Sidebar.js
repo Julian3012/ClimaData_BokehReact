@@ -12,7 +12,7 @@ class Sidebar extends Component {
 
     constructor(props) {
         super(props);
-        console.log('[App.js] constructor');
+        console.info('[App.js] constructor');
     }
 
     ParameterProps = (sess) => {

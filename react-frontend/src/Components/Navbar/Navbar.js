@@ -10,7 +10,7 @@ class Navbar extends Component {
 
     constructor(props) {
         super(props);
-        console.log('[Navbar.js] constructor');
+        console.info('[Navbar.js] constructor');
     }
 
     CbCoastline = () => {
