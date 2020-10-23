@@ -23,6 +23,7 @@ from constants import COLORMAPS
 from src.plots.CurvePlot import CurvePlot
 from src.plots.HeightProfilePlot import HeightProfilePlot
 from src.plots.TriMeshPlot import TriMeshPlot
+hv.extension("bokeh")
 
 
 class PlotObject:
@@ -32,8 +33,6 @@ class PlotObject:
 
     def __init__(self, logger, title, dataPath=""):
 
-        # TODO: Add Styling from themes.Bokeh
-        hv.extension("bokeh")
         self.renderer = hv.renderer("bokeh").instance(mode="server")
         self.logger = logger
 
@@ -209,7 +208,7 @@ class PlotObject:
 
         return aggregateDimensions
 
-    def getFile(self):
+    def get_filepath(self):
         """
         Function to capsulate the url input.\n
         Returns:
@@ -218,16 +217,6 @@ class PlotObject:
         link = "./data/" + self.dataPath
 
         return link
-
-    def fileUpdate(self, _a, _b, new):
-        """
-        Handler for urlinput.
-        """
-        try:
-            curdoc().clear()
-            self.__init__(logger=self.logger, title=self.title, dataPath=new)
-        except Exception as e:
-            self.logger.exception(e)
 
     def genPlot(self, dataUpdate):
         """
@@ -251,7 +240,7 @@ class PlotObject:
                 if self.xrData is None:
                     self.logger.info("Loading unchunked data for curveplot")
                     try:
-                        link = self.getFile()
+                        link = self.get_filepath()
                         self.xrData = xr.open_dataset(link)
                         assert self.xrData != None
                     except:
@@ -273,7 +262,7 @@ class PlotObject:
                 if self.xrData is None:
                     self.logger.info("Loading unchunked data for curveplot")
                     try:
-                        link = self.getFile()
+                        link = self.get_filepath()
                         self.xrData = xr.open_dataset(link)
                         assert self.xrData != None
                     except:
@@ -326,13 +315,13 @@ class PlotObject:
 
     def adjustRanges(self):
         try:
-            if (self.range_dict["x_start"] != None):
+            if (self.range_dict["x_start"] is not None):
                 self.plot.state.children[0].x_range.start = self.range_dict["x_start"]
                 self.plot.state.children[0].x_range.end = self.range_dict["x_end"]
                 self.plot.state.children[0].y_range.start = self.range_dict["y_start"]
                 self.plot.state.children[0].y_range.end = self.range_dict["y_end"]
         except:
-            if (self.range_dict["x_start"] != None):
+            if (self.range_dict["x_start"] is not None):
                 self.plot.state.x_range.start = self.range_dict["x_start"]
                 self.plot.state.x_range.end = self.range_dict["x_end"]
                 self.plot.state.y_range.start = self.range_dict["y_start"]
@@ -349,6 +338,16 @@ class PlotObject:
             self.range_dict["x_end"] = self.plot.state.x_range.end
             self.range_dict["y_start"] = self.plot.state.y_range.start
             self.range_dict["y_end"] = self.plot.state.y_range.end
+
+    def fileUpdate(self, _a, _b, new):
+        """
+        Handler for urlinput.
+        """
+        try:
+            curdoc().clear()
+            self.__init__(logger=self.logger, title=self.title, dataPath=new)
+        except Exception as e:
+            self.logger.exception(e)
 
     def variableUpdate(self, _a, _b, new):
         """
