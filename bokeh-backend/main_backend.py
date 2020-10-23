@@ -246,12 +246,12 @@ class PlotGenerator:
         """
         self.mainDialog(False)
 
-    def fileUpdate(self, _a, _b, new):
+    def fileUpdate(self, _a, old, new):
         """
         Handler for urlinput button.
         """
         curdoc().clear()
-        self.logger.info("New File: {}".format(new))
+        self.logger.info(f"Executed `PlotGenerator::file` {old} -> {new}")
         try:
             self.mainDialog(True)
         except Exception as e:
@@ -263,33 +263,39 @@ class PlotGenerator:
         """
         Handler for variable selection.
         """
+        self.logger.info(f"Executed `PlotGenerator::variable`")
         self.mainDialog(True)
 
     def cmapUpdate(self, _a, _b, _c):
+        self.logger.info(f"Executed `PlotGenerator::cmap`")
         self.mainDialog(True)
 
     def aggDimUpdate(self, _a, _b, _c):
         """
         Handler for aggregate dimension selection.
         """
+        self.logger.info(f"Executed `PlotGenerator::aggDim`")
         self.mainDialog(True)
 
     def aggFnUpdate(self, _a, _b, _c):
         """
         Handler for aggregate function selection.
         """
+        self.logger.info(f"Executed `PlotGenerator::aggFn`")
         self.mainDialog(True)
 
     def coastlineUpdate(self, _):
         """
         Handler for coastline checkbox.
         """
+        self.logger.info(f"Executed `PlotGenerator::coastline`")
         self.mainDialog(True)
 
     def coloringUpdate(self, _):
         """
         Handler for coloring parameters.
         """
+        self.logger.info(f"Executed `PlotGenerator::coloring`")
         self.mainDialog(True)
 
 

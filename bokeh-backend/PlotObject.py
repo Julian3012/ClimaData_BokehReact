@@ -324,6 +324,7 @@ class PlotObject:
     # All methods below do nothing except update `self.range_dict` or `self.val_dict`
 
     def setRanges(self):
+        tmp = self.range_dict
         try:
             self.range_dict["x_start"] = self.plot.state.children[0].x_range.start
             self.range_dict["x_end"] = self.plot.state.children[0].x_range.end
@@ -334,28 +335,38 @@ class PlotObject:
             self.range_dict["x_end"] = self.plot.state.x_range.end
             self.range_dict["y_start"] = self.plot.state.y_range.start
             self.range_dict["y_end"] = self.plot.state.y_range.end
+        self.logger.info(f"Changed `PlotObjekt::setRanges`: {tmp} -> {self.range_dict}")
 
     def variableUpdate(self, _a, _b, new):
         """
         Handler for selVar.
         """
+        tmp = self.val_dict["variable"]
         self.val_dict["variable"] = new
+        self.logger.info(f"Changed `PlotObjekt::variable`: {tmp} -> {new}")
 
     def cmapUpdate(self, _a, _b, new):
         """
         Handler for selCmap.
         """
+        tmp = self.val_dict["cm"]
         self.setRanges()
         self.val_dict["cm"] = new
+        self.logger.info(f"Changed `PlotObjekt::cmap`: {tmp} -> {new}")
+        
 
     def aggDimUpdate(self, _a, _b, new):
         """
         Handler for aggregate dimension selection.
         """
+        tmp = self.val_dict["aggDim"]
         self.val_dict["aggDim"] = new
+        self.logger.info(f"Changed `PlotObjekt::aggDim`: {tmp} -> {new}")
 
     def aggFnUpdate(self, _a, _b, new):
         """
         Handler for aggregate function selection.
         """
+        tmp = val_dict["aggFn"]
         self.val_dict["aggFn"] = new
+        self.logger.info(f"Changed `PlotObjekt::aggFn`: {tmp} -> {new}")
