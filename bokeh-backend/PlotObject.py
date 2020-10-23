@@ -1,24 +1,8 @@
-# import json
-# import logging
-# import math
-# import time
-
-# import bokeh as bokeh
-# import geoviews as gv
-# import geoviews.feature as gf
 import holoviews as hv
-# import numpy as np
-# import pandas as pd
 import xarray as xr
 from bokeh.io import curdoc
-# from bokeh.layouts import column, layout, row, widgetbox
 from bokeh.models import CheckboxGroup, Select
 from bokeh.models.widgets import TextInput
-# from bokeh.server.server import Server
-# from bokeh.themes.theme import Theme
-# from cartopy import crs
-# from holoviews.operation.datashader import datashade, rasterize
-
 from constants import COLORMAPS
 from src.plots.CurvePlot import CurvePlot
 from src.plots.HeightProfilePlot import HeightProfilePlot
