@@ -103,11 +103,14 @@ class TriMeshPlot(Plot):
             dm = hv.DynamicMap(self.buildTrimesh, kdims=self.freeDims).redim.range(
                 **ranges
             )
+            self.logger.info("is this called? 2")
 
         else:
             # This is needed as DynamicMap is not working with an empty kdims array.
             self.logger.info("Show without DynamicMap")
             dm = self.buildTrimesh()
+            self.logger.info("is this called?")
+
 
         self.logger.info("Checking for coloring mode...")
         try:
@@ -171,7 +174,6 @@ class TriMeshPlot(Plot):
         else:
             graph = preGraph
         graph = graph.opts(**totalgraphopts)
-        # print("Graph Atributes: ", graph.__dict__.keys())
 
         if len(self.freeDims) > 0:
             return self.renderer.get_widget(graph.opts(**totalgraphopts), "widgets")
@@ -212,10 +214,11 @@ class TriMeshPlot(Plot):
                     self.logger.error("Unknown Error! AggFn not None, mean, sum")
 
             # Apply unit
-            factor = 1
-            self.tris["var"] = self.tris["var"] * factor
+            # factor = 1
+            # self.tris["var"] = self.tris["var"] * factor
 
         res = hv.TriMesh((self.tris, self.verts), label=(self.title))
+        self.logger.info("hv.TriMesh build and returned")
 
         return res
 
