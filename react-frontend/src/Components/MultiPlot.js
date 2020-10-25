@@ -40,6 +40,7 @@ class MultiPlot extends Component {
                     deletePlot={this.props.deletePlot}
 
                     handleApply={this.props.handleApply}
+                    handleDelete={this.props.handleDelete}
 
                     disableOnLoad={this.props.disableOnLoad}
                     handleVarClick={this.props.handleVarClick}

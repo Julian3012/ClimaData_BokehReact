@@ -51,6 +51,7 @@ class PlotObject:
         self.cbLogY = None
         self.cbCoastlineOverlay = None
         self.slVar = None
+        self.delPl = None
 
         # Plot variables
         self.variable = None
@@ -82,6 +83,7 @@ class PlotObject:
             "logX": [],
             "logY": [],
             "cl": "0",
+            "delPl": [],
         }
 
         # Plot related
@@ -143,6 +145,7 @@ class PlotObject:
         )
         self.cbLogX = CheckboxGroup(labels=["logX"], active=self.val_dict["logX"])
         self.cbLogY = CheckboxGroup(labels=["logY"], active=self.val_dict["logY"])
+        self.cbDelPl = CheckboxGroup(labels=["delete_Plot"], active=self.val_dict["delPl"])
 
     def checkInputs(self):
         """
@@ -371,3 +374,10 @@ class PlotObject:
         tmp = self.val_dict["aggFn"]
         self.val_dict["aggFn"] = new
         self.logger.info(f"Changed `PlotObjekt::aggFn`: {tmp} -> {new}")
+
+    def delPlotUpdate(self, attr, old, new):
+        """
+        Handler for delete plot parameter.
+        """
+        self.__init__(self.logger, self.title)
+

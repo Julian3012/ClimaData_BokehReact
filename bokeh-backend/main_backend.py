@@ -123,6 +123,7 @@ class PlotGenerator:
                         plot.cbLogY,
                         plot.slAggregateDimension,
                         plot.slAggregateFunction,
+                        plot.cbDelPl
                     )
                 ]
                 lArray.append(col)
@@ -227,6 +228,7 @@ class PlotGenerator:
         plot.cbLogzCol.on_click(self.coloringUpdate)
         plot.cbLogX.on_click(self.coloringUpdate)
         plot.cbLogY.on_click(self.coloringUpdate)
+        plot.cbDelPl.on_change("active",plot.delPlotUpdate, self.delPlotUpdate)
 
     def deleteUpdate(self, _):
         """
@@ -291,6 +293,12 @@ class PlotGenerator:
         Handler for coloring parameters.
         """
         self.logger.info("Executed `PlotGenerator::coloring`")
+        self.mainDialog(True)
+    
+    def delPlotUpdate(self, attr, old, new):
+        """
+        Handler for coloring parameters.
+        """
         self.mainDialog(True)
 
 

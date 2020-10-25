@@ -640,6 +640,20 @@ class App extends Component {
   }
 
   /**
+   * Handler for opening the delete plot button
+   * @param {*} event 
+   * @param {*} posPlot 
+   */
+  handleDelete = (posPlot) => {
+    try {
+      this.getWidget(this.state.positions.deletePlot, posPlot).active = [0];
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+  /**
    * Handler for sidebar.
    */
   handleSidebar = () => {
@@ -696,6 +710,7 @@ class App extends Component {
 
         bk_session={this.state.bk_session}
         handleApply={this.handleApply}
+        handleDelete={this.handleDelete}
 
         activeSidebar={this.state.activeSidebar}
         showSidebar={this.handleSidebar}

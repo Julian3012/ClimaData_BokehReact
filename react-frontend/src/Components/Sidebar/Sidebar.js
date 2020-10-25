@@ -65,6 +65,7 @@ class Sidebar extends Component {
                 cbStLy={sess.logy}
 
                 handleApply={(event) => { this.props.handleApply(sess.pos) }}
+                handleDelete={(event) => { this.props.handleDelete(sess.pos) }}
 
                 cbActLxy={sess.disabled_Logxy}
                 txActFm={sess.disabled_FixCol}
@@ -111,7 +112,7 @@ class Sidebar extends Component {
                 <Grid container justify="center">
                     <StyledButton onClick={this.props.addPlot} disabled={this.props.disableOnLoad}>
                         Add Plot
-                        </StyledButton>
+                    </StyledButton>
                 </Grid>
             </Grid>
         )

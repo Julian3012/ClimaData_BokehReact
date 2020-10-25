@@ -220,6 +220,18 @@ class Parameter extends Component {
         );
     }
 
+    delPltBtn = () => {
+        return (
+            <Button
+                variant="contained"
+                onClick={this.props.handleDelete}
+                disabled={this.props.disableOnLoad}
+            >
+                Delete
+            </Button>
+        );
+    }
+
     render() {
 
         return (
@@ -267,8 +279,12 @@ class Parameter extends Component {
                         </Grid>
                     </Hidden>
 
-                    <Grid item xs={12}>
+                    <Grid item md={6} xs={4} >
                         {this.applyBtn()}
+                    </Grid>
+
+                    <Grid item md={6} xs={4} >
+                        {this.delPltBtn()}
                     </Grid>
 
                 </Grid>

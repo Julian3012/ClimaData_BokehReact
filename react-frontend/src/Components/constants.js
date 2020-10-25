@@ -180,6 +180,7 @@ export const POSITIONS = {
     logy: 11,
     aggregateDim: 12,
     aggregateFun: 13,
+    deletePlot: 14,
     slider: 21,
     plot: 22
 }
