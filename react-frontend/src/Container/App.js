@@ -640,16 +640,26 @@ class App extends Component {
   }
 
   /**
-   * Handler for opening the delete plot button
-   * @param {*} event 
+   * Handler for opening the delete plot button.
    * @param {*} posPlot 
    */
   handleDelete = (posPlot) => {
-    try {
-      this.getWidget(this.state.positions.deletePlot, posPlot).active = [0];
-    } catch (error) {
-      console.log(error)
-    }
+
+    this.getWidget(this.state.positions.deletePlot, posPlot).active = [0];
+
+    let plot = [];
+    plot.push(this.state.bk_session[posPlot])
+
+    plot.map((sess) => {
+      sess.file = "";
+      sess.variable = "";
+      sess.colorMap = "Blues";
+      sess.aggregateDim = "None";
+      sess.aggregateFun = "None";
+      sess.colorLevels = "";
+
+      return this.setSession(sess.pos, sess)
+    })
   }
 
 
