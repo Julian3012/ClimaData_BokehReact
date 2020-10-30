@@ -34,6 +34,8 @@ class MultiPlot extends Component {
 
                     slChLev={this.props.slChLev}
 
+                    cbStFc={this.props.cbStFc}
+
                     onClick={this.props.onClick}
 
                     addPlot={this.props.addPlot}

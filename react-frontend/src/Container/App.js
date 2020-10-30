@@ -27,6 +27,9 @@ class App extends Component {
         plotId: "plot-el",
         sessionId: sessionId,
         disableOnLoad: false,
+        disabled_FixCol: false,
+        symColoring: false,
+        logzColoring: false,
       };
     } else {
       let rdx_store = JSON.parse(JSON.stringify(this.props.list[0]));
@@ -45,9 +48,6 @@ class App extends Component {
       variable: "",
       showCoastline: true,
       colorMap: "Blues",
-      fixColoring: false,
-      symColoring: false,
-      logzColoring: false,
       colorLevels: 0,
       aggregateDim: "None",
       aggregateFun: "None",
@@ -64,7 +64,6 @@ class App extends Component {
         label: "",
       }],
       disabled_Logxy: true,
-      disabled_FixCol: true,
       diabled_Slider: true,
       disabled_default: false,
       x_range_start: 0,
@@ -95,6 +94,7 @@ class App extends Component {
    */
   getWidget = (posWidget, posPlot) => {
     console.info("posPlot: " + posPlot)
+    console.info("posWidget: " + posWidget)
     try {
       let model = window.Bokeh.documents[0].get_model_by_id("1000");
       if (posWidget <= 16) {
@@ -107,10 +107,9 @@ class App extends Component {
         } else {
           return model.attributes.children[divPlot].attributes.children[numPlot]
         }
-      } else if (posWidget === 17) {
-        return model.attributes.children[6 + 3 + 3]
-      } else if (posWidget === 18) {
-        return model.attributes.children[6 + 3 + 4]
+      } else if (posWidget > 16) {
+        let newPosition = posWidget - 14; 
+        return model.attributes.children[6 + 3 + newPosition]
       } else {
         console.error("Position value does not exist")
       }
@@ -142,7 +141,7 @@ class App extends Component {
   }
 
   /**
-   * Add plot in frontend. This is a handler function for the add-button.
+   * Add plot in frontend. This is a handler function for the Add Plot-button.
    */
   addPlot = () => {
     console.info(this.state.bk_session.length)
@@ -167,6 +166,7 @@ class App extends Component {
   deletePlot = () => {
     let plots = [];
     this.setState({ bk_session: plots });
+    this.setState({ disabled_FixCol: false });
     this.props.remove();
     try {
       this.getWidget(17, -1).active = [0];
@@ -284,7 +284,7 @@ class App extends Component {
       posPlot.map((sess) => {
         let doesShow = this.state.bk_session[sess.pos].showCoastline;
         sess.showCoastline = !doesShow;
-        this.getWidget(this.state.positions.showCoastline, sess.pos).active = this.setActiveEvent(doesShow);
+        this.getWidget(this.state.positions.coastline, sess.pos).active = this.setActiveEvent(doesShow);
 
         return this.setSession(sess.pos, sess);
       })
@@ -298,16 +298,12 @@ class App extends Component {
    * @param {*} event 
    * @param {*} posPlot - Number for the position of the plot. 
    */
-  handleFixColoring = (event, posPlot) => {
-
+  handleFixColoring = (event, session) => {
     try {
-      posPlot.map((sess) => {
-        let doesShow = this.state.bk_session[sess.pos].fixColoring;
-        sess.fixColoring = !doesShow;
-        sess.disabled_FixCol = doesShow;
-        this.getWidget(this.state.positions.fixColoring, sess.pos).active = this.setActiveEvent(doesShow);
-
-        return this.setSession(sess.pos, sess);
+      let doesShow = this.state.disabled_FixCol;
+      this.setState({ disabled_FixCol: !doesShow });
+      session.map(sess => {
+        return this.getWidget(this.state.positions.fixCol, sess.pos).active = this.setActiveEvent(doesShow);
       })
     } catch (e) {
       console.error(e)
@@ -319,14 +315,12 @@ class App extends Component {
    * @param {*} event 
    * @param {*} posPlot - Number for the position of the plot. 
    */
-  handleSymColoring = (event, posPlot) => {
+  handleSymColoring = (event, session) => {
     try {
-      posPlot.map((sess) => {
-        let doesShow = this.state.bk_session[sess.pos].symColoring;
-        sess.symColoring = !doesShow;
-        this.getWidget(this.state.positions.symColoring, sess.pos).active = this.setActiveEvent(doesShow);
-
-        return this.setSession(sess.pos, sess);
+      let doesShow = this.state.symColoring;
+      this.setState({symColoring: !doesShow});
+      session.map((sess) => {
+        return this.getWidget(this.state.positions.symCol, sess.pos).active = this.setActiveEvent(doesShow);
       })
     } catch (error) {
       console.error(error)
@@ -343,7 +337,7 @@ class App extends Component {
       posPlot.map((sess) => {
         let doesShow = this.state.bk_session[sess.pos].logzColoring;
         sess.logzColoring = !doesShow;
-        this.getWidget(this.state.positions.logzColoring, sess.pos).active = this.setActiveEvent(doesShow);
+        this.getWidget(this.state.positions.logCol, sess.pos).active = this.setActiveEvent(doesShow);
 
         return this.setSession(sess.pos, sess);
       })
@@ -602,31 +596,6 @@ class App extends Component {
   }
 
   /**
-   * Handler for slider.
-   * @param {*} event 
-   * @param {*} newValue 
-   * @param {*} posPlot 
-   */
-  handleSlider = (event, newValue, posPlot) => {
-    try {
-      let plot = []
-      posPlot.map((pos) => {
-        return plot.push(this.state.bk_session[pos]);
-      })
-      plot.map((sess) => {
-        let slider = this.getWidget(this.state.positions.slider, sess.pos);
-        if (newValue <= this.state.bk_session[sess.pos].sliderEnd) {
-          slider.value = newValue;
-        }
-        return "";
-      })
-    }
-    catch (e) {
-      console.error(e);
-    }
-  }
-
-  /**
    * Handler for opening the variable selection
    * @param {*} event 
    * @param {*} posPlot 
@@ -657,11 +626,12 @@ class App extends Component {
       sess.aggregateDim = "None";
       sess.aggregateFun = "None";
       sess.colorLevels = "";
+      sess.fixColMin = "";
+      sess.fixColMax = "";
 
       return this.setSession(sess.pos, sess)
     })
   }
-
 
   /**
    * Handler for sidebar.
@@ -685,10 +655,10 @@ class App extends Component {
         cbStCl={this.state.bk_session.length === 0 ? true : this.state.bk_session[0].showCoastline}
         cbChCl={this.handleShowCoastline}
 
-        cbStFc={this.state.bk_session.length === 0 ? false : this.state.bk_session[0].fixColoring}
+        cbStFc={this.state.bk_session.length === 0 ? false : this.state.disabled_FixCol}
         cbChFc={this.handleFixColoring}
 
-        cbStSc={this.state.bk_session.length === 0 ? false : this.state.bk_session[0].symColoring}
+        cbStSc={this.state.bk_session.length === 0 ? false : this.state.symColoring}
         cbChSc={this.handleSymColoring}
 
         cbStLc={this.state.bk_session.length === 0 ? false : this.state.bk_session[0].logzColoring}

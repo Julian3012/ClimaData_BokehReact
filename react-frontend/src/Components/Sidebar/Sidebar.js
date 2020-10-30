@@ -68,7 +68,8 @@ class Sidebar extends Component {
                 handleDelete={(event) => { this.props.handleDelete(sess.pos) }}
 
                 cbActLxy={sess.disabled_Logxy}
-                txActFm={sess.disabled_FixCol}
+                cbStFc={this.props.cbStFc}
+                
                 disableDefault={sess.disableDefault}
                 disableOnLoad={this.props.disableOnLoad}
             />

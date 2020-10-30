@@ -43,10 +43,6 @@ class PlotObject:
         self.txCLevels = None
         self.slAggregateFunction = None
         self.slAggregateDimension = None
-        self.cbCoastlineOverlay = None
-        self.cbFixCol = None
-        self.cbSymCol = None
-        self.cbLogzCol = None
         self.cbLogX = None
         self.cbLogY = None
         self.cbCoastlineOverlay = None
@@ -133,16 +129,7 @@ class PlotObject:
             options=self.optAggDim,
             value=self.val_dict["aggDim"],
         )
-        self.cbCoastlineOverlay = CheckboxGroup(labels=["Show coastline"], active=[0])
-        self.cbFixCol = CheckboxGroup(
-            labels=["Use fixed coloring"], active=self.val_dict["fcol"]
-        )
-        self.cbSymCol = CheckboxGroup(
-            labels=["symmetric coloring"], active=self.val_dict["scol"]
-        )
-        self.cbLogzCol = CheckboxGroup(
-            labels=["logz coloring"], active=self.val_dict["lcol"]
-        )
+
         self.cbLogX = CheckboxGroup(labels=["logX"], active=self.val_dict["logX"])
         self.cbLogY = CheckboxGroup(labels=["logY"], active=self.val_dict["logY"])
         self.cbDelPl = CheckboxGroup(labels=["delete_Plot"], active=self.val_dict["delPl"])
@@ -206,19 +193,31 @@ class PlotObject:
 
         return link
 
-    def genPlot(self, dataUpdate):
+    def genPlot(self, dataUpdate, cl, fc, sym, logz):
         """
         Generate plot object depending on the data.
+
+        PARAMETER
+        ========================
+        dataUpdate: Bool \n
+        cl: Array \n
+            Coastline
+        fc: Array \n
+            Fix coloring
+        sym: Array \n
+            Symmetric coloring
+        logz: Array \n
+            Logz coloring
         """
         try:
             self.variable = self.slVar.value
             self.cm = self.slCMap.value
             self.aggDim = self.slAggregateDimension.value
             self.aggFn = self.slAggregateFunction.value
-            self.showCoastline = 0 in self.cbCoastlineOverlay.active
-            self.useFixColoring = 0 in self.cbFixCol.active
-            self.cSymmetric = 0 in self.cbSymCol.active
-            self.cLogZ = 0 in self.cbLogzCol.active
+            self.showCoastline = 0 in cl
+            self.useFixColoring = 0 in fc
+            self.cSymmetric = 0 in sym
+            self.cLogZ = 0 in logz
             self.logX = 0 in self.cbLogX.active
             self.logY = 0 in self.cbLogY.active
 

@@ -38,7 +38,7 @@ class PlotGenerator:
             PlotObject(self.logger, title="Plot 5", dataPath=inp),
             PlotObject(self.logger, title="Plot 6", dataPath=inp),
         ]
-
+        self.navbar_active = False
         self.restart = entry
 
     def mainDialog(self, dataUpdate=True):
@@ -89,7 +89,12 @@ class PlotGenerator:
                 # Generate plot type
                 if plot.dataPath != "":
                     self.logger.info("[main_backend] Generate plot")
-                    figureElement = plot.genPlot(dataUpdate)
+                    cl = self.cbCoastlineOverlay.active
+                    fc = self.cbFixCol.active
+                    sym = self.cbSymCol.active
+                    logz = self.cbLogzCol.active
+                             
+                    figureElement = plot.genPlot(dataUpdate, cl, fc, sym, logz)
 
                 # Init plotelements and bokeh tools
                 if plot.dataPath != "":
@@ -111,11 +116,11 @@ class PlotGenerator:
                     row(
                         plot.urlinput,
                         plot.slVar,
-                        plot.cbCoastlineOverlay,
+                        # plot.cbCoastlineOverlay,
                         plot.slCMap,
-                        plot.cbFixCol,
-                        plot.cbSymCol,
-                        plot.cbLogzCol,
+                        # plot.cbFixCol,
+                        # plot.cbSymCol,
+                        # plot.cbLogzCol,
                         plot.txCLevels,
                         plot.txFixColoringMin,
                         plot.txFixColoringMax,
@@ -129,12 +134,25 @@ class PlotGenerator:
                 lArray.append(col)
 
             # Delete button
-            self.addDeleteButton()
+            self.deletePlots = self.addCheckbox("Delete Plots",self.delPlotUpdate,False)
             lArray.append(self.deletePlots)
 
             # Apply button
-            self.addApplyButton()
+            self.applyChanges = self.addCheckbox("Delete Plots",self.applyUpdate,False)
             lArray.append(self.applyChanges)
+
+            # Navbar items
+            if (self.navbar_active == False):
+                self.cbCoastlineOverlay = self.addCheckbox("Coastline",self.coloringUpdate,True,[0])
+                self.cbFixCol = self.addCheckbox("Fix Coloring",self.coloringUpdate,True)
+                self.cbSymCol = self.addCheckbox("Symmetric Coloring",self.coloringUpdate,True)
+                self.cbLogzCol = self.addCheckbox("Log z Coloring",self.coloringUpdate,True)
+                self.navbar_active = True
+
+            lArray.append(self.cbCoastlineOverlay)
+            lArray.append(self.cbFixCol)
+            lArray.append(self.cbSymCol)
+            lArray.append(self.cbLogzCol)
 
             new_array = [
                 row(lArray[0]),
@@ -150,7 +168,11 @@ class PlotGenerator:
                 lArray[9],
                 lArray[11],
                 lArray[12],
-                lArray[13]
+                lArray[13],
+                lArray[14],
+                lArray[15],
+                lArray[16],
+                lArray[17],
             ]
 
             l = layout(new_array)
@@ -190,28 +212,19 @@ class PlotGenerator:
             except Exception as e:
                 self.logger.exception(e)
 
-    def addDeleteButton(self):
-        """Create a delete button.
+    def addCheckbox(self, title, handler, visible, active=[]):
+        """
+        Create a delete button.
 
         Button gets used when the session creashes or plots get resetted.
         """
-        self.deletePlots = CheckboxGroup(
-                        labels=["Delete Button"], active=[]
+        checkbox = CheckboxGroup(
+                        labels=[title], active=active
                     )
-        self.deletePlots.on_click(self.deleteUpdate)
-        self.deletePlots.visible = False
+        checkbox.on_click(handler)
+        checkbox.visible = visible
 
-    def addApplyButton(self):
-        """Create a apply button.
-
-        Button gets used when you make changes to colorlevels
-        or min/max color values.
-        """
-        self.applyChanges = CheckboxGroup(
-                        labels=["Apply"], active=[]
-                    )
-        self.applyChanges.on_click(self.applyUpdate)
-        self.applyChanges.visible = False
+        return checkbox
 
     def set_handler(self, plot):
         """
@@ -222,10 +235,6 @@ class PlotGenerator:
         plot.slCMap.on_change("value", plot.cmapUpdate, self.cmapUpdate)
         plot.slAggregateFunction.on_change("value", plot.aggFnUpdate, self.aggFnUpdate)
         plot.slAggregateDimension.on_change("value", plot.aggDimUpdate, self.aggDimUpdate)
-        plot.cbCoastlineOverlay.on_click(self.coastlineUpdate)
-        plot.cbFixCol.on_click(self.coloringUpdate)
-        plot.cbSymCol.on_click(self.coloringUpdate)
-        plot.cbLogzCol.on_click(self.coloringUpdate)
         plot.cbLogX.on_click(self.coloringUpdate)
         plot.cbLogY.on_click(self.coloringUpdate)
         plot.cbDelPl.on_change("active",plot.delPlotUpdate, self.delPlotUpdate)

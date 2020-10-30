@@ -156,7 +156,7 @@ class Parameter extends Component {
                 size="small"
                 onChange={this.props.txChFmi}
                 value={this.props.txValFmi}
-                disabled={this.props.txActFm || this.props.disableOnLoad} />
+                />
 
         );
     }
@@ -170,7 +170,7 @@ class Parameter extends Component {
                 size="small"
                 onChange={this.props.txChFma}
                 value={this.props.txValFma}
-                disabled={this.props.txActFm || this.props.disableOnLoad} />
+                />
         );
     }
 
@@ -262,7 +262,7 @@ class Parameter extends Component {
                         </Grid>
                     </Hidden>
 
-                    <Hidden xlDown={this.props.txActFm}>
+                    <Hidden xlDown={!this.props.cbStFc}>
                         <Grid item md={6} >
                             {this.TxFixColMin()}
                         </Grid>
